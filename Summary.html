@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <!-- Compiled and minified CSS -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <?!= include('style.css'); ?>
+</head>
+
+<body>
+  <div class="navbar-fixed ">
+    <nav>
+      <div class="nav-wrapper">
+      <? if (isAdmin) { ?>
+        <?!= include('admin_nav'); ?>
+      <? } ?>
+      </div>
+    </nav>
+    <div class="progress white">
+      <div class="indeterminate blue"></div>
+    </div>
+  </div>
+  <div <? if (!isAdmin) { ?> <?!= "class='container'" ?> <? } ?> >
+  <div class="row">
+    <div class="col s12 m9 l10">
+      <? if (isAdmin) { ?>
+        <?!= include('admin_submitter'); ?>
+      <? } ?>
+      <div id="overview" class="section scrollspy">
+        <div class="row">
+          <div class="input-field col s12">
+            <textarea id="title" class="materialize-textarea" disabled></textarea>
+            <label class="active" for="title">Title</label>
+          </div>
+          <div class="input-field col s12">
+            <textarea id="theme" class="materialize-textarea" disabled></textarea>
+            <label class="active" for="theme">Session Theme</label>
+          </div>
+          <div class="input-field col s12">
+            <textarea id="type" class="materialize-textarea" disabled></textarea>
+            <label class="active" for="type">Session Type</label>
+          </div>
+          <?!= include('assign_review'); ?>
+        </div>
+      </div>
+      <div id="desc" class="section scrollspy">
+        <div class="row">
+          <div class="input-field col s12">
+            <textarea id="desc_area" class="materialize-textarea" disabled></textarea>
+            <label class="active" for="desc_area">Session Description</label>
+            <span id="desc_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
+          </div>
+        </div>
+      </div>
+      <div id="eval" class="section scrollspy">
+        <div class="row">
+          <div class="input-field col s12">
+            <textarea id="eval_area" class="materialize-textarea" disabled></textarea>
+            <label class="active" for="eval_area">Session content: evaluation and reflection</label>
+            <span id="eval_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
+          </div>
+        </div>
+      </div>
+      <div id="ref" class="section scrollspy">
+        <div class="row">
+          <div class="input-field col s12">
+            <textarea id="ref_area" class="materialize-textarea" disabled></textarea>
+            <label class="active" for="ref_area">References </label>
+          </div>
+        </div>
+      </div>
+      <div id="resources" class="section scrollspy">
+        <div class="row">
+          <div class="input-field col s12">
+            <textarea id="resources_area" class="materialize-textarea" disabled></textarea>
+            <label class="active" for="resources_area">Resources for participants</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col hide-on-small-only m3 l2">
+     <div class="toc-wrapper pinned">
+      <? if (!isAdmin) { ?>
+       <div class="center-align">
+         <p><a id="review_accept" class="waves-effect waves-light btn blue grey tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></p>
+         <p><a id="review_decline" class="waves-effect waves-light btn red grey tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></p>
+       </div>
+      <? } ?>
+      <ul class="section table-of-contents">
+        <? if (isAdmin) { ?>
+        <li><a href="#submitter">Submitted by</a></li>
+        <? } ?>
+        <li><a href="#overview">Session Overview</a></li>
+        <li><a href="#desc">Description</a></li>
+        <li><a href="#eval">Evaluation</a></li>
+        <li><a href="#ref">References</a></li>
+        <li><a href="#resources">Resources</a></li>
+      </ul>
+      </div>
+    </div>
+  </div>
+  </div>
+    <!-- Modal Structure -->
+  <div id="modal1" class="modal">
+    <div class="modal-content">
+      <h4>Oops - an error has occured</h4>
+      <p>We can't find your review assignment. Please check the link from your email.</p>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-action modal-close waves-effect waves-green btn-flat">OK</a>
+    </div>
+  </div>
+</body>
+<?!= include('script.js'); ?>
+<? if (isAdmin) { ?>
+<script>
+  var currentRow = parseInt(<?= currentRow || 2; ?>);
+</script>
+  <?!= include('admin_script.js'); ?>
+<? } else { ?>
+<script>
+  var review_token = "<?= review_token ?>";
+  var reviewer_token = "<?= reviewer_token ?>";
+  var reviewer_num = "<?= reviewer_num ?>";
+</script>
+  <?!= include('review_script.js'); ?>
+<? } ?>
+</html>
