@@ -16,11 +16,12 @@ function checkSubmissions() {
   sheet.getRange(1, 1, out.length, 4).setValues(out);
 }
 
-function createToken_(email, row, reviewer_num){
+function createToken_(email, row, mode, reviewer_num){
   var hashedEmail = getHashedText(email);
   var blob = Utilities.newBlob(JSON.stringify({reviewer:hashedEmail,
                                                row: row,
-                                               reviewer_num: 1}));
+                                               reviewer_num: reviewer_num,
+                                               mode: mode}));
   return Utilities.base64EncodeWebSafe(blob.getBytes()); 
 }
 
@@ -28,8 +29,14 @@ function decodeToken_(token){
   try { 
     return JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(token)).getDataAsString());
   } catch(e) {
-   return e; 
+    return {mode:'review'}; 
   }
+}
+
+function testToken(){
+ var token ="eyJyZXZpZXdlciI6IjlkNDZjNjc1NzBkYWYyYTJlNGEyZWIxOThkZTQyNmVlYmFkZWU4OTgzNWQ3NmRhMDUwZmNkMTlkOTliMTVjNTMiLCJyb3ciOiJhNTEyNTZlOWQ0NWIxODEwOGUyMWY3NjM0OWM0Nzk0MzNkZmMyNjhhMTM2NzQ4ZjIzODM5ZTBmZWYxYWY4OTNhIiwicmV2aWV3ZXJfbnVtIjoxfQ==";
+ var deToken = decodeToken_(token);
+  Logger.log(deToken)
 }
 
 function getHashedText(email){
@@ -60,6 +67,11 @@ function objectify(dataRange){
     }, {});
   });
   return obj;
+}
+
+// https://stackoverflow.com/a/1026087
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function getEmailTemplate(id){

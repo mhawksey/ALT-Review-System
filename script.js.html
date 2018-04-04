@@ -1,5 +1,6 @@
 <script>
 function updateFields(r){
+$('#ID').val(r['ID']);
 $('#rowTitle').text(r['Session title']);
 $('#name').val(r['First Name'] + ' ' + r['Last Name']);
 $('#inst').val(r['Institution (if applicable)']);
@@ -8,16 +9,16 @@ $('#title').val(r['Session title']);
 $('#theme').val(r['Which conference theme best fits your session?'].split(':')[0]);
 $('#type').val(r['Select what kind of session you\'d like to run:']);
 $('#desc_area').val(r['Session description']);
-$('#desc_area_count').text('~'+countWords(r['Session description'])+'/500');
+$('#desc_area_count').text('~'+countWords(r['Session description'])+'/500 words');
 $('#eval_area').val(r['Session content: evaluation and reflection']);
-$('#eval_area_count').text('~'+countWords(r['Session content: evaluation and reflection'])+'/500');
+$('#eval_area_count').text('~'+countWords(r['Session content: evaluation and reflection'])+'/500 words');
 $('#ref_area').val(r['References']);
-$('#rescorces_area').val(r['Resources for participants']);
+$('#resources_area').val(r['Resources for participants']);
 Materialize.updateTextFields();
-      $("[id$='_area']").trigger('autoresize');
-      $('.scrollspy').scrollSpy();
-      
-      $('.progress').hide();
+$("[id$='_area']").trigger('autoresize');
+$('.scrollspy').scrollSpy();
+
+$('.progress').hide();
 }
 
     function countWords(s){

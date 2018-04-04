@@ -2,6 +2,7 @@
 
 var SUB_SHEET_NAME = "Form responses (DO NOT EDIT)";
 var REV_SHEET_NAME = "Reviewers";
+var REVIEW_SHEET_NAME = "Reviews";
 
 var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwVMZocG3xPzNKyCvA36XIMo5xQ2wq6SLowKACNYSoBDwve-SM/exec"
 
@@ -12,6 +13,7 @@ function onOpen() {
       .addItem('Submission Details', 'showSummary')
       .addItem('Build Reviewer Lists', 'buildReviewerLists')
       .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
+      .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
       .addToUi();
 }
 
@@ -30,19 +32,32 @@ function doGet(e){
   html.reviewer_token = data.reviewer;
   html.reviewer_num = data.reviewer_num;
   html.review_token = data.row;
+  html.token = token;
+  html.mode = data.mode;
   html.isAdmin = false;
-  return html.evaluate().setTitle("ALT - Review System");
+  return html.evaluate()
+             .setTitle("ALT - Review System")
+             .setFaviconUrl('https://www.alt.ac.uk/sites/alt.ac.uk/files/files/favicon.ico');
 }
 
 function sendReviewerNotification(){
   var email = getEmailTemplate('assign_reviewer');
-  
+  sendReviewerEmails_(email, 'assigned');
+}
+
+function sendReviewerReminder(){
+  var email = getEmailTemplate('remind_reviewer');
+  var days = parseInt(Browser.inputBox('Number of days since assigned to remind'));
+  sendReviewerEmails_(email, 'reminded', days);
+}
+
+function sendReviewerEmails_(email, type, days){
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
   var subs = sheet.getDataRange();
   var sub_obj = objectify(subs)
   var headings = sheet.getDataRange()
-                    .offset(0, 0, 1)
-                    .getValues()[0];
+                      .offset(0, 0, 1)
+                      .getValues()[0];
   var incCol = headings.indexOf('Include');
   var revCols = [];
   for (var r = 1; r < 5; r++){
@@ -50,29 +65,53 @@ function sendReviewerNotification(){
   }
   var sub_filtered = sub_obj.filter(function(s){
     if (s['Include'] === 'yes'){
-      for (var r = 1; r < 5; r++){
-        if (s['Reviewer'+r] !== "" && s['Review'+r+' Status'] ===""){
+      for (var r = 0; r < 4; r++){
+        var row = parseInt(s.ID.match(/\d+$/)[0]);
+        var column = revCols[r];
+        //if (s['Reviewer'+r] !== "" && s['Review'+r+' Status'] ===""){
+        var note = sheet.getRange(row+1, column).getNote();
+        if (testEmailCase_(type, s, r, {sheet:sheet, row:(row+1), column:column, days:days})){
           // send email 
           var recipient = extractBracket(s['Reviewer'+r]);
           var url = UrlShortener.Url.insert({
-            longUrl: REVIEW_URL+'?token='+createToken_(recipient, s['Hashed ID'], r)
+            longUrl: REVIEW_URL+'?token='+createToken_(recipient, s['Hashed ID'], 'review', r)
           });
           s.review_url = url.id;
           var subject = fillInTemplateFromObject(email.subject, s);
           var body = fillInTemplateFromObject(email.text, s);
           MailApp.sendEmail(recipient, subject, body, {cc:'systems@alt.ac.uk',replyTo:'helpdesk@alt.ac.uk'});
           // record on sheet
-          var row = parseInt(s.ID.match(/\d+$/)[0]);
-          var column = revCols[r];
-          sheet.getRange(row+1, column).setValue('review_assigned').setNote('Assigned by: '+Session.getActiveUser().getEmail()+'\nDate: '+new Date());
-         return s; 
+
+          sheet.getRange(row+1, column).setValue('review_'+type)
+                                       .setNote(capitalizeFirstLetter(type)+' by: '+
+                                                Session.getActiveUser().getEmail()+'\nDate: ' + 
+                                                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+          return s; 
         }
       }
-     
-    }
-    
+      
+    }   
   });
-  Logger.log(sub_filtered);
+}
+
+function testEmailCase_(type, s, r, reminder){
+  if (type === 'assigned'){
+    if (s['Reviewer'+r] !== "" && s['Review'+r+' Status'] ===""){
+      return true; 
+    }
+  } else if (type === 'reminded'){
+    if (s['Review'+r+' Status'] === 'review_assigned'){
+      var note = reminder.sheet.getRange(reminder.row, reminder.column).getNote();
+      var dateString = note.match(/\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}/);
+      var note_date = (new Date().getTime()-new Date(dateString).getTime())/(1000*60*60*24);
+      if (note_date > reminder.days){        
+        return true;
+      }
+    }
+  } else {
+    return false
+  }
+  return false;
 }
 
 function include(filename) {
