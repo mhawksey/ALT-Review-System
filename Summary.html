@@ -35,9 +35,9 @@
       <? } ?> >
         <div class="row">
           <div class="col s12 m9 l10">
-            <h1>Proposal Review</h1>
-            <blockquote>We review all submissions to ensure that we maintain the highest quality and include the broad range of learning technology research, practice and policy of interest to our participants.</blockquote>
-            <? if (mode === 'review') { ?>
+          <? if (mode === 'review') { ?>
+            <h1>Review form</h1>
+            <blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'</blockquote>
           <div class="row center-align">
                   <div class="col s6"><a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></div>
                   <div class="col s6"><a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></div>
@@ -47,7 +47,7 @@
               <?!= include('admin_submitter'); ?>
                 <? } ?>
                   <div id="overview" class="section scrollspy">
-                    <h2>Session Overview</h2>
+                    <h2>Submission Overview</h2>
                     <div class="row">
                       <div class="input-field col s12">
                         <textarea id="title" class="materialize-textarea" disabled></textarea>
@@ -107,9 +107,9 @@
                     <div id="review" class="section scrollspy">
                       <form id="form_review" class="row">
                         <div class="col s12">
-                          <h1>Submission Review</h1>
-                          <h2>Review Criteria</h2>
-                          <p>This proposal:</p>
+                          <h1>Submit your review</h1>
+                          <h2>Review criteria checklist</h2>
+                          <p>Use this checklist to review whether the submissions meets the criteria. Indicate if this proposal:</p>
                           <div class="col s12">
                             <input name="criteria[]" type="checkbox" id="criteria_1" class="filled-in setting" value="1. Relates to theme" />
                             <label for="criteria_1">Does explain how the session relates to the chosen conference theme.</label>
@@ -124,7 +124,7 @@
                           </div>
                           <div class="row">
                             <div class="col s12" style="padding-top:20px">
-                              <h2>Review Decision/Feedback</h2>
+                              <h2>Record your decision</h2>
                               <ul class="collapsible">
                                 <li>
                                   <div class="collapsible-header active"><i class="material-icons">help_outline</i>
@@ -177,7 +177,7 @@
                           <div class="row">
                             <div class="input-field col s12">
                               <textarea name="feedback_text_area" id="feedback_text_area" class="materialize-textarea validate setting" data-length="1000" required="" aria-required="true"></textarea>
-                              <label class="active" for="feedback_text_area">Feedback for the author (this will be automatically emailed to the author):</label>
+                              <label class="active" for="feedback_text_area">Feedback for the author:</label>
                             </div>
                           </div>
 
@@ -201,13 +201,13 @@
                     <? if (isAdmin) { ?>
                       <li><a href="#submitter">Submitted by</a></li>
                     <? } ?>
-                      <li><a href="#overview">Session Overview</a></li>
+                      <li><a href="#overview">Submission Overview</a></li>
                       <li><a href="#desc">Description</a></li>
                       <li><a href="#eval">Session Content</a></li>
                       <li><a href="#ref">References</a></li>
                       <li><a href="#resources">Additional Resources</a></li>
                     <? if (mode === 'review') { ?>
-                      <li><a href="#review">Submission Review</a></li>
+                      <li><a href="#review">Submit your review</a></li>
                     <? } ?>
                   </ul>
                   <div class="center-align logo">

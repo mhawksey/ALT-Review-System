@@ -12,8 +12,8 @@
       
       function setReview(data){
         updateFields(data);
-        if (data.review_status === 'review_accept' || data.review_status === 'review_decline'){
-          $('#'+data.review_status).removeClass('disabled');
+        if (data.review_status === 'review_assigned' || data.review_status === 'review_accept' || data.review_status === 'review_decline'){
+          $('[id^=review_]').removeClass('disabled');
         }
         if (data.review_status){
           $('#'+data.review_status).removeClass('grey')

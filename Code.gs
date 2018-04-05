@@ -26,6 +26,7 @@ function showSummary() {
   var html = HtmlService.createTemplateFromFile('Summary')
   html.currentRow = SpreadsheetApp.getActiveSheet().getActiveRange().getRow();
   html.isAdmin = true;
+  html.mode = 'admin';
   SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   .showModalDialog(html.evaluate().setWidth(1200).setHeight(800), 'Submission Review');
 }
@@ -62,7 +63,7 @@ function checkAuthor(){
       var recipient = s['Email address (for communication only)']
       MailApp.sendEmail(recipient, subject, body, {cc:'systems@alt.ac.uk',replyTo:'helpdesk@alt.ac.uk'});
       var row = parseInt(s.ID.match(/\d+$/)[0]);
-      sheet.getRange(row+1, incCol).setValue('check_author')
+      sheet.getRange(row+1, incCol+1).setValue('check_author')
                                        .setNote('check_author by: '+
                                                 Session.getActiveUser().getEmail()+'\nDate: ' + 
                                                 Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
@@ -92,16 +93,17 @@ function sendReviewerEmails_(email, type, days){
   var incCol = headings.indexOf('Include');
   var revCols = [];
   for (var r = 1; r < 5; r++){
-    revCols.push(headings.indexOf('Reviewer'+r));
+    revCols.push(headings.indexOf('Reviewer'+r)+1);
   }
   var sub_filtered = sub_obj.filter(function(s){
     if (s['Include'] === 'yes'){
-      for (var r = 0; r < 4; r++){
-        var row = parseInt(s.ID.match(/\d+$/)[0]);
-        var column = revCols[r];
-        //if (s['Reviewer'+r] !== "" && s['Review'+r+' Status'] ===""){
-        var note = sheet.getRange(row+1, column).getNote();
-        if (testEmailCase_(type, s, r, {sheet:sheet, row:(row+1), column:column, days:days})){
+      var row = parseInt(s.ID.match(/\d+$/)[0])+1;
+      for (var r = 1; r < 5; r++){
+        
+        var colReviewer = revCols[r-1];
+        var colReviewStatus = colReviewer+1;
+        var note = sheet.getRange(row, colReviewStatus).getNote();
+        if (testEmailCase_(type, s, r, {sheet:sheet, row:row, column:colReviewStatus, days:days})){
           // send email 
           var recipient = extractBracket(s['Reviewer'+r]);
           var url = UrlShortener.Url.insert({
@@ -110,14 +112,22 @@ function sendReviewerEmails_(email, type, days){
           s.review_url = url.id;
           var subject = fillInTemplateFromObject(email.subject, s);
           var body = fillInTemplateFromObject(email.text, s);
-          MailApp.sendEmail(recipient, subject, body, {cc:'systems@alt.ac.uk',replyTo:'helpdesk@alt.ac.uk'});
-          // record on sheet
+          try {
+            MailApp.sendEmail(recipient, subject, body, {cc:'systems@alt.ac.uk',replyTo:'helpdesk@alt.ac.uk'});
+            // record on sheet
 
-          sheet.getRange(row+1, column).setValue('review_'+type)
+            sheet.getRange(row, colReviewStatus).setValue('review_'+type)
                                        .setNote(capitalizeFirstLetter(type)+' by: '+
-                                                Session.getActiveUser().getEmail()+'\nDate: ' + 
+                                                Session.getActiveUser().getEmail() + '\nTo: '+
+                                                recipient +'\nDate: ' + 
                                                 Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
-          return s; 
+          } catch(e) {
+            sheet.getRange(row, colReviewStatus).setValue('error_'+type)
+                                       .setNote('Error '+capitalizeFirstLetter(type)+' by: '+
+                                                Session.getActiveUser().getEmail()+'\nDate: ' + 
+                                                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') +
+                                                'Msg '+e.message );
+          }
         }
       }
       
@@ -134,7 +144,7 @@ function testEmailCase_(type, s, r, reminder){
     if (s['Review'+r+' Status'] === 'review_assigned'){
       var note = reminder.sheet.getRange(reminder.row, reminder.column).getNote();
       var dateString = note.match(/\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}/);
-      var note_date = (new Date().getTime()-new Date(dateString).getTime())/(1000*60*60*24);
+      var note_date = (new Date().getTime()-new Date(dateString).getTime())/(1000*60*60*24);      
       if (note_date > reminder.days){        
         return true;
       }
