@@ -15,6 +15,7 @@ function onOpen() {
   // Or DocumentApp or FormApp.
   ui.createMenu('Review System')
       .addItem('Submission Details', 'showSummary')
+      .addItem('Check submission email', 'checkAuthor')
       .addItem('Build Reviewer Lists', 'buildReviewerLists')
       .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
       .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
@@ -43,6 +44,31 @@ function doGet(e){
              .setTitle("ALT - Review System")
              .setFaviconUrl('https://www.alt.ac.uk/sites/alt.ac.uk/files/files/favicon.ico')
              .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+function checkAuthor(){
+  var email = getEmailTemplate('check_author');
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+  var subs = sheet.getDataRange();
+  var sub_obj = objectify(subs)
+  var headings = sheet.getDataRange()
+                      .offset(0, 0, 1)
+                      .getValues()[0];
+  var incCol = headings.indexOf('Include');
+  var sub_filtered = sub_obj.filter(function(s){
+    if (s['Include'] === 'check_author'){
+      var subject = fillInTemplateFromObject(email.subject, s);
+      var body = fillInTemplateFromObject(email.text, s);
+      var recipient = s['Email address (for communication only)']
+      MailApp.sendEmail(recipient, subject, body, {cc:'systems@alt.ac.uk',replyTo:'helpdesk@alt.ac.uk'});
+      var row = parseInt(s.ID.match(/\d+$/)[0]);
+      sheet.getRange(row+1, incCol).setValue('check_author')
+                                       .setNote('check_author by: '+
+                                                Session.getActiveUser().getEmail()+'\nDate: ' + 
+                                                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+          return s; 
+    }
+  });
 }
 
 function sendReviewerNotification(){
