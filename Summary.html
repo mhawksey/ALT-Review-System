@@ -22,7 +22,8 @@
       <div class="nav-wrapper">
         <? if (isAdmin) { ?>
           <?!= include('admin_nav'); ?>
-            <? } ?>
+        <? } ?>
+
       </div>
     </nav>
     <div class="progress white">
@@ -36,6 +37,12 @@
           <div class="col s12 m9 l10">
             <h1>Proposal Review</h1>
             <blockquote>We review all submissions to ensure that we maintain the highest quality and include the broad range of learning technology research, practice and policy of interest to our participants.</blockquote>
+            <? if (mode === 'review') { ?>
+          <div class="row center-align">
+                  <div class="col s6"><a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></div>
+                  <div class="col s6"><a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></div>
+                </div>
+            <? } ?>
             <? if (isAdmin) { ?>
               <?!= include('admin_submitter'); ?>
                 <? } ?>
@@ -188,14 +195,8 @@
                     </div>
                     <? } // mode=review ?>
           </div>
-          <div class="col hide-on-small-only m3 l2">
+          <div class="col hide-on-small-onl m3 l2">
             <div class="toc-wrapper pinned">
-              <? if (!isAdmin) { ?>
-                <div class="center-align">
-                  <p><a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></p>
-                  <p><a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></p>
-                </div>
-              <? } ?>
                   <ul class="section table-of-contents">
                     <? if (isAdmin) { ?>
                       <li><a href="#submitter">Submitted by</a></li>

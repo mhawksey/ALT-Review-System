@@ -41,7 +41,8 @@ function doGet(e){
   html.isAdmin = false;
   return html.evaluate()
              .setTitle("ALT - Review System")
-             .setFaviconUrl('https://www.alt.ac.uk/sites/alt.ac.uk/files/files/favicon.ico');
+             .setFaviconUrl('https://www.alt.ac.uk/sites/alt.ac.uk/files/files/favicon.ico')
+             .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
 function sendReviewerNotification(){
