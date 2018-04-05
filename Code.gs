@@ -4,7 +4,11 @@ var SUB_SHEET_NAME = "Form responses (DO NOT EDIT)";
 var REV_SHEET_NAME = "Reviewers";
 var REVIEW_SHEET_NAME = "Reviews";
 
-var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwVMZocG3xPzNKyCvA36XIMo5xQ2wq6SLowKACNYSoBDwve-SM/exec"
+// Dev
+var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwVMZocG3xPzNKyCvA36XIMo5xQ2wq6SLowKACNYSoBDwve-SM/exec";
+
+// Prod.
+// var REVIEW_URL = "https://script.google.com/macros/s/AKfycbxNtXYjjLKafhqwjJD2lS-NoKadVMQYiUUsd-JXDieOPYW4IFc/exec";
 
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
