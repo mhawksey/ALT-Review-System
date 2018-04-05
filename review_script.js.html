@@ -24,6 +24,7 @@
           $('#modal_title').text('Information');
           $('#modal_text').html('<p>It looks like you have already reviewed this proposal. If you think this is an error please email <a href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a> quoting Ref:'+data.ID+'</p>');
           $('#modal').modal('open');
+          $('#submit_but').addClass("disabled");
         }
         console.log(data)
       }

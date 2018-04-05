@@ -105,6 +105,7 @@ function setReviewStatus(row, el){
 }
 
 function processReviewForm(formData){
+  console.time('processReviewForm')
   // https://stackoverflow.com/a/43238894
   // BEGIN - start lock here
   var lock = LockService.getScriptLock();
@@ -132,7 +133,7 @@ function processReviewForm(formData){
   // write result
   sheet.getRange(2, 1, 1, row.length).setValues([row]).setFontWeight('normal');  
   var email = updateReviewColumn_(formData.review_token, formData.reviewer_token, formData.reviewer_num, formData.feedback_decision);
-  SpreadsheetApp.flush(); // applies all pending spreadsheet changes
+  //SpreadsheetApp.flush(); // applies all pending spreadsheet changes
   lock.releaseLock();
   var recipient = extractBracket(email);
   var email = getEmailTemplate('thank_reviewer');
@@ -144,5 +145,6 @@ function processReviewForm(formData){
     MailApp.sendEmail('martin.hawksey@alt.ac.uk', 'ALT Review System Error', JSON.stringify(formData, null, '\t'));
   }
   // END - end lock here
+  console.timeEnd('processReviewForm');
   return {result:'ok'};
 }
