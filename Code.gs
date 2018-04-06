@@ -67,7 +67,6 @@ function checkAuthor(){
                                        .setNote('check_author by: '+
                                                 Session.getActiveUser().getEmail()+'\nDate: ' + 
                                                 Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
-          return s; 
     }
   });
 }
