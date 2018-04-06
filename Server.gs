@@ -133,7 +133,7 @@ function processReviewForm(formData){
   // write result
   sheet.getRange(2, 1, 1, row.length).setValues([row]).setFontWeight('normal');  
   var email = updateReviewColumn_(formData.review_token, formData.reviewer_token, formData.reviewer_num, formData.feedback_decision);
-  //SpreadsheetApp.flush(); // applies all pending spreadsheet changes
+  SpreadsheetApp.flush(); // applies all pending spreadsheet changes
   lock.releaseLock();
   var recipient = extractBracket(email);
   var email = getEmailTemplate('thank_reviewer');

@@ -37,7 +37,7 @@
           <div class="col s12 m9 l10">
           <? if (mode === 'review') { ?>
             <h1>Review form</h1>
-            <blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'</blockquote>
+            <blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'.</blockquote>
           <div class="row center-align">
                   <div class="col s6"><a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></div>
                   <div class="col s6"><a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></div>
@@ -109,7 +109,7 @@
                         <div class="col s12">
                           <h1>Submit your review</h1>
                           <h2>Review criteria checklist</h2>
-                          <p>Use this checklist to review whether the submissions meets the criteria. Indicate if this proposal:</p>
+                          <p>Use this checklist to record whether the submissions meets the criteria. Indicate if this proposal:</p>
                           <div class="col s12">
                             <input name="criteria[]" type="checkbox" id="criteria_1" class="filled-in setting" value="1. Relates to theme" />
                             <label for="criteria_1">Does explain how the session relates to the chosen conference theme.</label>
@@ -127,8 +127,9 @@
                               <h2>Record your decision</h2>
                               <ul class="collapsible">
                                 <li>
-                                  <div class="collapsible-header active"><i class="material-icons">help_outline</i>
-                                    <h2>Review Outcomes Explained</h2></div>
+                                  <div class="collapsible-header active">
+                                    <i class="material-icons">help_outline</i>
+                                    <h3>Review Outcomes Explained</h3></div>
                                   <div class="collapsible-body">
                                     <ul class="collection">
                                       <li class="collection-item"><strong>Accept</strong> - Accept the proposal with no changes, a strong proposal, everything is as it should be.</li>
@@ -173,11 +174,33 @@
                               <label for="different_type">Recommended session type</label>
                             </div>
                           </div>
-
+                          <div class="row">
+                          <div class="col s12">
+<ul class="collapsible">
+                                <li>
+                                  <div class="collapsible-header"><i class="material-icons">help_outline</i>
+                                    <h3>How to write feedback for authors</h3></div>
+                                  <div class="collapsible-body">
+                                  <p>The feedback you provide is sent to authors, so keep this in mind when writing your comments.</p>
+                                  <p>Be concise, sometimes a sentence or two is enough and we ask that feedback is as clear and specific as possible, referring directly to sentences or sections of the proposal that should be revised.</p>
+                                  <p>Here are tips from other reviewers:</p>
+                                  <ul class="browser-default">
+                                    <li>Avoid praising or criticising the author, make sure all comments refer to the proposal . Consider giving 3 points of positive feedback, followed by the suggestions for change, which (as suggested below) should be focussed on what the author needs to do, rather than general comments.</li>
+                                    <li>Try to write feedback that you’d be happy to receive and that the authors can clearly action. Be positive in your language and constructive in your suggestions, rather than tell people what the problem is tell them what you think the solution should be.</li>
+                                    <li>For example: If you think a workshop proposal sounds boring, try saying “This session needs more interaction, please include details of the activities your participants will be doing during the session”.</li>
+                                    <li>Remember that just because someone has done something in a different way than you would have done it, does not make them wrong. Be respectful and be explicit about the nature of the advice you are giving: for example, are you are offering suggestions for consideration (“the proposal could be enhanced by the inclusion of…”), or insisting on a problem being fixed (“this section is unclear and should be rewritten”)?</li>
+                                    <li>Keep in mind that our authors come from different sectors and backgrounds and English may not be their first language.</li>
+                                  </ul>
+                                  </div>
+                                </li>
+                             </ul>
+                             </div>
+                             </div>
                           <div class="row">
                             <div class="input-field col s12">
-                              <textarea name="feedback_text_area" id="feedback_text_area" class="materialize-textarea validate setting" data-length="1000" required="" aria-required="true"></textarea>
-                              <label class="active" for="feedback_text_area">Feedback for the author:</label>
+                            
+                              <textarea name="feedback_text_area" id="feedback_text_area" class="materialize-textarea validate setting" data-length="1500" required="" aria-required="true"></textarea>
+                              <label class="active" for="feedback_text_area">Feedback for the author (required):</label>
                             </div>
                           </div>
 
@@ -210,8 +233,15 @@
                       <li><a href="#review">Submit your review</a></li>
                     <? } ?>
                   </ul>
-                  <div class="center-align logo">
+                  <? if (mode === 'review') { ?>
+                  <div class="row">
+                  <div class="col s6 center-align" style="font-size: 80%;"><h2 class="section-title"><i class="material-icons">info_outline</i> Information</h2><p>For reference here is the <a taget="_blank" href="https://altc.alt.ac.uk/2018/reviewerguidance/">full reviewer guidance</a>. If you have questions or problems please contact <a taget="_blank" href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a></p> </div>
+                  </div>
+                  <? } ?>
+                  <div class="row">
+                  <div class="col s6 center-align logo">
                     <img src="https://www.alt.ac.uk/sites/alt.ac.uk/files/alt-logo_0_0.png" alt="ALT Logo" /><br/><span>Charity number: 1160039</span>
+                  </div>
                   </div>
             </div>
           </div>
