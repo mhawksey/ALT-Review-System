@@ -41,6 +41,7 @@
                 <div class="col s6"><a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></div>
                 <div class="col s6"><a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></div>
               </div>
+              <blockquote id="prompt_review_accept" style="display:none">If you are happy to review this proposial please scroll down to <a href="#review">Submit your review</a> and record your decision (you can revisit this page from the link in the email at anytime to complete your review).</blockquote>
             <? } ?>
             <? if (isAdmin) { ?>
               <?!= include('admin_submitter'); ?>
@@ -116,7 +117,7 @@
                   <li><a href="#ref">References</a></li>
                   <li><a href="#resources">Additional Resources</a></li>
                   <? if (mode === 'review') { ?>
-                    <li><a href="#review">Submit your review</a></li>
+                    <li id="tap_target_review"><a href="#review">Submit your review</a></li>
                   <? } ?>
               </ul>
               <? if (mode === 'review') { ?>

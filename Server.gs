@@ -105,7 +105,7 @@ function getReviewData(review_token, reviewer_token, reviewer_num) {
     }
   }
   console.timeEnd('getReviewData')
-  return d.submission;
+  return JSON.stringify(d.submission);
 }
 
 /**

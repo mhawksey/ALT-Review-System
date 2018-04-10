@@ -13,6 +13,8 @@
     }
     // get proposal success handler
     function setReview(data) {
+      var data = JSON.parse(data);
+    console.log(data)
       // update text boxes
       updateFields(data);
 
@@ -21,7 +23,8 @@
         $('[id^=review_]').removeClass('disabled');
       }
       if (data.review_status) {
-        $('#' + data.review_status).removeClass('grey')
+        $('#' + data.review_status).removeClass('grey');
+        $('#prompt_' + data.review_status).slideDown(400);
       }
 
       // check if proposal has already been reviewed
@@ -48,12 +51,14 @@
       $('.progress').hide();
       $('[id^=review_]').prop("disabled", false)
       $('#' + data.review_status).removeClass('grey');
+      $('#prompt_' + data.review_status).show(400);
     }
 
     // review form event
     $("#form_review").on('submit', function(e) {
       e.preventDefault();
       $('#submit_but').addClass("disabled");
+      $('[id^=review_]').addClass('disabled');
       $('.progress').show();
       $('#session_title').val($('#title').val());
       $('#token').val(token);
@@ -115,6 +120,7 @@
       $('select').material_select();
       $('.collapsible').collapsible();
       $('.tooltipped').tooltip();
+      $('.scrollspy').scrollSpy();
 
       $('select[required]').css({
         display: 'inline',
