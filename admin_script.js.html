@@ -1,57 +1,65 @@
 <script>
   $(function() {
-    google.script.run.withSuccessHandler(getSubs)
-      .getData();
     var IS_FILTERED = false;
     var SHEET = {};
-    $('#rowNum').text(currentRow);
 
+    // get all submissions from the google sheet
+    google.script.run.withSuccessHandler(getSubs)
+      .getAllSubmissionData();
+
+    // get all submissions handler
     function getSubs(sheet) {
       SHEET = JSON.parse(sheet);
       showSubs(currentRow);
     }
+    // update dialog title text
+    $('#rowNum').text(currentRow);
 
+    // pagination events
     $('#pagePrev').on('click', function() {
       currentRow--;
       showSubs(currentRow, '--');
     });
-
     $('#pageNext').on('click', function() {
       currentRow++;
       showSubs(currentRow, '++');
     });
-    
+
+    // filter event
     $('#include_filter').on('click', function() {
       IS_FILTERED = !IS_FILTERED;
-      $( this ).toggleClass( "active" )
+      $(this).toggleClass("active")
     });
-    
+
+    // include/exclude buttons event
     $("[id$='_review']").on('click', function(el) {
-    $('.progress').show();
+      $('.progress').show();
       $("[id$='_review']").removeClass('active');
       $("[id$='_review']").addClass('disabled');
-      google.script.run.withSuccessHandler(function(result){
-      console.log(result);
+      var value = el.target.id.split('_')[0];
+      google.script.run.withSuccessHandler(function(result) {
+        console.log(result);
         $("[id$='_review']").removeClass('active')
         $("[id$='_review']").removeClass('disabled');
-        $('#'+result).addClass('active');
+        $('#' + result).addClass('active');
         $('.progress').hide();
-      }).setReviewStatus(currentRow, el.target.id);
+      }).setReviewStatus(currentRow, value);
     });
-    
 
+    // pagination event handler
     function showSubs(showRow, direction) {
       var data = SHEET;
       var r = data[showRow - 2];
-      if (IS_FILTERED && r['Include'] === 'no'){
-        eval('currentRow'+direction);
+      // TODO check pagination when filtered
+      if (IS_FILTERED && r['Include'] === 'no') {
+        eval('currentRow' + direction);
         return showSubs(currentRow, direction);
       }
-      $('#rowNum').text(currentRow-1);
+      $('#rowNum').text(currentRow - 1);
       updateFields(r);
       var toReview = r['Include']
       $("[id$='_review']").removeClass('active');
-      $('#'+toReview+'_review').addClass('active');
+      $('#' + toReview + '_review').addClass('active');
     }
   });
 </script>

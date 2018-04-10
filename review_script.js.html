@@ -1,126 +1,134 @@
 <script>
   $(function() {
-      if (review_token === "undefined"){
-        $('.modal').modal();
-        $('#modal_title').text('Oops - an error has occured');
-        $('#modal_text').text('We can\'t find your submission. Please check the link from your email.');
-        $('#modal').modal('open');
-      }
-      
+    // Handle no review token
+    if (review_token === "undefined") {
+      $('.modal').modal();
+      $('#modal_title').text('Oops - an error has occured');
+      $('#modal_text').text('We can\'t find your submission. Please check the link from your email.');
+      $('#modal').modal('open');
+    } else {
+      // get proposal
       google.script.run.withSuccessHandler(setReview)
-      .getReviewData(review_token, reviewer_token, reviewer_num);
-      
-      function setReview(data){
-        updateFields(data);
-        if (data.review_status === 'review_assigned' || data.review_status === 'review_reminded' || data.review_status === 'review_accept' || data.review_status === 'review_decline'){
-          $('[id^=review_]').removeClass('disabled');
-        }
-        if (data.review_status){
-          $('#'+data.review_status).removeClass('grey')
-        }
-        var reviewed_options = ['accept', 'accept_minor_revisions', 'accept_different_type', 'resubmit', 'reject'];
-        if (reviewed_options.indexOf(data.review_status) > -1){
-          $('.modal').modal();
-          $('#modal_title').text('Information');
-          $('#modal_text').html('<p>It looks like you have already reviewed this proposal. If you think this is an error please email <a href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a> quoting Ref:'+data.ID+'</p>');
-          $('#modal').modal('open');
-          $('#submit_but').addClass("disabled");
-        }
-        console.log(data)
+        .getReviewData(review_token, reviewer_token, reviewer_num);
+    }
+    // get proposal success handler
+    function setReview(data) {
+      // update text boxes
+      updateFields(data);
+
+      // handle review accept/decline buttons
+      if (data.review_status === 'review_assigned' || data.review_status === 'review_reminded' || data.review_status === 'review_accept' || data.review_status === 'review_decline') {
+        $('[id^=review_]').removeClass('disabled');
       }
-      
-      $('[id^=review_]').on('click', function(e) {
-        $('[id^=review_]').prop("disabled", true).addClass('grey');
-        $('.progress').show();
-        var type = $(e.currentTarget).prop("id");
-        google.script.run.withSuccessHandler(reviewHandler)
-                     .setReviewerStatus(review_token, reviewer_token, reviewer_num, type);
-      });
-      
-      function reviewHandler(data){
-        $('.progress').hide();
-        $('[id^=review_]').prop("disabled", false)
-        $('#'+data.review_status).removeClass('grey');
+      if (data.review_status) {
+        $('#' + data.review_status).removeClass('grey')
       }
-      
-      $("#form_review").on('submit',function(e){
-        e.preventDefault();
-        $('#submit_but').addClass("disabled");
-        $('.progress').show();
-        $('#session_title').val($('#title').val());
-        $('#token').val(token);
-        $('#review_token').val(review_token);
-        $('#reviewer_token').val(reviewer_token);
-        $('#reviewer_num').val(reviewer_num);
-        google.script.run.withSuccessHandler(handleReviewResponse).processReviewForm(this);
-        $('.setting').prop("disabled", true);
-        $('select').material_select();
-      });
-      
-      function handleReviewResponse(data){
-        $('.progress').hide();
+
+      // check if proposal has already been reviewed
+      var reviewed_options = ['accept', 'accept_minor_revisions', 'accept_different_type', 'resubmit', 'reject'];
+      if (reviewed_options.indexOf(data.review_status) > -1) {
         $('.modal').modal();
-        if (data.result === 'ok'){
-          $('#modal_title').text('Thank you - Review submitted');
-          $('#modal_text').text('Your review has been recorded. You may now close this browser tab.');
-        } else {
-          $('#modal_title').text('Oops - an error has occured');
-          $('#modal_text').text('Your review was not recorded. Please try submitting again.');
-          $('#submit_but').removeClass("disabled");
-        }
+        $('#modal_title').text('Information');
+        $('#modal_text').html('<p>It looks like you have already reviewed this proposal. If you think this is an error please email <a href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a> quoting Ref:' + data.ID + '</p>');
         $('#modal').modal('open');
-        console.log(data);
+        $('#submit_but').addClass("disabled");
       }
-      
-      $("#feedback_decision").on('change',function(e){
-        var accept_type = $(this).val();
-        var type_select = $('#different_type');
-        if (accept_type === 'accept_different_type'){
-          $('#select_different_type').show();
-          type_select.addClass('validate')
-                     .prop('required',true)
-                     .attr("aria-required", "true");
-                     $('select[required]').css({
-         display: 'inline',
-         position: 'absolute',
-         float: 'left',
-         padding: 0,
-         margin: 0,
-         border: '1px solid rgba(255,255,255,0)',
-         height: 0, 
-         width: 0,
-         top: '2em',
-         left: '3em',
-         opacity: 0
-         });
-        } else {
-          $('#select_different_type').hide();
-          type_select.removeClass('validate')
-                     .prop('required',false)
-                     .removeAttr("aria-required");
-        }
-        $('#feedback_decision').material_select();
-      });
-      
-      $(document).ready(function() {
-        $('select').material_select();
-        $('.collapsible').collapsible();
-        $('.tooltipped').tooltip();
-        
+    }
+
+    // review button event
+    $('[id^=review_]').on('click', function(e) {
+      $('[id^=review_]').prop("disabled", true).addClass('grey');
+      $('.progress').show();
+      var type = $(e.currentTarget).prop("id");
+      google.script.run.withSuccessHandler(reviewHandler)
+        .setReviewerStatus(review_token, reviewer_token, reviewer_num, type);
+    });
+    // review button event handler
+    function reviewHandler(data) {
+      $('.progress').hide();
+      $('[id^=review_]').prop("disabled", false)
+      $('#' + data.review_status).removeClass('grey');
+    }
+
+    // review form event
+    $("#form_review").on('submit', function(e) {
+      e.preventDefault();
+      $('#submit_but').addClass("disabled");
+      $('.progress').show();
+      $('#session_title').val($('#title').val());
+      $('#token').val(token);
+      $('#review_token').val(review_token);
+      $('#reviewer_token').val(reviewer_token);
+      $('#reviewer_num').val(reviewer_num);
+      google.script.run.withSuccessHandler(handleReviewResponse).processReviewForm(this);
+      $('.setting').prop("disabled", true);
+      $('select').material_select();
+    });
+    // review form event handler
+    function handleReviewResponse(data) {
+      $('.progress').hide();
+      $('.modal').modal();
+      if (data.result === 'ok') {
+        $('#modal_title').text('Thank you - Review submitted');
+        $('#modal_text').text('Your review has been recorded. You may now close this browser tab.');
+      } else {
+        $('#modal_title').text('Oops - an error has occured');
+        $('#modal_text').text('Your review was not recorded. Please try submitting again.');
+        $('#submit_but').removeClass("disabled");
+      }
+      $('#modal').modal('open');
+    }
+
+    // feedback select event (show different seesion type select)
+    $("#feedback_decision").on('change', function(e) {
+      var accept_type = $(this).val();
+      var type_select = $('#different_type');
+      if (accept_type === 'accept_different_type') {
+        $('#select_different_type').show();
+        type_select.addClass('validate')
+          .prop('required', true)
+          .attr("aria-required", "true");
         $('select[required]').css({
-         display: 'inline',
-         position: 'absolute',
-         float: 'left',
-         padding: 0,
-         margin: 0,
-         border: '1px solid rgba(255,255,255,0)',
-         height: 0, 
-         width: 0,
-         top: '2em',
-         left: '3em',
-         opacity: 0
-         });
-      });  
+          display: 'inline',
+          position: 'absolute',
+          float: 'left',
+          padding: 0,
+          margin: 0,
+          border: '1px solid rgba(255,255,255,0)',
+          height: 0,
+          width: 0,
+          top: '2em',
+          left: '3em',
+          opacity: 0
+        });
+      } else {
+        $('#select_different_type').hide();
+        type_select.removeClass('validate')
+          .prop('required', false)
+          .removeAttr("aria-required");
+      }
+      $('#feedback_decision').material_select();
+    });
+
+    // initialize materialize components
+    $(document).ready(function() {
+      $('select').material_select();
+      $('.collapsible').collapsible();
+      $('.tooltipped').tooltip();
+
+      $('select[required]').css({
+        display: 'inline',
+        position: 'absolute',
+        float: 'left',
+        padding: 0,
+        margin: 0,
+        border: '1px solid rgba(255,255,255,0)',
+        height: 0,
+        width: 0,
+        top: '2em',
+        left: '3em',
+        opacity: 0
+      });
+    });
   });
-  
 </script>

@@ -3,7 +3,7 @@ function checkSubmissions() {
   var formURL = doc.getFormUrl();
   var form = FormApp.openByUrl(formURL);
   var resp = form.getResponses();
-  var out = [['timestamp', 'ID', 'email', 'title']]; 
+  var out = [['timestamp', 'ID', 'email', 'title']];
   for (r in resp){
     var sub = resp[r].getItemResponses();
     var timestamp = resp[r].getTimestamp();
@@ -22,14 +22,14 @@ function createToken_(email, row, mode, reviewer_num){
                                                row: row,
                                                reviewer_num: reviewer_num,
                                                mode: mode}));
-  return Utilities.base64EncodeWebSafe(blob.getBytes()); 
+  return Utilities.base64EncodeWebSafe(blob.getBytes());
 }
 
 function decodeToken_(token){
-  try { 
+  try {
     return JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(token)).getDataAsString());
   } catch(e) {
-    return {mode:'review'}; 
+    return {mode:'review'};
   }
 }
 
@@ -50,7 +50,7 @@ function getHashedText(email){
     chr = (chr < 0 ? chr + 256 : chr).toString(16);
     return str + (chr.length==1?'0':'') + chr;
   },'');
-  return hashedEmail; 
+  return hashedEmail;
 }
 
 function objectify(dataRange){
@@ -80,7 +80,7 @@ function getEmailTemplate(id){
   var email_obj = objectify(emails);
   return email_obj.filter(idFilter(id))[0];
 }
-  
+
 function idFilter(id) {
     return function(element) {
       if (element.id === id){
@@ -112,8 +112,13 @@ function fillInTemplateFromObject(template, data) {
   return email;
 }
 
-// 
+//
 function extractBracket(str){
   var rxp = /\(([^\)]+)\)/;
   return rxp.exec( str )[1]
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename)
+    .getContent();
 }

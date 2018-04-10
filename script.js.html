@@ -1,32 +1,35 @@
 <script>
-function updateFields(r){
-$('#ID').val(r['ID']);
-$('#rowTitle').text(r['Session title']);
-$('#name').val(r['First Name'] + ' ' + r['Last Name']);
-$('#inst').val(r['Institution (if applicable)']);
-$('#sectors').val(r['Which sector(s) are you based in?']);
-$('#title').val(r['Session title']);
-$('#theme').val(r['Which conference theme best fits your session?'].split(':')[0]);
-$('#type').val(r['Select what kind of session you\'d like to run:']);
-$('#desc_area').val(r['Session description']);
-$('#desc_area_count').text('~'+countWords(r['Session description'])+'/500 words');
-$('#eval_area').val(r['Session content: evaluation and reflection']);
-$('#eval_area_count').text('~'+countWords(r['Session content: evaluation and reflection'])+'/500 words');
-$('#ref_area').val(r['References']);
-$('#resources_area').val(r['Resources for participants']);
-Materialize.updateTextFields();
-$("[id$='_area']").trigger('autoresize');
-$('.scrollspy').scrollSpy();
+  function updateFields(r) {
 
-$('.progress').hide();
-}
+    // update fields from sheet data 
+    $('#ID').val(r['ID']);
+    $('#rowTitle').text(r['Session title']);
+    $('#name').val(r['First Name'] + ' ' + r['Last Name']);
+    $('#inst').val(r['Institution (if applicable)']);
+    $('#sectors').val(r['Which sector(s) are you based in?']);
+    $('#title').val(r['Session title']);
+    $('#theme').val(r['Which conference theme best fits your session?'].split(':')[0]);
+    $('#type').val(r['Select what kind of session you\'d like to run:']);
+    $('#desc_area').val(r['Session description']);
+    $('#desc_area_count').text('~' + countWords(r['Session description']) + '/500 words');
+    $('#eval_area').val(r['Session content: evaluation and reflection']);
+    $('#eval_area_count').text('~' + countWords(r['Session content: evaluation and reflection']) + '/500 words');
+    $('#ref_area').val(r['References']);
+    $('#resources_area').val(r['Resources for participants']);
 
-    function countWords(s){
-    s = s.replace(/(^\s*)|(\s*$)/gi,"");//exclude  start and end white-space
-    s = s.replace(/[ ]{2,}/gi," ");//2 or more space to 1
-    s = s.replace(/\n /,"\n"); // exclude newline with a start spacing
-    return s.split(' ').length; 
-    }
+    // Refresh materialize components
+    Materialize.updateTextFields();
+    $("[id$='_area']").trigger('autoresize');
+    $('.scrollspy').scrol
+
+    // hide progress bar
+    $('.progress').hide();
+  }
+
+  function countWords(s) {
+    s = s.replace(/(^\s*)|(\s*$)/gi, ""); //exclude  start and end white-space
+    s = s.replace(/[ ]{2,}/gi, " "); //2 or more space to 1
+    s = s.replace(/\n /, "\n"); // exclude newline with a start spacing
+    return s.split(' ').length;
+  }
 </script>
-
-

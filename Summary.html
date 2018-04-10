@@ -22,8 +22,7 @@
       <div class="nav-wrapper">
         <? if (isAdmin) { ?>
           <?!= include('admin_nav'); ?>
-        <? } ?>
-
+            <? } ?>
       </div>
     </nav>
     <div class="progress white">
@@ -35,214 +34,104 @@
       <? } ?> >
         <div class="row">
           <div class="col s12 m9 l10">
-          <? if (mode === 'review') { ?>
-            <h1>Review form</h1>
-            <blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'.</blockquote>
-          <div class="row center-align">
-                  <div class="col s6"><a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></div>
-                  <div class="col s6"><a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></div>
-                </div>
+            <? if (mode === 'review') { ?>
+              <h1>Review form</h1>
+              <blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'.</blockquote>
+              <div class="row center-align">
+                <div class="col s6"><a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></div>
+                <div class="col s6"><a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></div>
+              </div>
             <? } ?>
             <? if (isAdmin) { ?>
               <?!= include('admin_submitter'); ?>
-                <? } ?>
-                  <div id="overview" class="section scrollspy">
-                    <h2>Submission Overview</h2>
-                    <div class="row">
-                      <div class="input-field col s12">
-                        <textarea id="title" class="materialize-textarea" disabled></textarea>
-                        <label class="active" for="title">Title</label>
-                      </div>
-                      <div class="input-field col s12">
-                        <textarea id="theme" class="materialize-textarea" disabled></textarea>
-                        <label class="active" for="theme">Session Theme</label>
-                      </div>
-                      <div class="input-field col s12">
-                        <textarea id="type" class="materialize-textarea" disabled></textarea>
-                        <label class="active" for="type">Session Type</label>
-                      </div>
-                      <?!= include('assign_review'); ?>
-                    </div>
+            <? } ?>
+              <div id="overview" class="section scrollspy">
+                <h2>Submission Overview</h2>
+                <div class="row">
+                  <div class="input-field col s12">
+                    <textarea id="title" class="materialize-textarea" disabled></textarea>
+                    <label class="active" for="title">Title</label>
                   </div>
-                  <div id="desc" class="section scrollspy">
-                    <h2>Description</h2>
-                    <div class="row">
-                      <div class="input-field col s12">
-                        <textarea id="desc_area" class="materialize-textarea" disabled></textarea>
-                        <label class="active" for="desc_area">Session Description</label>
-                        <span id="desc_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
-                      </div>
-                    </div>
+                  <div class="input-field col s12">
+                    <textarea id="theme" class="materialize-textarea" disabled></textarea>
+                    <label class="active" for="theme">Session Theme</label>
                   </div>
-                  <div id="eval" class="section scrollspy">
-                    <h2>Session Content</h2>
-                    <div class="row">
-                      <div class="input-field col s12">
-                        <textarea id="eval_area" class="materialize-textarea" disabled></textarea>
-                        <label class="active" for="eval_area">Session Content: evaluation and reflection</label>
-                        <span id="eval_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
-                      </div>
-                    </div>
+                  <div class="input-field col s12">
+                    <textarea id="type" class="materialize-textarea" disabled></textarea>
+                    <label class="active" for="type">Session Type</label>
                   </div>
-                  <div id="ref" class="section scrollspy">
-                    <h2>References</h2>
-                    <div class="row">
-                      <div class="input-field col s12">
-                        <textarea id="ref_area" class="materialize-textarea" disabled></textarea>
-                        <label class="active" for="ref_area">References </label>
-                      </div>
-                    </div>
+                </div>
+              </div>
+              <div id="desc" class="section scrollspy">
+                <h2>Description</h2>
+                <div class="row">
+                  <div class="input-field col s12">
+                    <textarea id="desc_area" class="materialize-textarea" disabled></textarea>
+                    <label class="active" for="desc_area">Session Description</label>
+                    <span id="desc_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
                   </div>
-                  <div id="resources" class="section scrollspy">
-                    <h2>Additional Resources</h2>
-                    <div class="row">
-                      <div class="input-field col s12">
-                        <textarea id="resources_area" class="materialize-textarea" disabled></textarea>
-                        <label class="active" for="resources_area">Resources for participants (Optional field - not submission requirement)</label>
-                      </div>
-                    </div>
+                </div>
+              </div>
+              <div id="eval" class="section scrollspy">
+                <h2>Session Content</h2>
+                <div class="row">
+                  <div class="input-field col s12">
+                    <textarea id="eval_area" class="materialize-textarea" disabled></textarea>
+                    <label class="active" for="eval_area">Session Content: evaluation and reflection</label>
+                    <span id="eval_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
                   </div>
-                  
-                  <? if (mode === 'review') { ?>
-                    <div id="review" class="section scrollspy">
-                      <form id="form_review" class="row">
-                        <div class="col s12">
-                          <h1>Submit your review</h1>
-                          <h2>Review criteria checklist</h2>
-                          <p>Use this checklist to record whether the submissions meets the criteria. Indicate if this proposal:</p>
-                          <div class="col s12">
-                            <input name="criteria[]" type="checkbox" id="criteria_1" class="filled-in setting" value="1. Relates to theme" />
-                            <label for="criteria_1">Does explain how the session relates to the chosen conference theme.</label>
-                            <input name="criteria[]" type="checkbox" id="criteria_2" class="filled-in setting" value="2. Clearly written" />
-                            <label for="criteria_2">Is clearly written (i.e. acronyms are explained, and language appropriate for an international audience and from participants from different sectors).</label>
-                            <input name="criteria[]" type="checkbox" id="criteria_3" class="filled-in setting" value="3. Session outcome" />
-                            <label for="criteria_3">States what participants will gain from the session and why they should attend.</label>
-                            <input name="criteria[]" type="checkbox" id="criteria_4" class="filled-in setting" value="4. Critical refection" />
-                            <label for="criteria_4">Includes details of what the session is based on, such as a particular project or initiative or practice? Does it critically reflect on this and evaluate it (i.e. state how many learners/staff are involved, what feedback was collected and how transferable your experience/findings/tools are).</label>
-                            <input name="criteria[]" type="checkbox" id="criteria_5" class="filled-in setting" value="5. Commercial acknowledgement" />
-                            <label for="criteria_5">If it is a commercial proposal, we ask that it meets all the above criteria and clearly states what products are being demonstrated or discussed and acknowledges the role of the company in the session.</label>
-                          </div>
-                          <div class="row">
-                            <div class="col s12" style="padding-top:20px">
-                              <h2>Record your decision</h2>
-                              <ul class="collapsible">
-                                <li>
-                                  <div class="collapsible-header active">
-                                    <i class="material-icons">help_outline</i>
-                                    <h3>Review Outcomes Explained</h3></div>
-                                  <div class="collapsible-body">
-                                    <ul class="collection">
-                                      <li class="collection-item"><strong>Accept</strong> - Accept the proposal with no changes, a strong proposal, everything is as it should be.</li>
-                                      <li class="collection-item"><strong>Accept with minor revisions</strong> - Accept with minor changes, the proposal, with only minor changes: a strong proposal, but usually lacking in one aspect, for example too little reflection or information
-                                        provided. Your feedback will be directly sent to the authors, so be as clear and detailed as you can be about what changes they should make.</li>
-                                      <li class="collection-item"><strong>Accept as different type</strong> - Accept the proposal, but as a different type: use this option if you feel the proposal was submitted in the wrong format, i.e. it would be better as a short presentation or poster. In your feedback specify how the proposal needs to be revised in order to be accepted as a different type of session.</li>
-                                      <li class="collection-item"><strong>Recommend re-submission</strong> - The proposal cannot be accepted, but you feel that it meets the criteria to a sufficient degree that it could be accepted if it was revised. Your feedback will be directly
-                                        sent to the authors, so be as clear and detailed as you can be about what changes they should make.</li>
-                                      <li class="collection-item"><strong>Reject</strong> - Reject the proposal if it is out of scope, of poor quality or otherwise fails to meet the criteria and you feel it cannot be improved sufficiently by making revisions.</li>
-                                    </ul>
-                                  </div>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="input-field col s12">
-                              <select id="feedback_decision" name="feedback_decision" class="validate setting" required="" aria-required="true">
-                              <option value="" disabled selected>Choose your option</option>
-                              <option value="accept">Accept</option>
-                              <option value="accept_minor_revisions">Accept with minor revisions</option>
-                              <option value="accept_different_type">Accept as different type</option>
-                              <option value="resubmit">Recommend re-submission</option>
-                              <option value="reject">Reject</option>
-                              </select>
-                              <label for="feedback_decision">Review Outcome</label>
-                            </div>
-                          </div>
-                          
-                          <div class="row" id="select_different_type" style="display:none">
-                            <div class="input-field col s12">
-                              <select id="different_type" name="different_type" class="setting">
-                              <option value="" disabled selected>Choose your option</option>
-                              <option>Research session</option>
-                              <option>Discussion panel or forum</option>
-                              <option>Workshop or demonstration</option>
-                              <option>Work-in-progress report/experimental session</option>
-                              <option>Short presentation</option>
-                              <option>Lightning talk</option>
-                              <option>Poster &amp; poster talk</option>
-                              </select>
-                              <label for="different_type">Recommended session type</label>
-                            </div>
-                          </div>
-                          <div class="row">
-                          <div class="col s12">
-<ul class="collapsible">
-                                <li>
-                                  <div class="collapsible-header"><i class="material-icons">help_outline</i>
-                                    <h3>How to write feedback for authors</h3></div>
-                                  <div class="collapsible-body">
-                                  <p>The feedback you provide is sent to authors, so keep this in mind when writing your comments.</p>
-                                  <p>Be concise, sometimes a sentence or two is enough and we ask that feedback is as clear and specific as possible, referring directly to sentences or sections of the proposal that should be revised.</p>
-                                  <p>Here are tips from other reviewers:</p>
-                                  <ul class="browser-default">
-                                    <li>Avoid praising or criticising the author, make sure all comments refer to the proposal . Consider giving 3 points of positive feedback, followed by the suggestions for change, which (as suggested below) should be focussed on what the author needs to do, rather than general comments.</li>
-                                    <li>Try to write feedback that you’d be happy to receive and that the authors can clearly action. Be positive in your language and constructive in your suggestions, rather than tell people what the problem is tell them what you think the solution should be.</li>
-                                    <li>For example: If you think a workshop proposal sounds boring, try saying “This session needs more interaction, please include details of the activities your participants will be doing during the session”.</li>
-                                    <li>Remember that just because someone has done something in a different way than you would have done it, does not make them wrong. Be respectful and be explicit about the nature of the advice you are giving: for example, are you are offering suggestions for consideration (“the proposal could be enhanced by the inclusion of…”), or insisting on a problem being fixed (“this section is unclear and should be rewritten”)?</li>
-                                    <li>Keep in mind that our authors come from different sectors and backgrounds and English may not be their first language.</li>
-                                  </ul>
-                                  </div>
-                                </li>
-                             </ul>
-                             </div>
-                             </div>
-                          <div class="row">
-                            <div class="input-field col s12">
-                            
-                              <textarea name="feedback_text_area" id="feedback_text_area" class="materialize-textarea validate setting" data-length="1500" required="" aria-required="true"></textarea>
-                              <label class="active" for="feedback_text_area">Feedback for the author (required):</label>
-                            </div>
-                          </div>
-
-                          <div class="center-align">
-                            <button id="submit_but" class="btn waves-effect waves-light" type="submit" name="action">Submit <i class="material-icons right">send</i></button>
-                          </div>
-                        </div>
-                        <input type="hidden" id="ID" name="ID" />
-                        <input type="hidden" id="session_title" name="Session title" />
-                        <input type="hidden" id="token" name="token" />
-                        <input type="hidden" id="review_token" name="review_token" />
-                        <input type="hidden" id="reviewer_num" name="reviewer_num" />
-                        <input type="hidden" id="reviewer_token" name="reviewer_token" />
-                      </form>
-                    </div>
-                    <? } // mode=review ?>
+                </div>
+              </div>
+              <div id="ref" class="section scrollspy">
+                <h2>References</h2>
+                <div class="row">
+                  <div class="input-field col s12">
+                    <textarea id="ref_area" class="materialize-textarea" disabled></textarea>
+                    <label class="active" for="ref_area">References </label>
+                  </div>
+                </div>
+              </div>
+              <div id="resources" class="section scrollspy">
+                <h2>Additional Resources</h2>
+                <div class="row">
+                  <div class="input-field col s12">
+                    <textarea id="resources_area" class="materialize-textarea" disabled></textarea>
+                    <label class="active" for="resources_area">Resources for participants (Optional field - not submission requirement)</label>
+                  </div>
+                </div>
+              </div>
+            <? if (mode === 'review') { ?>
+              <?!= include('reviewer_form'); ?>
+            <? } // mode=review ?>
           </div>
           <div class="col hide-on-small-onl m3 l2">
             <div class="toc-wrapper pinned">
-                  <ul class="section table-of-contents">
-                    <? if (isAdmin) { ?>
-                      <li><a href="#submitter">Submitted by</a></li>
-                    <? } ?>
-                      <li><a href="#overview">Submission Overview</a></li>
-                      <li><a href="#desc">Description</a></li>
-                      <li><a href="#eval">Session Content</a></li>
-                      <li><a href="#ref">References</a></li>
-                      <li><a href="#resources">Additional Resources</a></li>
-                    <? if (mode === 'review') { ?>
-                      <li><a href="#review">Submit your review</a></li>
-                    <? } ?>
-                  </ul>
+              <ul class="section table-of-contents">
+                <? if (isAdmin) { ?>
+                  <li><a href="#submitter">Submitted by</a></li>
+                <? } ?>
+                  <li><a href="#overview">Submission Overview</a></li>
+                  <li><a href="#desc">Description</a></li>
+                  <li><a href="#eval">Session Content</a></li>
+                  <li><a href="#ref">References</a></li>
+                  <li><a href="#resources">Additional Resources</a></li>
                   <? if (mode === 'review') { ?>
-                  <div class="row">
-                  <div class="col s6 center-align" style="font-size: 80%;"><h2 class="section-title"><i class="material-icons">info_outline</i> Information</h2><p>For reference here is the <a target="_blank" href="https://altc.alt.ac.uk/2018/reviewerguidance/">full reviewer guidance</a>. If you have questions or problems please contact <a target="_blank" href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a></p> </div>
-                  </div>
+                    <li><a href="#review">Submit your review</a></li>
                   <? } ?>
-                  <div class="row">
+              </ul>
+              <? if (mode === 'review') { ?>
+                <div class="row">
+                  <div class="col s6 center-align" style="font-size: 80%;">
+                    <h2 class="section-title"><i class="material-icons">info_outline</i> Information</h2>
+                    <p>For reference here is the <a target="_blank" href="https://altc.alt.ac.uk/2018/reviewerguidance/">full reviewer guidance</a>. If you have questions or problems please contact <a target="_blank" href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a></p>
+                  </div>
+                </div>
+              <? } ?>
+                <div class="row">
                   <div class="col s6 center-align logo">
                     <img src="https://www.alt.ac.uk/sites/alt.ac.uk/files/alt-logo_0_0.png" alt="ALT Logo" /><br/><span>Charity number: 1160039</span>
                   </div>
-                  </div>
+                </div>
             </div>
           </div>
         </div>
@@ -258,7 +147,7 @@
     </div>
   </div>
 </body>
-  <?!= include('script.js'); ?>
+<?!= include('script.js'); ?>
   <? if (isAdmin) { ?>
     <script>
       var currentRow = parseInt(<?= currentRow || 2; ?>);
