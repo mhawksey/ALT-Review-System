@@ -34,7 +34,7 @@ function decodeToken_(token){
 }
 
 function testToken(){
- var token ="eyJyZXZpZXdlciI6IjlkNDZjNjc1NzBkYWYyYTJlNGEyZWIxOThkZTQyNmVlYmFkZWU4OTgzNWQ3NmRhMDUwZmNkMTlkOTliMTVjNTMiLCJyb3ciOiJhNTEyNTZlOWQ0NWIxODEwOGUyMWY3NjM0OWM0Nzk0MzNkZmMyNjhhMTM2NzQ4ZjIzODM5ZTBmZWYxYWY4OTNhIiwicmV2aWV3ZXJfbnVtIjoxfQ==";
+ var token ="eyJyZXZpZXdlciI6ImUyOTRhYWVmZDc2NTE5YWYyN2EzMjNhNjM0NDgzNWVhY2M4ZWZjMTViMTA0MWE1YjQ4NzI5NTdhNzI2N2FkOWYiLCJyb3ciOiI2MzkyYTgzOGJmODU5MWViMmUwZGRlNzZiOGQ5NjM2N2I5YWE0YWVlNGM5NWIyZWMxZTY4MmIzNGM0ZDg0ZWNjIiwicmV2aWV3ZXJfbnVtIjoxLCJtb2RlIjoicmV2aWV3In0=";
  var deToken = decodeToken_(token);
   Logger.log(deToken)
 }
@@ -114,8 +114,13 @@ function fillInTemplateFromObject(template, data) {
 
 //
 function extractBracket(str){
-  var rxp = /\(([^\)]+)\)/;
-  return rxp.exec( str )[1]
+  var rxp = /\(([^\)]+)\)/g;  
+  var match;
+  var matches = [];
+  while ((match = rxp.exec(str)) != null) {
+    matches.push(match);
+  }
+  return matches[matches.length-1][1];
 }
 
 function include(filename) {
