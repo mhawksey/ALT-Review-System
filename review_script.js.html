@@ -19,7 +19,7 @@
       updateFields(data);
 
       // handle review accept/decline buttons
-      if (data.review_status === 'review_assigned' || data.review_status === 'review_reminded' || data.review_status === 'review_accept' || data.review_status === 'review_decline') {
+      if (data.review_status === 'review_assigned' || data.review_status === 'review_reminded' || data.review_status === 'review_accept' || data.review_status === 'review_decline' || data.review_status === 'review_reassigned') {
         $('[id^=review_]').removeClass('disabled');
       }
       if (data.review_status) {

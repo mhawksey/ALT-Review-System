@@ -22,6 +22,7 @@ function onOpen() {
     .addItem('Build Reviewer Lists', 'buildReviewerLists')
     .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
     .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
+    .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
     .addToUi();
 }
 
@@ -114,6 +115,17 @@ function sendReviewerReminder() {
 }
 
 /**
+ * Sends email reminder to reviewers who have accepted with link to review submission.
+ */
+function sendReviewerReminderAccepted() {
+  var resp = Browser.msgBox("Sending emails", "You are about to send reviewer reminder emails to reviewers who have accepted reviews but not provided feedback. Are you sure?", Browser.Buttons.YES_NO);
+  if (resp === 'yes') {
+    var email = getEmailTemplate('remind_reviewer_accepted');
+    sendReviewerEmails_(email, 'accept');
+  }
+}
+
+/**
  * Private function to send emails
  * @param {Object} email template.
  * @param {string} type of email (review_assign || review_remind).
@@ -197,13 +209,17 @@ function testEmailCase_(type, s, r, reminder) {
       return true;
     }
   } else if (type === 'reminded') {
-    if (s['Review' + r + ' Status'] === 'review_assigned') {
+    if (s['Review' + r + ' Status'] === 'review_assigned' || s['Review' + r + ' Status'] === 'review_reminded') {
       var note = reminder.sheet.getRange(reminder.row, reminder.column).getNote();
       var dateString = note.match(/\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}/);
       var note_date = (new Date().getTime() - new Date(dateString).getTime()) / (1000 * 60 * 60 * 24);
       if (note_date > reminder.days) {
         return true;
       }
+    }
+  } else if (type === 'accept') {
+    if (s['Review' + r + ' Status'] === 'review_accept') {
+      return true;
     }
   } else {
     return false

@@ -127,3 +127,34 @@ function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename)
     .getContent();
 }
+
+function refreshReviewStats(){
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var headings = sheet.getDataRange()
+  .offset(0, 0, 1)
+  .getValues()[0];
+  var formulas = sheet.getDataRange()
+  .offset(0, 0, 1)
+  .getFormulas()[0];
+  Logger.log(formulas);
+  var calcCols = ['Reviews Assigned', 'Reviews Submitted', 'Reviews Accepted', 'Reviews Declined', 'Reviews Reminded'];
+  var calcFormula = { "Reviews Assigned":"=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF('Form responses (DO NOT EDIT)'!AG:AM,J$2:J)})", 
+                     "Reviews Submitted":"=ARRAYFORMULA({\"Reviews Submitted\";COUNTIF(Reviews!D:D,\"=\"&A2:A)})",
+                     "Reviews Accepted":"=ARRAYFORMULA({\"Reviews Accepted\";COUNTIFS('Form responses (DO NOT EDIT)'!AG:AG,$J$2:J,'Form responses (DO NOT EDIT)'!AH:AH,\"review_accept\")+COUNTIFS('Form responses (DO NOT EDIT)'!AI:AI,$J$2:J,'Form responses (DO NOT EDIT)'!AJ:AJ,\"review_accept\")+COUNTIFS('Form responses (DO NOT EDIT)'!AK:AK,$J$2:J,'Form responses (DO NOT EDIT)'!AL:AL,\"review_accept\")+COUNTIFS('Form responses (DO NOT EDIT)'!AM:AM,$J$2:J,'Form responses (DO NOT EDIT)'!AN:AN,\"review_accept\")})", 
+                     "Reviews Declined":"=ARRAYFORMULA({\"Reviews Declined\";COUNTIFS('Form responses (DO NOT EDIT)'!AG:AG,$J$2:J,'Form responses (DO NOT EDIT)'!AH:AH,\"review_decline\")+COUNTIFS('Form responses (DO NOT EDIT)'!AI:AI,$J$2:J,'Form responses (DO NOT EDIT)'!AJ:AJ,\"review_decline\")+COUNTIFS('Form responses (DO NOT EDIT)'!AK:AK,$J$2:J,'Form responses (DO NOT EDIT)'!AL:AL,\"review_decline\")+COUNTIFS('Form responses (DO NOT EDIT)'!AM:AM,$J$2:J,'Form responses (DO NOT EDIT)'!AN:AN,\"review_decline\")})", 
+                     "Reviews Reminded":"=ARRAYFORMULA({\"Reviews Reminded\";COUNTIFS('Form responses (DO NOT EDIT)'!AG:AG,$J$2:J,'Form responses (DO NOT EDIT)'!AH:AH,\"review_reminded\")+COUNTIFS('Form responses (DO NOT EDIT)'!AI:AI,$J$2:J,'Form responses (DO NOT EDIT)'!AJ:AJ,\"review_reminded\")+COUNTIFS('Form responses (DO NOT EDIT)'!AK:AK,$J$2:J,'Form responses (DO NOT EDIT)'!AL:AL,\"review_reminded\")+COUNTIFS('Form responses (DO NOT EDIT)'!AM:AM,$J$2:J,'Form responses (DO NOT EDIT)'!AN:AN,\"review_reminded\")})"
+                     };
+  
+  calcCols.forEach(function(source){
+    var colIdx = headings.indexOf(source)+1;
+    if (colIdx > 0 ){
+      sheet.getRange(1, colIdx, sheet.getLastRow()).clearContent();
+      sheet.getRange(1, colIdx).setFormula(calcFormula[source]);
+      SpreadsheetApp.flush();
+      var col = sheet.getRange(1, colIdx, sheet.getLastRow())
+      var data = col.getValues();
+      col.setValues(data);
+    }
+Logger.log(headings.indexOf(source));
+});
+}
