@@ -1,11 +1,11 @@
 <script>
   $(function() {
-    var IS_FILTERED = false;
+    var IS_FILTERED = true;
     var SHEET = {};
 
     // get all submissions from the google sheet
     google.script.run.withSuccessHandler(getSubs)
-      .getAllSubmissionData();
+      .getAllSubmissionData(mode);
 
     // get all submissions handler
     function getSubs(sheet) {
@@ -50,8 +50,7 @@
     function showSubs(showRow, direction) {
       var data = SHEET;
       var r = data[showRow - 2];
-      // TODO check pagination when filtered
-      if (IS_FILTERED && r['Include'] === 'no') {
+      if (IS_FILTERED && r['hidden'] !== undefined) {
         eval('currentRow' + direction);
         return showSubs(currentRow, direction);
       }

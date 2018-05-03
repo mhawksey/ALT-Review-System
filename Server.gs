@@ -110,14 +110,70 @@ function getReviewData(review_token, reviewer_token, reviewer_num) {
 
 /**
  * Get all the submission data for admin_script.js
+ * @param {string} optMode to include/exclude review data
  * @return {string} returns all submission data.
  */
-function getAllSubmissionData() {
+function getAllSubmissionData(optMode) {
+  var mode = optMode || false;
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
-  // Fetch the range of cells A1:B3
   var dataRange = sheet.getDataRange();
-  return JSON.stringify(objectify(dataRange));
+  var data = objectify(dataRange);
+  data = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), data); 
+  
+  if (mode === 'reviewAdmin'){
+    var revSheet = SpreadsheetApp.getActive().getSheetByName(REVIEW_SHEET_NAME); 
+    var revData = revSheet.getDataRange();
+    var revObj = objectify(revData);
+    for (i=0; i < data.length; i++){
+      var id = data[i]['Hashed ID'];
+      var reviews = revObj.filter(function(r){
+        if(r.review_token === id){
+         return r 
+        }
+      })
+      if (reviews.length > 0){
+        for (r=0; r < reviews.length; r++){
+           data[i]['Review'+reviews[r].reviewer_num+' Text'] = reviews[r].feedback_text_area;
+           data[i]['Review'+reviews[r].reviewer_num+' Type'] = reviews[r].different_type;
+        }
+      }
+    }
+  }
+  
+  return JSON.stringify(data);
 }
+
+/**
+ * Add hidden row identifier to sheet data.
+ * https://sites.google.com/site/scriptsexamples/learn-by-example/google-sheets-api/filters#TOC-Get-filtered-rows
+ * @param {string} ssId of the spreadsheet
+ * @param {Integer) sheetId of the sheet
+ * @param {Array} sourceData in [][] of sheet
+ * @return {Array} of data with hidden row identifier.
+ */
+function addFilteredRows_(ssId, sheetId, sourceData) {
+  var hiddenRows = [];
+  
+  // limit what's returned from the API
+  var fields = "sheets(data(rowMetadata(hiddenByFilter)),properties/sheetId)";
+  var sheets = Sheets.Spreadsheets.get(ssId, {fields: fields}).sheets;  
+  
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].properties.sheetId == sheetId) {
+      var data = sheets[i].data;
+      var rows = data[0].rowMetadata;
+      for (var j = 0; j < rows.length; j++) {
+        if (rows[j].hiddenByFilter) hiddenRows.push(j);
+      }
+    }
+  }
+  for (var h=0; h < hiddenRows.length; h++){
+    if (sourceData[hiddenRows[h]-1]){
+      sourceData[hiddenRows[h]-1]['hidden'] = true;
+    }
+  }
+  return sourceData;
+} 
 
 /**
  * Set the review status for admin_script.js

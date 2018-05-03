@@ -17,23 +17,39 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('Review System')
-    .addItem('Submission Details', 'showSummary')
-    .addItem('Check submission email', 'checkAuthor')
-    .addItem('Build Reviewer Lists', 'buildReviewerLists')
-    .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
-    .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
-    .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
-    .addToUi();
+  .addItem('Submission Details Check', 'showSummary')
+  .addItem('Build Reviewer Lists', 'buildReviewerLists')
+  .addItem('Review Decisions Admin', 'showReviewAdmin')
+  .addSubMenu(ui.createMenu('Email Notifications')
+              .addItem('Check submission email', 'checkAuthor')
+              .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
+              .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
+              .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted'))
+  .addToUi();
+}
+/**
+ * Show proposal data for admin
+ */
+function showSummary(){
+  showDialog('admin');
+}
+
+/**
+ * Show proposal data with reviews for admin
+ */
+function showReviewAdmin(){
+  showDialog('reviewAdmin');
 }
 
 /**
  * Show proposal data for admin
  */
-function showSummary() {
+function showDialog(mode) {
+  var currentRow = SpreadsheetApp.getActiveSheet().getActiveRange().getRow();
   var html = HtmlService.createTemplateFromFile('Summary')
-  html.currentRow = SpreadsheetApp.getActiveSheet().getActiveRange().getRow();
+  html.currentRow = (currentRow < 2) ? 2 : currentRow;
   html.isAdmin = true;
-  html.mode = 'admin';
+  html.mode = mode;
   SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
     .showModalDialog(html.evaluate().setWidth(1200).setHeight(800), 'Submission Review');
 }
@@ -51,7 +67,7 @@ function doGet(e) {
   html.reviewer_num = data.reviewer_num;
   html.review_token = data.row;
   html.token = token;
-  html.mode = data.mode;
+  html.mode = data.mode || false;
   html.isAdmin = false;
   return html.evaluate()
     .setTitle("ALT - Review System")

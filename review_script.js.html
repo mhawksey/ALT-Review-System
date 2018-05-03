@@ -49,9 +49,15 @@
     // review button event handler
     function reviewHandler(data) {
       $('.progress').hide();
-      $('[id^=review_]').prop("disabled", false)
+      $('[id^=review_]').prop("disabled", false);
       $('#' + data.review_status).removeClass('grey');
       $('#prompt_' + data.review_status).show(400);
+      if (data.review_status === 'review_decline'){
+        $('.modal').modal();
+        $('#modal_title').text('Information');
+        $('#modal_text').text('Your choice to decline this review has been recorded. You may close this browser tab.');
+        $('#modal').modal('open');
+      }
     }
 
     // review form event
@@ -115,26 +121,5 @@
       $('#feedback_decision').material_select();
     });
 
-    // initialize materialize components
-    $(document).ready(function() {
-      $('select').material_select();
-      $('.collapsible').collapsible();
-      $('.tooltipped').tooltip();
-      $('.scrollspy').scrollSpy();
-
-      $('select[required]').css({
-        display: 'inline',
-        position: 'absolute',
-        float: 'left',
-        padding: 0,
-        margin: 0,
-        border: '1px solid rgba(255,255,255,0)',
-        height: 0,
-        width: 0,
-        top: '2em',
-        left: '3em',
-        opacity: 0
-      });
-    });
   });
 </script>

@@ -44,6 +44,9 @@
               <blockquote id="prompt_review_accept" style="display:none">If you are happy to review this proposal please scroll down to <a href="#review">Submit your review</a> and record your decision (you can revisit this page from the link in the email at anytime to complete your review).</blockquote>
             <? } ?>
             <? if (isAdmin) { ?>
+              <? if (mode === 'reviewAdmin') { ?>
+                <?!= include('admin_review'); ?>
+              <? } ?>
               <?!= include('admin_submitter'); ?>
             <? } ?>
               <div id="overview" class="section scrollspy">
@@ -109,6 +112,9 @@
             <div class="toc-wrapper pinned">
               <ul class="section table-of-contents">
                 <? if (isAdmin) { ?>
+                <? if (mode === 'reviewAdmin') { ?>
+                  <li><a href="#reviewDecision">Review Decision</a></li>
+                <? } ?>
                   <li><a href="#submitter">Submitted by</a></li>
                 <? } ?>
                   <li><a href="#overview">Submission Overview</a></li>
@@ -127,12 +133,13 @@
                     <p>For reference here is the <a target="_blank" href="https://altc.alt.ac.uk/2018/reviewerguidance/">full reviewer guidance</a>. If you have questions or problems please contact <a target="_blank" href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a></p>
                   </div>
                 </div>
-              <? } ?>
                 <div class="row">
                   <div class="col s6 center-align logo">
                     <img src="https://www.alt.ac.uk/sites/alt.ac.uk/files/alt-logo_0_0.png" alt="ALT Logo" /><br/><span>Charity number: 1160039</span>
                   </div>
                 </div>
+              <? } ?>
+                
             </div>
           </div>
         </div>
@@ -151,11 +158,12 @@
 <?!= include('script.js'); ?>
   <? if (isAdmin) { ?>
     <script>
-      var currentRow = parseInt(<?= currentRow || 2; ?>);
+      var currentRow = parseInt(<?= currentRow || 2; ?>); 
     </script>
     <?!= include('admin_script.js'); ?>
   <? } else if (mode === 'review') { ?>
     <script>
+      var mode = "<?= mode; ?>";
       var token = "<?= token ?>";
       var review_token = "<?= review_token ?>";
       var reviewer_token = "<?= reviewer_token ?>";
