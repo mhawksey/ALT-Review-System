@@ -156,14 +156,16 @@
   </div>
 </body>
 <?!= include('script.js'); ?>
+    <script>
+      var mode = "<?= mode; ?>";
+    </script>
   <? if (isAdmin) { ?>
     <script>
-      var currentRow = parseInt(<?= currentRow || 2; ?>); 
-    </script>
+      var currentRow = parseInt(<?= currentRow || 2; ?>);
+     </script>
     <?!= include('admin_script.js'); ?>
   <? } else if (mode === 'review') { ?>
     <script>
-      var mode = "<?= mode; ?>";
       var token = "<?= token ?>";
       var review_token = "<?= review_token ?>";
       var reviewer_token = "<?= reviewer_token ?>";

@@ -248,3 +248,33 @@ function processReviewForm(formData) {
     result: 'ok'
   };
 }
+
+/**
+ * Process the review admin form data for admin_script.js
+ * @param {Object} formData to be recorded.
+ * @return {Object} returns result.
+ */
+function processReviewAdminForm(formData){
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+  var dataRange = sheet.getDataRange()
+  var dataValues = dataRange.getValues();
+  var dataValuesHeader = dataValues.shift();
+  for (var r = 0; r < dataValues.length; r++) {
+    if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === formData.hashed_id) {
+      sheet.getRange(r + 2, dataValuesHeader.indexOf('Decision') + 1)
+        .setValue(formData.feedback_decision)
+        .setNote(formData.feedback_decision + ' ' + Session.getActiveUser().getEmail() + '\nDate: ' +
+          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+      sheet.getRange(r + 2, dataValuesHeader.indexOf('Decision Status') + 1)
+        .setValue(formData.action)
+        .setNote(formData.action + ' ' + Session.getActiveUser().getEmail() + '\nDate: ' +
+          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+      sheet.getRange(r + 2, dataValuesHeader.indexOf('Feedback Text') + 1)
+        .setValue(formData.feedback);
+      sheet.getRange(r + 2, dataValuesHeader.indexOf('different_type') + 1)
+        .setValue(formData.different_type);
+      break;
+    }
+  }
+  return formData;
+}

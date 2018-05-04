@@ -90,36 +90,5 @@
       $('#modal').modal('open');
     }
 
-    // feedback select event (show different seesion type select)
-    $("#feedback_decision").on('change', function(e) {
-      var accept_type = $(this).val();
-      var type_select = $('#different_type');
-      if (accept_type === 'accept_different_type') {
-        $('#select_different_type').show();
-        type_select.addClass('validate')
-          .prop('required', true)
-          .attr("aria-required", "true");
-        $('select[required]').css({
-          display: 'inline',
-          position: 'absolute',
-          float: 'left',
-          padding: 0,
-          margin: 0,
-          border: '1px solid rgba(255,255,255,0)',
-          height: 0,
-          width: 0,
-          top: '2em',
-          left: '3em',
-          opacity: 0
-        });
-      } else {
-        $('#select_different_type').hide();
-        type_select.removeClass('validate')
-          .prop('required', false)
-          .removeAttr("aria-required");
-      }
-      $('#feedback_decision').material_select();
-    });
-
   });
 </script>

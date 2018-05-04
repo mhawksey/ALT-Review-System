@@ -1,5 +1,6 @@
-<div id="reviewDecision" class="section scrollspy">
-  <h2>Review Decision</h2>
+<div id="reviewDecision" class="card grey lighten-5 section scrollspy">
+  <form id="decision_form" class="card-content">
+  <h2 class="card-title">Review Decision</h2>
   <div class="row">
   <div class="col s3">
     <h3>Reviewer 1</h3>
@@ -46,12 +47,20 @@
     </div>
   </div>
   </div>
- 
+  <?!= include('decision_fields'); ?>
   <div class="row">
     <div class="input-field col s12">
-       <textarea id="feedback_area" class="materialize-textarea"></textarea>
-       <label class="active" for="feedback_area">Submission Feedback</label>
+       <textarea id="feedback_area" name="feedback" class="materialize-textarea setting"></textarea>
+       <label class="active" for="feedback_area">Submission Feedback (<a id="reset_feedback" href="#">reset</a>)</label>
        <span id="feedback_area" class="character-counter" style="float: right; font-size: 12px;"></span>
      </div>
   </div>
+  <div class="row">
+     <div class="col s12 center-align">
+        <button id="save_but" name="saved" class="btn waves-effect waves-light black disabled" type="submit">Save Decision <i class="material-icons right">save</i></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="emailed_but" class="btn waves-effect waves-light blue disabled" type="submit">Save+Email Decision <i class="material-icons right">send</i></button>
+        <input type="hidden" id="hashed_id" name="hashed_id">
+        <input type="hidden" id="action" name="action">
+     </div>
+  </div>
+</form>
 </div>

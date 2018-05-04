@@ -124,8 +124,8 @@ function extractBracket(str){
 }
 
 function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename)
-    .getContent();
+  return HtmlService.createTemplateFromFile(filename).evaluate().getContent() //.createHtmlOutputFromFile(filename)
+    //.getContent();
 }
 
 function refreshReviewStats(){
@@ -138,12 +138,12 @@ function refreshReviewStats(){
   .getFormulas()[0];
   Logger.log(formulas);
   var calcCols = ['Reviews Assigned', 'Reviews Submitted', 'Reviews Accepted', 'Reviews Declined', 'Reviews Reminded'];
-  var calcFormula = { "Reviews Assigned":"=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF('Form responses (DO NOT EDIT)'!AG:AM,J$2:J)})", 
+  var calcFormula = { "Reviews Assigned":"=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF(AllReviewCols,J$2:J)})", 
                      "Reviews Submitted":"=ARRAYFORMULA({\"Reviews Submitted\";COUNTIF(Reviews!D:D,\"=\"&A2:A)})",
-                     "Reviews Accepted":"=ARRAYFORMULA({\"Reviews Accepted\";COUNTIFS('Form responses (DO NOT EDIT)'!AG:AG,$J$2:J,'Form responses (DO NOT EDIT)'!AH:AH,\"review_accept\")+COUNTIFS('Form responses (DO NOT EDIT)'!AI:AI,$J$2:J,'Form responses (DO NOT EDIT)'!AJ:AJ,\"review_accept\")+COUNTIFS('Form responses (DO NOT EDIT)'!AK:AK,$J$2:J,'Form responses (DO NOT EDIT)'!AL:AL,\"review_accept\")+COUNTIFS('Form responses (DO NOT EDIT)'!AM:AM,$J$2:J,'Form responses (DO NOT EDIT)'!AN:AN,\"review_accept\")})", 
-                     "Reviews Declined":"=ARRAYFORMULA({\"Reviews Declined\";COUNTIFS('Form responses (DO NOT EDIT)'!AG:AG,$J$2:J,'Form responses (DO NOT EDIT)'!AH:AH,\"review_decline\")+COUNTIFS('Form responses (DO NOT EDIT)'!AI:AI,$J$2:J,'Form responses (DO NOT EDIT)'!AJ:AJ,\"review_decline\")+COUNTIFS('Form responses (DO NOT EDIT)'!AK:AK,$J$2:J,'Form responses (DO NOT EDIT)'!AL:AL,\"review_decline\")+COUNTIFS('Form responses (DO NOT EDIT)'!AM:AM,$J$2:J,'Form responses (DO NOT EDIT)'!AN:AN,\"review_decline\")})", 
-                     "Reviews Reminded":"=ARRAYFORMULA({\"Reviews Reminded\";COUNTIFS('Form responses (DO NOT EDIT)'!AG:AG,$J$2:J,'Form responses (DO NOT EDIT)'!AH:AH,\"review_reminded\")+COUNTIFS('Form responses (DO NOT EDIT)'!AI:AI,$J$2:J,'Form responses (DO NOT EDIT)'!AJ:AJ,\"review_reminded\")+COUNTIFS('Form responses (DO NOT EDIT)'!AK:AK,$J$2:J,'Form responses (DO NOT EDIT)'!AL:AL,\"review_reminded\")+COUNTIFS('Form responses (DO NOT EDIT)'!AM:AM,$J$2:J,'Form responses (DO NOT EDIT)'!AN:AN,\"review_reminded\")})"
-                     };
+                     "Reviews Accepted":"=ARRAYFORMULA({\"Reviews Accepted\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_accept\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_accept\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_accept\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_accept\")})", 
+                     "Reviews Declined":"=ARRAYFORMULA({\"Reviews Declined\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_decline\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_decline\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_decline\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_decline\")})", 
+                     "Reviews Reminded":"=ARRAYFORMULA({\"Reviews Reminded\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_reminded\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_reminded\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_reminded\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_reminded\")})"
+                    };
   
   calcCols.forEach(function(source){
     var colIdx = headings.indexOf(source)+1;
@@ -155,6 +155,5 @@ function refreshReviewStats(){
       var data = col.getValues();
       col.setValues(data);
     }
-Logger.log(headings.indexOf(source));
-});
+  });
 }
