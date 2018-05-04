@@ -73,14 +73,9 @@
       $('.progress').show();
       google.script.run.withSuccessHandler(handleReviewAdminResponse)
                        .processReviewAdminForm(this);
-      /*$('#session_title').val($('#title').val());
-      $('#token').val(token);
-      $('#review_token').val(review_token);
-      $('#reviewer_token').val(reviewer_token);
-      $('#reviewer_num').val(reviewer_num);
-      google.script.run.withSuccessHandler(handleReviewResponse).processReviewForm(this);*/
+      
       $('.setting').prop("disabled", true);
-      //$('select').material_select();
+      //$('select').formSelect();
     });
     
     $('[id$=_but]').on('click', function() {
@@ -98,6 +93,8 @@
     function handleReviewAdminResponse(data) {
       $('.progress').hide();
       $('[id$=_but]').removeClass('disabled');
+      $('#saved_but').text('Update Decision');
+      $('#feedback_area, #feedback_decision, select_different_type').removeAttr('disabled');
       console.log(data);
     }
   });

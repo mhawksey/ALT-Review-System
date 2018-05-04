@@ -73,7 +73,7 @@
       $('#reviewer_num').val(reviewer_num);
       google.script.run.withSuccessHandler(handleReviewResponse).processReviewForm(this);
       $('.setting').prop("disabled", true);
-      $('select').material_select();
+      $('select').formSelect();
     });
     // review form event handler
     function handleReviewResponse(data) {

@@ -29,9 +29,14 @@
       // remove collapsible
       $('#reviews_text').empty();
       $("#feedback_decision").val(r['Decision'])
-                             .material_select();
+                             .formSelect();
       $("#hashed_id").val(r['Hashed ID']);
       $('#feedback_area').val(r['Feedback Text']);
+      if (r['Decision Status'] !==""){
+        $('#saved_but').text('Update Decision');
+      } else {
+        $('#saved_but').text('Save Decision');
+      }
       default_feedback ="";      
       console.log(r);
       for (var i = 1; i <= 4; i++){
@@ -89,10 +94,11 @@
     }
 
     // Refresh materialize components
-    Materialize.updateTextFields();
-    $('.materialize-textarea').trigger('autoresize');
-    $('.scrollspy').scrol
-
+    M.updateTextFields();
+   // M.textareaAutoResize($('.materialize-textarea'));
+    $('.materialize-textarea').each(function() {
+      M.textareaAutoResize($('#'+$( this ).attr('id')));
+    });
     // hide progress bar
     $('.progress').hide();
   }
@@ -105,7 +111,7 @@
   }
       // initialize materialize components
     $(document).ready(function() {
-      $('select').material_select();
+      $('select').formSelect();
       $('.collapsible').collapsible();
       $('.tooltipped').tooltip();
       $('.scrollspy').scrollSpy();
