@@ -5,10 +5,10 @@ var REV_SHEET_NAME = "Reviewers";
 var REVIEW_SHEET_NAME = "Reviews";
 
 // Dev
-//var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwVMZocG3xPzNKyCvA36XIMo5xQ2wq6SLowKACNYSoBDwve-SM/exec";
+var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxvEN6YaSj8c6MQ4dPZIYcBZq1PpywzmBLrsIYXZs-A/dev";
 
 // Prod.
-var REVIEW_URL = "https://script.google.com/macros/s/AKfycbxNtXYjjLKafhqwjJD2lS-NoKadVMQYiUUsd-JXDieOPYW4IFc/exec";
+//var REVIEW_URL = "https://script.google.com/macros/s/AKfycbxNtXYjjLKafhqwjJD2lS-NoKadVMQYiUUsd-JXDieOPYW4IFc/exec";
 
 /**
  * On open
@@ -62,7 +62,7 @@ function showDialog(mode) {
  * @return {HtmlService} returns result.
  */
 function doGet(e) {
-  var token = e.parameter.token
+  var token = e.parameter.token;
   var data = decodeToken_(token);
   var html = HtmlService.createTemplateFromFile('Summary');
   html.reviewer_token = data.reviewer;
@@ -197,7 +197,7 @@ function sendReviewDecisions() {
     var headings = sheet.getDataRange()
     .offset(0, 0, 1)
     .getValues()[0];
-    var decCol = headings.indexOf('Decision Status');
+    var desCol = headings.indexOf('Decision Status');
     var sub_filtered = sub_obj.filter(function(s) {
       if (s['Decision'] !== '' && s['Decision Status'] === 'saved' && !s['hidden']) {
         var recipient = s['Email address (for communication only)']

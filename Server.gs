@@ -15,6 +15,35 @@ function setReviewerStatus(review_token, reviewer_token, reviewer_num, type) {
 }
 
 /**
+ * Sets the RSVP column for decision_script.js.
+ * @param {string} type to be recorded (review_accept/review_decline).
+ * @return {Object} response data.
+ */
+function setProposalStatus(token, type) {
+  var data = decodeToken_(token);
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+  var dataRange = sheet.getDataRange();
+  var dataValues = dataRange.getValues();
+  var dataValuesHeader = dataRange.offset(0, 0, 1)
+                                  .getValues()[0];
+  
+  for (var r = 0; r < dataValues.length; r++) {
+    if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === data.row) {
+      sheet.getRange(r + 1, dataValuesHeader.indexOf('RSVP') + 1)
+        .setValue(type)
+        .setNote(type + ' \nDate: ' +
+          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+      return {
+        result: 'ok',
+        review_status: type
+      }; 
+    }
+  }
+  throw "Did not find submission";
+}
+
+
+/**
  * Private function to record data in the reviewer status column.
  * @param {string} review_token for the review.
  * @param {string} reviewer_token for the review.
@@ -100,7 +129,7 @@ function getReviewData(review_token, reviewer_token, reviewer_num) {
   var d = checkForReviewerMismatch_(review_token, reviewer_token, reviewer_num);
 
   for (el in d.submission) {
-    if (el.indexOf('Additional') > -1 || el.indexOf('Review') > -1) {
+    if (el.indexOf('Email') > -1 || el.indexOf('Additional') > -1 || el.indexOf('Review') > -1) {
       delete d.submission[el];
     }
   }
@@ -108,6 +137,38 @@ function getReviewData(review_token, reviewer_token, reviewer_num) {
   return JSON.stringify(d.submission);
 }
 
+/**
+ * Get the submission data for decision_script.js
+ * @param {string} token for the submission.
+ * @return {string} returns submission data.
+ */
+function getProposalData(token) {
+  var data = decodeToken_(token);
+  if (data.mode !== 'decision'){
+    return JSON.stringify({result: 'error'});
+  } 
+  console.time('getProposalData');
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+  // Fetch the range of cells A:AN
+  var dataRange = sheet.getRange("A:AQ");
+  var dataValues = dataRange.getValues();
+  var dataValuesHeader = dataValues.shift();
+  var subs = objectify(dataRange);
+  // return filtered for review_token (should return single row)
+  var sub = subs.filter(function(r) {
+    if (r['Hashed ID'] === data.row) {
+      return r
+    }
+  });
+  // delete reviewer details
+  for (el in sub[0]) {
+    if (el.indexOf('Email') > -1 || el.indexOf('Notes') > -1 || el.indexOf('Review') > -1) {
+      delete sub[0][el];
+    }
+  }
+  console.timeEnd('getProposalData')
+  return JSON.stringify(sub[0]);
+}
 /**
  * Get all the submission data for admin_script.js
  * @param {string} optMode to include/exclude review data
@@ -277,4 +338,56 @@ function processReviewAdminForm(formData){
     }
   }
   return formData;
+}
+
+/**
+ * Process the review admin form data for admin_script.js
+ * @param {Object} formData to be recorded.
+ * @return {Object} returns result.
+ */
+function processSubmissionForm(formData){
+  console.time('processSubmissionForm')
+  // https://stackoverflow.com/a/43238894
+  // BEGIN - start lock here
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000); // wait 30 seconds for others' use of the code section and lock to stop and then proceed
+  } catch (e) {
+    return {
+      result: 'error',
+      message: 'Could not obtain lock'
+    };
+  }
+  var data = decodeToken_(formData.token);
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+  var dataRange = sheet.getDataRange();
+  var dataValues = dataRange.getValues();
+  var dataValuesHeader = dataRange.offset(0, 0, 1)
+                                  .getValues()[0];
+  var updates = 0;
+  for (var r = 0; r < dataValues.length; r++) {
+    if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === data.row) {
+      for (f in formData){
+        if (dataValuesHeader.indexOf(f) > -1){
+          var writeRange =  sheet.getRange(r + 1, dataValuesHeader.indexOf(f) + 1)
+          var existingData = writeRange.getValue();
+          if (existingData !== formData[f]){
+            updates++;
+            writeRange.setValue(formData[f])
+                      .setNote('Author updated this value \nDate: ' +
+                               Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+          }
+        }
+      }
+      break;
+    }
+  }
+  SpreadsheetApp.flush(); // applies all pending spreadsheet changes
+  lock.releaseLock();
+  // END - end lock here
+  console.timeEnd('processSubmissionForm');
+  return {
+    result: 'ok',
+    updates: updates
+  };
 }

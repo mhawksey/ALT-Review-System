@@ -33,18 +33,53 @@
   <div <? if (!isAdmin) { ?>
     <?!= "class='container'" ?>
       <? } ?> >
+
         <div class="row">
           <div class="col s12 m9 l10">
+           <? if (mode === 'decision') { ?>
+             <form id="submission_form">
+           <? } ?>
             <? if (mode === 'review') { ?>
               <h1>Review form</h1>
               <blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'.</blockquote>
               <div class="row center-align">
-                <div class="col s6"><a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a></div>
-                <div class="col s6"><a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a></div>
+                <div class="col s12">
+                  <a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a>
+                 </div>
               </div>
               <blockquote id="prompt_review_accept" style="display:none">If you are happy to review this proposal please scroll down to <a href="#review">Submit your review</a> and record your decision (you can revisit this page from the link in the email at anytime to complete your review).</blockquote>
             <? } ?>
-            <? if (isAdmin) { ?>
+           <? if (mode === 'decision') { ?>
+              <h1>Review form</h1>
+              <blockquote>Please click 'Include' to indicate if you or one of your co-authors is planning on presenting this proposal. Click 'Withdraw' if you or one of your co-authors can no longer present this session.</blockquote>
+              <div class="row center-align">
+                <div class="col s12">
+                  <a id="proposal_withdraw" class="waves-effect waves-light btn red grey tooltipped" data-position="bottom" data-tooltip="Click to withdraw this proposal"><i class="material-icons left">highlight_off</i>Withdraw</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <a id="proposal_include" class="waves-effect waves-light btn blue grey tooltipped" data-position="bottom" data-tooltip="Click if you would still like your proposal included in the programme"><i class="material-icons left">check_circle</i>Include</a>
+                </div>
+              </div>
+              <blockquote id="prompt_proposal_include" style="display:none">Please review your submission and feedback and de-anonymise your submission if required. If you make changes please remember to click 'Submit' at the bottom of this form (you can revisit this page from the link in the email to edit at a later date).</blockquote>
+              <div id="reviewDecision" class="card grey lighten-5 section scrollspy">
+               <div class="card-content">
+                <h2>Review Decision</h2>
+                 <div class="row">
+                  <div class="input-field col s12">
+                    <div id="Review">
+                      <div class="valign-wrapper review_dec">
+                       <i class="material-icons">block</i> <div class="status"></div>
+                     </div>
+                    </div>
+                  </div>
+                  <div class="input-field col s12">
+                    <textarea id="review_area" class="materialize-textarea" disabled></textarea>
+                    <label class="active" for="review_area">Feedback</label>
+                  </div>
+                 </div>
+                </div>
+              </div>
+            <? } ?>
+            <? if (isAdmin || mode === 'decision' ) { ?>
               <? if (mode === 'reviewAdmin') { ?>
                 <?!= include('admin_review'); ?>
               <? } ?>
@@ -54,7 +89,7 @@
                 <h2>Submission Overview</h2>
                 <div class="row">
                   <div class="input-field col s12">
-                    <textarea id="title" class="materialize-textarea" disabled></textarea>
+                    <textarea id="title" name="Session title" class="materialize-textarea" disabled></textarea>
                     <label class="active" for="title">Title</label>
                   </div>
                   <div class="input-field col s12">
@@ -71,7 +106,7 @@
                 <h2>Description</h2>
                 <div class="row">
                   <div class="input-field col s12">
-                    <textarea id="desc_area" class="materialize-textarea" disabled></textarea>
+                    <textarea id="desc_area" name="Session description" class="materialize-textarea" disabled></textarea>
                     <label class="active" for="desc_area">Session Description</label>
                     <span id="desc_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
                   </div>
@@ -81,7 +116,7 @@
                 <h2>Session Content</h2>
                 <div class="row">
                   <div class="input-field col s12">
-                    <textarea id="eval_area" class="materialize-textarea" disabled></textarea>
+                    <textarea id="eval_area" name="Session content: evaluation and reflection" class="materialize-textarea" disabled></textarea>
                     <label class="active" for="eval_area">Session Content: evaluation and reflection</label>
                     <span id="eval_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
                   </div>
@@ -91,7 +126,7 @@
                 <h2>References</h2>
                 <div class="row">
                   <div class="input-field col s12">
-                    <textarea id="ref_area" class="materialize-textarea" disabled></textarea>
+                    <textarea id="ref_area" name="References" class="materialize-textarea" disabled></textarea>
                     <label class="active" for="ref_area">References </label>
                   </div>
                 </div>
@@ -100,7 +135,7 @@
                 <h2>Additional Resources</h2>
                 <div class="row">
                   <div class="input-field col s12">
-                    <textarea id="resources_area" class="materialize-textarea" disabled></textarea>
+                    <textarea id="resources_area" name="Resources for participants" class="materialize-textarea" disabled></textarea>
                     <label class="active" for="resources_area">Resources for participants (Optional field - not submission requirement)</label>
                   </div>
                 </div>
@@ -108,12 +143,26 @@
             <? if (mode === 'review') { ?>
               <?!= include('reviewer_form'); ?>
             <? } // mode=review ?>
+            <? if (mode === 'decision') { ?>
+            <div id="submit" class="section scrollspy">
+              <div class="row">
+                <div class="col s12 center-align">
+                  <button id="submit_but" class="btn waves-effect waves-light blue" type="submit" name="action">Submit <i class="material-icons right">send</i></button>
+                  <input type="hidden" id="token" name="token" />
+                  <input type="hidden" id="status" name="Submission Status" value="updated" />
+                </div>
+              </div>
+             </div>
+            <? } ?>
+           <? if (mode === 'decision') { ?>
+             </form>
+           <? } ?>
           </div>
           <div class="col hide-on-small-onl m3 l2">
             <div class="toc-wrapper pinned">
               <ul class="section table-of-contents">
-                <? if (isAdmin) { ?>
-                <? if (mode === 'reviewAdmin') { ?>
+                <? if (isAdmin || mode === 'decision') { ?>
+                <? if (mode === 'reviewAdmin' || mode === 'decision' ) { ?>
                   <li><a href="#reviewDecision">Review Decision</a></li>
                 <? } ?>
                   <li><a href="#submitter">Submitted by</a></li>
@@ -124,10 +173,13 @@
                   <li><a href="#ref">References</a></li>
                   <li><a href="#resources">Additional Resources</a></li>
                   <? if (mode === 'review') { ?>
-                    <li id="tap_target_review"><a href="#review">Submit your review</a></li>
+                    <li><a href="#review">Submit your review</a></li>
+                  <? } ?>
+                  <? if (mode === 'decision') { ?>
+                    <li><a href="#submit">Submit</a></li>
                   <? } ?>
               </ul>
-              <? if (mode === 'review') { ?>
+              <? if (mode === 'review' || mode === 'decision') { ?>
                 <div class="row">
                   <div class="col s6 center-align" style="font-size: 80%;">
                     <h2 class="section-title"><i class="material-icons">info_outline</i> Information</h2>
@@ -148,7 +200,7 @@
   <!-- Modal Structure -->
   <div id="modal" class="modal">
     <div class="modal-content">
-      <h4 id="modal_title">Oops - an error has occured</h4>
+      <h4><div id="modal_title">Oops - an error has occured</div></h4>
       <div id="modal_text">We can't find your review assignment. Please check the link from your email.</div>
     </div>
     <div class="modal-footer">
@@ -165,6 +217,11 @@
       var currentRow = parseInt(<?= currentRow || 2; ?>);
      </script>
     <?!= include('admin_script.js'); ?>
+  <? } else if (mode === 'decision') { ?>
+   <script>
+      var token = "<?= token ?>";
+    </script>
+    <?!= include('decision_script.js'); ?>
   <? } else if (mode === 'review') { ?>
     <script>
       var token = "<?= token ?>";

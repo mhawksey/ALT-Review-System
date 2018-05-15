@@ -1,0 +1,103 @@
+<script>
+  $(function() {
+    // Handle no review token
+    if (token === "undefined") {
+      $('.modal').modal();
+      $('#modal_title').text('Oops - an error has occured');
+      $('#modal_text').text('We can\'t find your submission. Please check the link from your email.');
+      $('#modal').modal('open');
+    } else {
+      // get proposal
+      google.script.run.withSuccessHandler(setData)
+        .getProposalData(token);
+    }
+    
+    // get proposal success handler
+    function setData(r) {
+      var r = JSON.parse(r);
+      console.log(r);
+      // update text boxes
+      updateFields(r);
+      $('.materialize-textarea:not(#review_area,#theme,#type)').prop("disabled", false);
+      if (r['RSVP']) {
+        $('#' + r['RSVP']).removeClass('grey');
+        $('#prompt_' + r['RSVP']).slideDown(400);
+      }
+      
+      // update word counts on selected fields
+      $('#desc_area, #eval_area').on('change keyup paste', function(event){
+        $('#'+event.target.id+'_count').text('~' + countWords($(this).val()) + '/500 words');
+      });
+      var resp = r['Decision'];
+      var type = resp.split('_');
+      $('#Review .review_dec > i').addClass(type[0]);
+        $('#Review .status').text(resp.replace(/_/g,' '));
+      var icon = $('#Review .review_dec > i');
+        if (type[0] === 'accept' && type.length === 1){
+          icon.text('sentiment_very_satisfied');
+        } else if (type[0] === 'accept'){
+          icon.text('sentiment_satisfied');
+        } else if (type[0] === 'reject'){
+          icon.text('sentiment_very_dissatisfied');
+        } else if (type[0] === 'resubmit'){
+          icon.text('sentiment_dissatisfied');
+        } else {
+          icon.text('block');
+        }
+    }
+    
+     // review button event
+    $('[id^=proposal_]').on('click', function(e) {
+      $('[id^=proposal_]').prop("disabled", true).addClass('grey');
+      $('.progress').show();
+      var type = $(e.currentTarget).prop("id");
+      google.script.run.withSuccessHandler(decisionHandler)
+        .setProposalStatus(token, type);
+    });
+    // review button event handler
+    function decisionHandler(data) {
+    console.log(data)
+      $('.progress').hide();
+      $('[id^=prompt_]').hide();
+      $('[id^=proposal_]').prop("disabled", false);
+      $('#' + data.review_status).removeClass('grey');
+      $('#prompt_' + data.review_status).show(400);
+      //if (data.review_status === 'proposal_withdraw'){
+        $('.modal').modal();
+        $('#modal_title').text('Thank you!');
+        $('#modal_text').text('Your choice has been recorded. ' + $('#prompt_' + data.review_status).text());
+        $('#modal').modal('open');
+      //}
+    }
+    
+    $("#submission_form").on('submit', function(e) {
+      e.preventDefault();                                  
+      $('[id$=_but]').addClass('disabled');
+      $('.progress').show();
+      $('#token').val(token);
+      google.script.run.withSuccessHandler(handleSubmissionResponse)
+                       .processSubmissionForm(this);
+      
+      $('.setting').prop("disabled", true);
+      //$('select').formSelect();
+    });
+     // review form event handler
+    function handleSubmissionResponse(data) {
+     console.log(data)
+      $('[id$=_but]').removeClass('disabled');
+      $('.progress').hide();
+      $('.modal').modal();
+      if (data.result === 'ok') {
+        $('#modal_title').text('Thank you - Proposal updated');
+        $('#modal_text').text('Your updated proposal has been recorded. You may now close this browser tab.');
+      } else {
+        $('#modal_title').text('Oops - an error has occured');
+        $('#modal_text').text('Your review was not recorded. Please try submitting again.');
+        $('#submit_but').removeClass("disabled");
+      }
+      $('#modal').modal('open');
+    }
+  });
+</script>
+
+

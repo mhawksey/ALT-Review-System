@@ -8,6 +8,7 @@
 
     // update fields from sheet data 
     $('#ID').val(r['ID']);
+    $('#review_area').val(r['Feedback Text']);
     $('#rowTitle').text(r['Session title']);
     $('#name').val(r['First Name'] + ' ' + r['Last Name']);
     $('#inst').val(r['Institution (if applicable)']);
@@ -22,57 +23,7 @@
     $('#ref_area').val(r['References']);
     $('#resources_area').val(r['Resources for participants']);
     
-    // add review responses
-    if (mode === 'reviewAdmin'){
-      $('[id$=_but]').removeClass('disabled')
-                     .removeAttr('clicked');
-      // remove collapsible
-      $('#reviews_text').empty();
-      $("#feedback_decision").val(r['Decision'])
-                             .formSelect();
-      $("#hashed_id").val(r['Hashed ID']);
-      $('#feedback_area').val(r['Feedback Text']);
-      if (r['Decision Status'] !==""){
-        $('#saved_but').text('Update Decision');
-      } else {
-        $('#saved_but').text('Save Decision');
-      }
-      default_feedback ="";      
-      for (var i = 1; i <= 4; i++){
-        var rev = 'Review'+i;
-        var resp = r[rev+' Status'];
-        var type = resp.split('_');
-        $('#'+rev+' .review_dec > i').addClass(type[0]);
-        $('#'+rev+' .status').text(resp);
-        $('#'+rev+' .type').text(r[rev+' Type']);
-        if (resp === 'accept_different_type'){
-          $('#'+rev+' .review_type').show();
-        } else {
-          $('#'+rev+' .review_type').hide();
-        }
-        var icon = $('#'+rev+' .review_dec > i');
-        if (type[0] === 'accept' && type.length === 1){
-          icon.text('sentiment_very_satisfied');
-        } else if (type[0] === 'accept'){
-          icon.text('sentiment_satisfied');
-        } else if (type[0] === 'reject'){
-          icon.text('sentiment_very_dissatisfied');
-        } else if (type[0] === 'resubmit'){
-          icon.text('sentiment_dissatisfied');
-        } else {
-          icon.text('block');
-        }
-        
-        if (r[rev+' Text']){
-          var review_feedback = 'Reviewer '+i+'\n'+(r[rev+' Text'])+'\n\n';
-          default_feedback += review_feedback
-          if (r['Feedback Text'] ===""){
-            var feed = $('#feedback_area');
-            var cur = feed.val();
-            var append = cur + review_feedback;
-            feed.val(append);
-          }
-        }
+    
 
         /*if (r[rev+' Text'] || resp === 'accept_different_type'){
           var feed = $('#feedback_area');
@@ -89,9 +40,7 @@
             $('#type_'+i).show();
           }
         }*/
-      }
 
-    }
 
     // Refresh materialize components
     M.updateTextFields();
