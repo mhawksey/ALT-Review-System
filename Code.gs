@@ -21,6 +21,8 @@ function onOpen() {
   .addItem('Build Reviewer Lists', 'buildReviewerLists')
   .addItem('Review Decisions Admin', 'showReviewAdmin')
   .addSubMenu(ui.createMenu('Email Notifications')
+              .addItem('Send test email', 'sendTestEmail')
+              .addItem('Send to all included submissions', 'notifyAuthors')
               .addItem('Check submission email', 'checkAuthor')
               .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
               .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
@@ -76,6 +78,41 @@ function doGet(e) {
 }
 
 /**
+ * Send test email.
+ */
+function sendTestEmail() {
+  var template = Browser.inputBox("Sending emails", 'Enter the template id you wish to send a test email to:', Browser.Buttons.OK_CANCEL);
+  if (template !== "cancel") {
+    // get all submissions
+    var email = getEmailTemplate(template);
+    var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+    var subs = sheet.getDataRange();
+    var sub_obj = objectify(subs)
+    var headings = sheet.getDataRange()
+      .offset(0, 0, 1)
+      .getValues()[0];
+    var incCol = headings.indexOf('Include');
+    // iterate for submissions with check_author in Include column
+    var sub_filtered = sub_obj.filter(function(s) {
+      if (s['Include'] === 'test') {
+        var subject = fillInTemplateFromObject(email.subject, s);
+        var body = fillInTemplateFromObject(email.text, s);
+        var recipient = Session.getActiveUser().getEmail()
+        MailApp.sendEmail(recipient, subject, body, {
+          cc: 'systems@alt.ac.uk',
+          replyTo: 'helpdesk@alt.ac.uk'
+        });
+        var row = parseInt(s.ID.match(/\d+$/)[0]);
+        // record email has been sent
+        sheet.getRange(row + 1, incCol + 1).setNote(template+' sent by: ' +
+            Session.getActiveUser().getEmail() + '\nDate: ' +
+            Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+      }
+    });
+  }
+}
+
+/**
  * Sends email to notify them proposal isn't going to be reviewed.
  */
 function checkAuthor() {
@@ -110,7 +147,89 @@ function checkAuthor() {
     });
   }
 }
+/**
+ * Sends email to all included lead authors.
+ */
+function notifyAuthors() {
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails to all authors with 'yes' in the Include column. Are you sure?", Browser.Buttons.YES_NO);
+  if (resp === 'yes') {
+    // get all submissions
+    var email = getEmailTemplate('notify_authors');
+    var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+    var subs = sheet.getDataRange();
+    var sub_obj = objectify(subs)
+    var headings = sheet.getDataRange()
+      .offset(0, 0, 1)
+      .getValues()[0];
+    var incCol = headings.indexOf('Include');
+    // iterate for submissions with check_author in Include column
+    var sub_filtered = sub_obj.filter(function(s) {
+      if (s['Include'] === 'yes') {
+        var subject = fillInTemplateFromObject(email.subject, s);
+        var body = fillInTemplateFromObject(email.text, s);
+        var recipient = s['Email address (for communication only)']
+        MailApp.sendEmail(recipient, subject, body, {
+          cc: 'systems@alt.ac.uk',
+          replyTo: 'helpdesk@alt.ac.uk'
+        });
+        var row = parseInt(s.ID.match(/\d+$/)[0]);
+        // record email has been sent
+        sheet.getRange(row + 1, incCol + 1).setNote('notify_authors sent by: ' +
+            Session.getActiveUser().getEmail() + '\nDate: ' +
+            Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+      }
+    });
+  }
+}
 
+/**
+* Sends email to all included lead authors.
+*/
+function sendReviewDecisions() {
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails review decisions. Are you sure?", Browser.Buttons.YES_NO);
+  if (resp === 'yes') {
+    // get all submissions
+    var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+    var dataRange = sheet.getDataRange();
+    var sub_obj = objectify(dataRange);
+    sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj); 
+    
+    var headings = sheet.getDataRange()
+    .offset(0, 0, 1)
+    .getValues()[0];
+    var decCol = headings.indexOf('Decision Status');
+    var sub_filtered = sub_obj.filter(function(s) {
+      if (s['Decision'] !== '' && s['Decision Status'] === 'saved' && !s['hidden']) {
+        var recipient = s['Email address (for communication only)']
+        var url = UrlShortener.Url.insert({
+          longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'decision', 1)
+        });
+        s.review_url = url.id;
+        var email = getEmailTemplate(s['Decision']+'_proposal');
+        var subject = fillInTemplateFromObject(email.subject, s);
+        var body = fillInTemplateFromObject(email.text, s);
+        try {
+          MailApp.sendEmail(recipient, subject, body, {
+            cc: 'systems@alt.ac.uk',
+            replyTo: 'helpdesk@alt.ac.uk'
+          });
+          var row = parseInt(s.ID.match(/\d+$/)[0]);
+          // record email has been sent
+          sheet.getRange(row + 1, desCol + 1).setValue('sent')
+                                             .setNote(s['Decision']+'_proposal sent by: ' +
+                                                      Session.getActiveUser().getEmail() + '\nDate: ' +
+            Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+        } catch(e){
+          sheet.getRange(row + 1, desCol + 1).setValue('error')
+                                             .setNote(s['Decision']+'_proposal sent by: ' +
+                                                      Session.getActiveUser().getEmail() + '\nDate: ' +
+                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm')+'\n'+
+                                                      'Msg ' + e.message);
+        }
+      }
+    });
+  }
+}
 /**
  * Sends email notifications to reviewers with link to review submission.
  */
@@ -151,7 +270,7 @@ function sendReviewerEmails_(email, type, days) {
   // get all submissions
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
   var subs = sheet.getDataRange();
-  var sub_obj = objectify(subs)
+  var sub_obj = objectify(subs);
   var headings = sheet.getDataRange()
     .offset(0, 0, 1)
     .getValues()[0];

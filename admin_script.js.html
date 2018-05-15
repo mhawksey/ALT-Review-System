@@ -84,9 +84,9 @@
     });
     
     $('#reset_feedback').on('click', function(e) {
-    console.log('clicked')
       e.preventDefault();
       $('#feedback_area').val(default_feedback);
+      M.textareaAutoResize( $('#feedback_area'));
     });
     
     // review form event handler

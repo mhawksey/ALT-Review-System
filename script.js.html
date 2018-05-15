@@ -38,7 +38,6 @@
         $('#saved_but').text('Save Decision');
       }
       default_feedback ="";      
-      console.log(r);
       for (var i = 1; i <= 4; i++){
         var rev = 'Review'+i;
         var resp = r[rev+' Status'];
@@ -63,17 +62,18 @@
         } else {
           icon.text('block');
         }
-        var review_feedback = 'Reviewer '+i+'\n'+(r[rev+' Text'])+'\n\n';
-        if (r[rev+' Text'] && r['Feedback Text'] ===""){
-          var feed = $('#feedback_area');
-          var cur = feed.val();
-          var append = cur + review_feedback;
-          feed.val(append);
-        } else if (r[rev+' Text']){
+        
+        if (r[rev+' Text']){
+          var review_feedback = 'Reviewer '+i+'\n'+(r[rev+' Text'])+'\n\n';
           default_feedback += review_feedback
+          if (r['Feedback Text'] ===""){
+            var feed = $('#feedback_area');
+            var cur = feed.val();
+            var append = cur + review_feedback;
+            feed.val(append);
+          }
         }
-        
-        
+
         /*if (r[rev+' Text'] || resp === 'accept_different_type'){
           var feed = $('#feedback_area');
           var cur = feed.val();
