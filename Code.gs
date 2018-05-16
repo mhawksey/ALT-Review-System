@@ -26,7 +26,8 @@ function onOpen() {
               .addItem('Check submission email', 'checkAuthor')
               .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
               .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
-              .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted'))
+              .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
+              .addItem('Send Decisions', 'sendReviewDecisions'))
   .addToUi();
 }
 /**

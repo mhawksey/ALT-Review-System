@@ -11,7 +11,24 @@
       google.script.run.withSuccessHandler(setData)
         .getProposalData(token);
     }
+    var author_count = 0;
     
+    function addAuthor(){
+
+     
+      $('#authors').append('<div class="row valign-wrapper" id="authorgroup'+author_count+'"><div class="input-field col s5">'+
+                                    '<input class="auth_name" data-counter="'+author_count+'" id="additionalauthor'+author_count+'" type="text">' +
+                                    '<label for="additionalauthor'+author_count+'">Additional Author '+author_count+' Full Name</label>' +
+                                 '</div>' + 
+                                 '<div class="input-field col s6">' +
+                                    '<input class="auth_inst" id="additionalinst'+author_count+'" type="text">' +
+                                    '<label for="additionalinst'+author_count+'">Additional Author '+author_count+' Institution (if applicable)</label>' +
+                                 '</div>' +
+                                 '<div class="input-field col s1">' +
+                                    '<a data-counter="'+author_count+'" class="remove_additional"><i class="material-icons">cancel</i></a>' +
+                                 '</div></div>');
+      
+    }
     // get proposal success handler
     function setData(r) {
       var r = JSON.parse(r);
@@ -23,6 +40,19 @@
         $('#' + r['RSVP']).removeClass('grey');
         $('#prompt_' + r['RSVP']).slideDown(400);
       }
+      
+      var author_data = r['Additional Authors'].split('~');    
+      author_data.forEach(function(a){
+        var author_info = a.split('||');
+        if (author_info[0] !=='' || author_info[1] !==''){
+          author_count++;
+          if (author_count > 1) {
+           addAuthor();
+          }
+          $('#additionalauthor'+author_count).val(author_info[0]);
+          $('#additionalinst'+author_count).val(author_info[1]);
+        }
+      });
       
       // update word counts on selected fields
       $('#desc_area, #eval_area').on('change keyup paste', function(event){
@@ -92,11 +122,16 @@
       $('.progress').show();
       $('#type').prop("disabled", false);
       $('#token').val(token);
+      var auth_details = [];
+      $('.auth_name').each(function(){
+        auth_details.push($(this).val()+'||'+$('#additionalinst'+$(this).data('counter')).val());
+      });
+      $('#combined_authors').val(auth_details.join('~'));
+      console.log(auth_details.join('~'))
       google.script.run.withSuccessHandler(handleSubmissionResponse)
                        .processSubmissionForm(this);
       
       $('.setting').prop("disabled", true);
-      //$('select').formSelect();
     });
      // review form event handler
     function handleSubmissionResponse(data) {
@@ -115,6 +150,14 @@
       }
       $('#modal').modal('open');
     }
+    
+    $('#add_additional').on('click', function(){
+      author_count++;
+      addAuthor();
+    });
+    $('#authors').on('click', '.remove_additional', function(event){
+      $('#authorgroup'+$(this).data('counter')).remove();
+    });
   });
 </script>
 
