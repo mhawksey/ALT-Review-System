@@ -150,7 +150,7 @@ function getProposalData(token) {
   console.time('getProposalData');
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
   // Fetch the range of cells A:AN
-  var dataRange = sheet.getRange("A:AQ");
+  var dataRange = sheet.getDataRange();
   var dataValues = dataRange.getValues();
   var dataValuesHeader = dataValues.shift();
   var subs = objectify(dataRange);
@@ -333,7 +333,7 @@ function processReviewAdminForm(formData){
       sheet.getRange(r + 2, dataValuesHeader.indexOf('Feedback Text') + 1)
         .setValue(formData.feedback);
       sheet.getRange(r + 2, dataValuesHeader.indexOf('different_type') + 1)
-        .setValue(formData.different_type);
+        .setValue(formData.different_type || "");
       break;
     }
   }

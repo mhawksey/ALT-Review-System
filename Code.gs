@@ -205,7 +205,7 @@ function sendReviewDecisions() {
           longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'decision', 1)
         });
         s.review_url = url.id;
-        var email = getEmailTemplate(s['Decision']+'_proposal');
+        var email = getEmailTemplate('proposal_'+s['Decision']);
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         try {
@@ -302,6 +302,7 @@ function sendReviewerEmails_(email, type, days) {
             longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'review', r)
           });
           s.review_url = url.id;
+          Logger.log(s.review_url);
           // build email
           var subject = fillInTemplateFromObject(email.subject, s);
           var body = fillInTemplateFromObject(email.text, s);

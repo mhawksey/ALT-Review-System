@@ -47,11 +47,21 @@
   h3 {
     font-size: 1rem;
     line-height: 110%;
-    margin: 0.3rem 0 0.05rem 0;
+    margin: 1rem 0 0.6rem 0;
+    font-weight: 600;
   }
-
+  
+  .collapsible-header {
+    padding: 0.5rem 0.4rem 0.2rem;
+  }
   .collapsible-header i {
     margin-right: 0.1rem;
+  }
+  .collapsible-header h3 {
+  margin-top: 0.2rem;
+  }
+  .collapsible-body {
+    padding: 1rem;
   }
 
   .section-title i.material-icons {
@@ -68,11 +78,11 @@
     color: #757575;
   }
 
-  [type="checkbox"]+label {
+  [type="checkbox"]+span:not(.lever) {
     color: rgba(0, 0, 0, 0.82);
   }
 
-  [type="checkbox"].filled-in:checked+label:after {
+  [type="checkbox"].filled-in:checked+span:not(.lever):after {
     border-color: #079948;
     background-color: #079948;
   }
@@ -109,9 +119,6 @@
     color: rgba(0, 0, 0, 0.82);
     border-bottom: 1px dotted rgba(0, 0, 0, 0.42);
   }
-  #Review .status{
-  text-transform: capitalize;
-  }
   .review_dec > i{
    color: rgba(204, 204, 204, .8);
   }
@@ -134,5 +141,8 @@
     -ms-transform: rotate(180deg); /* IE 9 */
     -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
     transform: rotate(180deg);
+  }
+  #changeType{
+      padding-top: 20px;
   }
 </style>

@@ -31,16 +31,30 @@
       var resp = r['Decision'];
       var type = resp.split('_');
       $('#Review .review_dec > i').addClass(type[0]);
-        $('#Review .status').text(resp.replace(/_/g,' '));
+        //$('#Review .status').text(resp.replace(/_/g,' '));
       var icon = $('#Review .review_dec > i');
+      $('#changeType').hide();
+      var review_text = $('#Review .status')
         if (type[0] === 'accept' && type.length === 1){
           icon.text('sentiment_very_satisfied');
+          review_text.html('<strong>Accepted:</strong> Congratulations! Your proposal has been accepted.');
         } else if (type[0] === 'accept'){
           icon.text('sentiment_satisfied');
+          if (resp === 'accept_minor_revisions'){
+           review_text.html('<strong>Accepted with minor revisions:</strong> Congratulations! Your proposal has been accepted pending minor revisions, outlined in the feedback below.');
+          } else {
+           review_text.html('<strong>Change of session type:</strong> Your proposal requires revision as reviewers have recommended it for acceptance as a different type of session. Please refer to the feedback below.');
+           $('#requestType').val(r['Select what kind of session you\'d like to run:'].split('(')[0]);
+           $('#acceptType').val(r['different_type']);
+           $('#type').val(r['different_type']);
+           M.updateTextFields();
+           $('#changeType').slideDown(400);
+          }
         } else if (type[0] === 'reject'){
           icon.text('sentiment_very_dissatisfied');
         } else if (type[0] === 'resubmit'){
           icon.text('sentiment_dissatisfied');
+          review_text.html('<strong>Revise &amp; re-submit:</strong> Your proposal requires revision before it can be accepted. Please refer to the feedback below.');
         } else {
           icon.text('block');
         }
@@ -49,6 +63,7 @@
      // review button event
     $('[id^=proposal_]').on('click', function(e) {
       $('[id^=proposal_]').prop("disabled", true).addClass('grey');
+      
       $('.progress').show();
       var type = $(e.currentTarget).prop("id");
       google.script.run.withSuccessHandler(decisionHandler)
@@ -60,6 +75,7 @@
       $('.progress').hide();
       $('[id^=prompt_]').hide();
       $('[id^=proposal_]').prop("disabled", false);
+      
       $('#' + data.review_status).removeClass('grey');
       $('#prompt_' + data.review_status).show(400);
       //if (data.review_status === 'proposal_withdraw'){
@@ -74,6 +90,7 @@
       e.preventDefault();                                  
       $('[id$=_but]').addClass('disabled');
       $('.progress').show();
+      $('#type').prop("disabled", false);
       $('#token').val(token);
       google.script.run.withSuccessHandler(handleSubmissionResponse)
                        .processSubmissionForm(this);
@@ -85,6 +102,7 @@
     function handleSubmissionResponse(data) {
      console.log(data)
       $('[id$=_but]').removeClass('disabled');
+      $('#type').prop("disabled", true);
       $('.progress').hide();
       $('.modal').modal();
       if (data.result === 'ok') {

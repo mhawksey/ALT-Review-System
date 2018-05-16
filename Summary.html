@@ -51,25 +51,41 @@
               <blockquote id="prompt_review_accept" style="display:none">If you are happy to review this proposal please scroll down to <a href="#review">Submit your review</a> and record your decision (you can revisit this page from the link in the email at anytime to complete your review).</blockquote>
             <? } ?>
            <? if (mode === 'decision') { ?>
-              <h1>Review form</h1>
-              <blockquote>Please click 'Include' to indicate if you or one of your co-authors is planning on presenting this proposal. Click 'Withdraw' if you or one of your co-authors can no longer present this session.</blockquote>
+              <h1>Submission form</h1>
+              <blockquote>Before reviewing your proposal, please confirm that you or at least one of your co-authors will be registering for the conference by clicking on ‘Proceed with proposal’. If you are no longer able to participate please select ‘Withdraw proposal’. </blockquote>
               <div class="row center-align">
                 <div class="col s12">
-                  <a id="proposal_withdraw" class="waves-effect waves-light btn red grey tooltipped" data-position="bottom" data-tooltip="Click to withdraw this proposal"><i class="material-icons left">highlight_off</i>Withdraw</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <a id="proposal_include" class="waves-effect waves-light btn blue grey tooltipped" data-position="bottom" data-tooltip="Click if you would still like your proposal included in the programme"><i class="material-icons left">check_circle</i>Include</a>
+                  <a id="proposal_include" class="waves-effect waves-light btn blue grey tooltipped" data-position="bottom" data-tooltip="Click you or at least one of your co-authors will be registering for the conference"><i class="material-icons left">check_circle</i>Proceed with proposal</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <a id="proposal_withdraw" class="waves-effect waves-light btn red grey tooltipped" data-position="bottom" data-tooltip="Click to withdraw this proposal"><i class="material-icons left">highlight_off</i>Withdraw</a>
                 </div>
               </div>
               <blockquote id="prompt_proposal_include" style="display:none">Please review your submission and feedback and de-anonymise your submission if required. If you make changes please remember to click 'Submit' at the bottom of this form (you can revisit this page from the link in the email to edit at a later date).</blockquote>
               <div id="reviewDecision" class="card grey lighten-5 section scrollspy">
                <div class="card-content">
-                <h2>Review Decision</h2>
+                <h2>Proposal Review</h2>
                  <div class="row">
-                  <div class="input-field col s12">
+                  <div class="col s12">
+                  <p>All submissions have been reviewed and feedback from reviewers is included below:</p>
+                  <h3>Review Decision</h3>
                     <div id="Review">
                       <div class="valign-wrapper review_dec">
                        <i class="material-icons">block</i> <div class="status"></div>
                      </div>
                     </div>
+                    <div id="changeType">
+  <div class="row valign-wrapper ">
+    <div class="input-field col s5">
+      <input id="requestType" type="text" disabled>
+      <label class="active" for="requestType">Requested type</label>
+    </div>
+    <div class="col s1 center-align" ><i class="material-icons">chevron_right</i>
+    </div>
+    <div class="input-field col s6">
+      <input id="acceptType" type="text" disabled>
+      <label class="active" for="acceptType">Accepted type</label>
+    </div>
+  </div>
+</div>
                   </div>
                   <div class="input-field col s12">
                     <textarea id="review_area" class="materialize-textarea" disabled></textarea>
@@ -97,7 +113,7 @@
                     <label class="active" for="theme">Session Theme</label>
                   </div>
                   <div class="input-field col s12">
-                    <textarea id="type" class="materialize-textarea" disabled></textarea>
+                    <textarea id="type" name="Session Type" class="materialize-textarea" disabled></textarea>
                     <label class="active" for="type">Session Type</label>
                   </div>
                 </div>
