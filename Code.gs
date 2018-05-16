@@ -17,30 +17,30 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('Review System')
-  .addItem('Submission Details Check', 'showSummary')
-  .addItem('Build Reviewer Lists', 'buildReviewerLists')
-  .addItem('Review Decisions Admin', 'showReviewAdmin')
-  .addSubMenu(ui.createMenu('Email Notifications')
-              .addItem('Send test email', 'sendTestEmail')
-              .addItem('Send to all included submissions', 'notifyAuthors')
-              .addItem('Check submission email', 'checkAuthor')
-              .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
-              .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
-              .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
-              .addItem('Send Decisions', 'sendReviewDecisions'))
-  .addToUi();
+    .addItem('Submission Details Check', 'showSummary')
+    .addItem('Build Reviewer Lists', 'buildReviewerLists')
+    .addItem('Review Decisions Admin', 'showReviewAdmin')
+    .addSubMenu(ui.createMenu('Email Notifications')
+      .addItem('Send test email', 'sendTestEmail')
+      .addItem('Send to all included submissions', 'notifyAuthors')
+      .addItem('Check submission email', 'checkAuthor')
+      .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
+      .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
+      .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
+      .addItem('Send Decisions', 'sendReviewDecisions'))
+    .addToUi();
 }
 /**
  * Show proposal data for admin
  */
-function showSummary(){
+function showSummary() {
   showDialog('admin');
 }
 
 /**
  * Show proposal data with reviews for admin
  */
-function showReviewAdmin(){
+function showReviewAdmin() {
   showDialog('reviewAdmin');
 }
 
@@ -105,9 +105,9 @@ function sendTestEmail() {
         });
         var row = parseInt(s.ID.match(/\d+$/)[0]);
         // record email has been sent
-        sheet.getRange(row + 1, incCol + 1).setNote(template+' sent by: ' +
-            Session.getActiveUser().getEmail() + '\nDate: ' +
-            Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+        sheet.getRange(row + 1, incCol + 1).setNote(template + ' sent by: ' +
+          Session.getActiveUser().getEmail() + '\nDate: ' +
+          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
       }
     });
   }
@@ -176,16 +176,16 @@ function notifyAuthors() {
         var row = parseInt(s.ID.match(/\d+$/)[0]);
         // record email has been sent
         sheet.getRange(row + 1, incCol + 1).setNote('notify_authors sent by: ' +
-            Session.getActiveUser().getEmail() + '\nDate: ' +
-            Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+          Session.getActiveUser().getEmail() + '\nDate: ' +
+          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
       }
     });
   }
 }
 
 /**
-* Sends email to all included lead authors.
-*/
+ * Sends email to all included lead authors.
+ */
 function sendReviewDecisions() {
   var resp = Browser.msgBox("Sending emails", "You are about to send emails review decisions. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
@@ -193,11 +193,11 @@ function sendReviewDecisions() {
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
     var dataRange = sheet.getDataRange();
     var sub_obj = objectify(dataRange);
-    sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj); 
-    
+    sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj);
+
     var headings = sheet.getDataRange()
-    .offset(0, 0, 1)
-    .getValues()[0];
+      .offset(0, 0, 1)
+      .getValues()[0];
     var desCol = headings.indexOf('Decision Status');
     var sub_filtered = sub_obj.filter(function(s) {
       if (s['Decision'] !== '' && s['Decision Status'] === 'saved' && !s['hidden']) {
@@ -206,7 +206,7 @@ function sendReviewDecisions() {
           longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'decision', 1)
         });
         s.review_url = url.id;
-        var email = getEmailTemplate('proposal_'+s['Decision']);
+        var email = getEmailTemplate('proposal_' + s['Decision']);
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         try {
@@ -217,15 +217,15 @@ function sendReviewDecisions() {
           var row = parseInt(s.ID.match(/\d+$/)[0]);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('sent')
-                                             .setNote(s['Decision']+'_proposal sent by: ' +
-                                                      Session.getActiveUser().getEmail() + '\nDate: ' +
-            Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
-        } catch(e){
+            .setNote(s['Decision'] + '_proposal sent by: ' +
+              Session.getActiveUser().getEmail() + '\nDate: ' +
+              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+        } catch (e) {
           sheet.getRange(row + 1, desCol + 1).setValue('error')
-                                             .setNote(s['Decision']+'_proposal sent by: ' +
-                                                      Session.getActiveUser().getEmail() + '\nDate: ' +
-                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm')+'\n'+
-                                                      'Msg ' + e.message);
+            .setNote(s['Decision'] + '_proposal sent by: ' +
+              Session.getActiveUser().getEmail() + '\nDate: ' +
+              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') + '\n' +
+              'Msg ' + e.message);
         }
       }
     });

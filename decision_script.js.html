@@ -12,22 +12,22 @@
         .getProposalData(token);
     }
     var author_count = 0;
-    
-    function addAuthor(){
 
-     
-      $('#authors').append('<div class="row valign-wrapper" id="authorgroup'+author_count+'"><div class="input-field col s5">'+
-                                    '<input class="auth_name" data-counter="'+author_count+'" id="additionalauthor'+author_count+'" type="text">' +
-                                    '<label for="additionalauthor'+author_count+'">Additional Author '+author_count+' Full Name</label>' +
-                                 '</div>' + 
-                                 '<div class="input-field col s6">' +
-                                    '<input class="auth_inst" id="additionalinst'+author_count+'" type="text">' +
-                                    '<label for="additionalinst'+author_count+'">Additional Author '+author_count+' Institution (if applicable)</label>' +
-                                 '</div>' +
-                                 '<div class="input-field col s1">' +
-                                    '<a data-counter="'+author_count+'" class="remove_additional"><i class="material-icons">cancel</i></a>' +
-                                 '</div></div>');
-      
+    function addAuthor() {
+
+
+      $('#authors').append('<div class="row valign-wrapper" id="authorgroup' + author_count + '"><div class="input-field col s5">' +
+        '<input class="auth_name" data-counter="' + author_count + '" id="additionalauthor' + author_count + '" type="text">' +
+        '<label for="additionalauthor' + author_count + '">Additional Author ' + author_count + ' Full Name</label>' +
+        '</div>' +
+        '<div class="input-field col s6">' +
+        '<input class="auth_inst" id="additionalinst' + author_count + '" type="text">' +
+        '<label for="additionalinst' + author_count + '">Additional Author ' + author_count + ' Institution (if applicable)</label>' +
+        '</div>' +
+        '<div class="input-field col s1">' +
+        '<a data-counter="' + author_count + '" class="remove_additional"><i class="material-icons">cancel</i></a>' +
+        '</div></div>');
+
     }
     // get proposal success handler
     function setData(r) {
@@ -40,60 +40,60 @@
         $('#' + r['RSVP']).removeClass('grey');
         $('#prompt_' + r['RSVP']).slideDown(400);
       }
-      
-      var author_data = r['Additional Authors'].split('~');    
-      author_data.forEach(function(a){
+
+      var author_data = r['Additional Authors'].split('~');
+      author_data.forEach(function(a) {
         var author_info = a.split('||');
-        if (author_info[0] !=='' || author_info[1] !==''){
+        if (author_info[0] !== '' || author_info[1] !== '') {
           author_count++;
           if (author_count > 1) {
-           addAuthor();
+            addAuthor();
           }
-          $('#additionalauthor'+author_count).val(author_info[0]);
-          $('#additionalinst'+author_count).val(author_info[1]);
+          $('#additionalauthor' + author_count).val(author_info[0]);
+          $('#additionalinst' + author_count).val(author_info[1]);
         }
       });
-      
+
       // update word counts on selected fields
-      $('#desc_area, #eval_area').on('change keyup paste', function(event){
-        $('#'+event.target.id+'_count').text('~' + countWords($(this).val()) + '/500 words');
+      $('#desc_area, #eval_area').on('change keyup paste', function(event) {
+        $('#' + event.target.id + '_count').text('~' + countWords($(this).val()) + '/500 words');
       });
       var resp = r['Decision'];
       var type = resp.split('_');
       $('#Review .review_dec > i').addClass(type[0]);
-        //$('#Review .status').text(resp.replace(/_/g,' '));
+      //$('#Review .status').text(resp.replace(/_/g,' '));
       var icon = $('#Review .review_dec > i');
       $('#changeType').hide();
       var review_text = $('#Review .status')
-        if (type[0] === 'accept' && type.length === 1){
-          icon.text('sentiment_very_satisfied');
-          review_text.html('<strong>Accepted:</strong> Congratulations! Your proposal has been accepted.');
-        } else if (type[0] === 'accept'){
-          icon.text('sentiment_satisfied');
-          if (resp === 'accept_minor_revisions'){
-           review_text.html('<strong>Accepted with minor revisions:</strong> Congratulations! Your proposal has been accepted pending minor revisions, outlined in the feedback below.');
-          } else {
-           review_text.html('<strong>Change of session type:</strong> Your proposal requires revision as reviewers have recommended it for acceptance as a different type of session. Please refer to the feedback below.');
-           $('#requestType').val(r['Select what kind of session you\'d like to run:'].split('(')[0]);
-           $('#acceptType').val(r['different_type']);
-           $('#type').val(r['different_type']);
-           M.updateTextFields();
-           $('#changeType').slideDown(400);
-          }
-        } else if (type[0] === 'reject'){
-          icon.text('sentiment_very_dissatisfied');
-        } else if (type[0] === 'resubmit'){
-          icon.text('sentiment_dissatisfied');
-          review_text.html('<strong>Revise &amp; re-submit:</strong> Your proposal requires revision before it can be accepted. Please refer to the feedback below.');
+      if (type[0] === 'accept' && type.length === 1) {
+        icon.text('sentiment_very_satisfied');
+        review_text.html('<strong>Accepted:</strong> Congratulations! Your proposal has been accepted.');
+      } else if (type[0] === 'accept') {
+        icon.text('sentiment_satisfied');
+        if (resp === 'accept_minor_revisions') {
+          review_text.html('<strong>Accepted with minor revisions:</strong> Congratulations! Your proposal has been accepted pending minor revisions, outlined in the feedback below.');
         } else {
-          icon.text('block');
+          review_text.html('<strong>Change of session type:</strong> Your proposal requires revision as reviewers have recommended it for acceptance as a different type of session. Please refer to the feedback below.');
+          $('#requestType').val(r['Select what kind of session you\'d like to run:'].split('(')[0]);
+          $('#acceptType').val(r['different_type']);
+          $('#type').val(r['different_type']);
+          M.updateTextFields();
+          $('#changeType').slideDown(400);
         }
+      } else if (type[0] === 'reject') {
+        icon.text('sentiment_very_dissatisfied');
+      } else if (type[0] === 'resubmit') {
+        icon.text('sentiment_dissatisfied');
+        review_text.html('<strong>Revise &amp; re-submit:</strong> Your proposal requires revision before it can be accepted. Please refer to the feedback below.');
+      } else {
+        icon.text('block');
+      }
     }
-    
-     // review button event
+
+    // review button event
     $('[id^=proposal_]').on('click', function(e) {
       $('[id^=proposal_]').prop("disabled", true).addClass('grey');
-      
+
       $('.progress').show();
       var type = $(e.currentTarget).prop("id");
       google.script.run.withSuccessHandler(decisionHandler)
@@ -101,41 +101,41 @@
     });
     // review button event handler
     function decisionHandler(data) {
-    console.log(data)
+      console.log(data)
       $('.progress').hide();
       $('[id^=prompt_]').hide();
       $('[id^=proposal_]').prop("disabled", false);
-      
+
       $('#' + data.review_status).removeClass('grey');
       $('#prompt_' + data.review_status).show(400);
       //if (data.review_status === 'proposal_withdraw'){
-        $('.modal').modal();
-        $('#modal_title').text('Thank you!');
-        $('#modal_text').text('Your choice has been recorded. ' + $('#prompt_' + data.review_status).text());
-        $('#modal').modal('open');
+      $('.modal').modal();
+      $('#modal_title').text('Thank you!');
+      $('#modal_text').text('Your choice has been recorded. ' + $('#prompt_' + data.review_status).text());
+      $('#modal').modal('open');
       //}
     }
-    
+
     $("#submission_form").on('submit', function(e) {
-      e.preventDefault();                                  
+      e.preventDefault();
       $('[id$=_but]').addClass('disabled');
       $('.progress').show();
       $('#type').prop("disabled", false);
       $('#token').val(token);
       var auth_details = [];
-      $('.auth_name').each(function(){
-        auth_details.push($(this).val()+'||'+$('#additionalinst'+$(this).data('counter')).val());
+      $('.auth_name').each(function() {
+        auth_details.push($(this).val() + '||' + $('#additionalinst' + $(this).data('counter')).val());
       });
       $('#combined_authors').val(auth_details.join('~'));
       //console.log(auth_details.join('~'))
       google.script.run.withSuccessHandler(handleSubmissionResponse)
-                       .processSubmissionForm(this);
-      
+        .processSubmissionForm(this);
+
       $('.setting').prop("disabled", true);
     });
-     // review form event handler
+    // review form event handler
     function handleSubmissionResponse(data) {
-     console.log(data)
+      console.log(data)
       $('[id$=_but]').removeClass('disabled');
       $('#type').prop("disabled", true);
       $('.progress').hide();
@@ -150,15 +150,13 @@
       }
       $('#modal').modal('open');
     }
-    
-    $('#add_additional').on('click', function(){
+
+    $('#add_additional').on('click', function() {
       author_count++;
       addAuthor();
     });
-    $('#authors').on('click', '.remove_additional', function(event){
-      $('#authorgroup'+$(this).data('counter')).remove();
+    $('#authors').on('click', '.remove_additional', function(event) {
+      $('#authorgroup' + $(this).data('counter')).remove();
     });
   });
 </script>
-
-

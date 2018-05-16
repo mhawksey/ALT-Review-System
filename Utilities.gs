@@ -3,57 +3,57 @@ function checkSubmissions() {
   var formURL = doc.getFormUrl();
   var form = FormApp.openByUrl(formURL);
   var resp = form.getResponses();
-  var out = [['timestamp', 'ID', 'email', 'title']];
-  for (r in resp){
+  var out = [
+    ['timestamp', 'ID', 'email', 'title']
+  ];
+  for (r in resp) {
     var sub = resp[r].getItemResponses();
     var timestamp = resp[r].getTimestamp();
     var id = resp[r].getId();
     var email = sub[2].getResponse();
     var title = sub[7].getResponse();
-    out.push([timestamp,id,email,title]);
+    out.push([timestamp, id, email, title]);
   }
   var sheet = doc.getSheetByName('SubmissionCheck');
   sheet.getRange(1, 1, out.length, 4).setValues(out);
 }
 
-function createToken_(email, row, mode, reviewer_num){
+function createToken_(email, row, mode, reviewer_num) {
   var hashedEmail = getHashedText(email);
-  var blob = Utilities.newBlob(JSON.stringify({reviewer:hashedEmail,
-                                               row: row,
-                                               reviewer_num: reviewer_num,
-                                               mode: mode}));
+  var blob = Utilities.newBlob(JSON.stringify({
+    reviewer: hashedEmail,
+    row: row,
+    reviewer_num: reviewer_num,
+    mode: mode
+  }));
   return Utilities.base64EncodeWebSafe(blob.getBytes());
 }
 
-function decodeToken_(token){
+function decodeToken_(token) {
   try {
     return JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(token)).getDataAsString());
-  } catch(e) {
-    return {mode:'review'};
+  } catch (e) {
+    return {
+      mode: 'review'
+    };
   }
 }
 
-function testToken(){
- var token ="eyJyZXZpZXdlciI6ImUyOTRhYWVmZDc2NTE5YWYyN2EzMjNhNjM0NDgzNWVhY2M4ZWZjMTViMTA0MWE1YjQ4NzI5NTdhNzI2N2FkOWYiLCJyb3ciOiI2MzkyYTgzOGJmODU5MWViMmUwZGRlNzZiOGQ5NjM2N2I5YWE0YWVlNGM5NWIyZWMxZTY4MmIzNGM0ZDg0ZWNjIiwicmV2aWV3ZXJfbnVtIjoxLCJtb2RlIjoicmV2aWV3In0=";
- var deToken = decodeToken_(token);
-  Logger.log(deToken)
-}
-
-function getHashedText(email){
+function getHashedText(email) {
   var hash = CacheService.getScriptCache().get('HASH');
-  if (!hash){
+  if (!hash) {
     hash = PropertiesService.getScriptProperties().getProperty('HASH');
     CacheService.getScriptCache().put('HASH', hash, 86000)
   }
   // based on https://stackoverflow.com/a/27933459
-  var hashedEmail = Utilities.computeHmacSha256Signature(email,hash).reduce(function(str,chr){
+  var hashedEmail = Utilities.computeHmacSha256Signature(email, hash).reduce(function(str, chr) {
     chr = (chr < 0 ? chr + 256 : chr).toString(16);
-    return str + (chr.length==1?'0':'') + chr;
-  },'');
+    return str + (chr.length == 1 ? '0' : '') + chr;
+  }, '');
   return hashedEmail;
 }
 
-function objectify(dataRange){
+function objectify(dataRange) {
   // Fetch values for each row in the Range.
   var data = dataRange.getValues();
   var header = data.shift();
@@ -71,10 +71,10 @@ function objectify(dataRange){
 
 // https://stackoverflow.com/a/1026087
 function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function getEmailTemplate(id){
+function getEmailTemplate(id) {
   var emailTemp = SpreadsheetApp.getActive().getSheetByName('EmailTemplates');
   var emails = emailTemp.getDataRange();
   var email_obj = objectify(emails);
@@ -82,11 +82,11 @@ function getEmailTemplate(id){
 }
 
 function idFilter(id) {
-    return function(element) {
-      if (element.id === id){
-        return element;
-      }
+  return function(element) {
+    if (element.id === id) {
+      return element;
     }
+  }
 }
 
 // Replaces markers in a template string with values define in a JavaScript data object.
@@ -105,7 +105,7 @@ function fillInTemplateFromObject(template, data) {
   // If no value is available, replace with the empty string.
   for (var i = 0; i < templateVars.length; ++i) {
     // normalizeHeader ignores ${"} so we can call it directly here.
-    var variableData = data[templateVars[i].substring(1,templateVars[i].length-1)];
+    var variableData = data[templateVars[i].substring(1, templateVars[i].length - 1)];
     email = email.replace(templateVars[i], variableData || "");
   }
 
@@ -113,41 +113,42 @@ function fillInTemplateFromObject(template, data) {
 }
 
 //
-function extractBracket(str){
-  var rxp = /\(([^\)]+)\)/g;  
+function extractBracket(str) {
+  var rxp = /\(([^\)]+)\)/g;
   var match;
   var matches = [];
   while ((match = rxp.exec(str)) != null) {
     matches.push(match);
   }
-  return matches[matches.length-1][1];
+  return matches[matches.length - 1][1];
 }
 
 function include(filename) {
   return HtmlService.createTemplateFromFile(filename).evaluate().getContent() //.createHtmlOutputFromFile(filename)
-    //.getContent();
+  //.getContent();
 }
 
-function refreshReviewStats(){
+function refreshReviewStats() {
   var sheet = SpreadsheetApp.getActiveSheet();
   var headings = sheet.getDataRange()
-  .offset(0, 0, 1)
-  .getValues()[0];
+    .offset(0, 0, 1)
+    .getValues()[0];
   var formulas = sheet.getDataRange()
-  .offset(0, 0, 1)
-  .getFormulas()[0];
+    .offset(0, 0, 1)
+    .getFormulas()[0];
   Logger.log(formulas);
   var calcCols = ['Reviews Assigned', 'Reviews Submitted', 'Reviews Accepted', 'Reviews Declined', 'Reviews Reminded'];
-  var calcFormula = { "Reviews Assigned":"=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF(AllReviewCols,J$2:J)})", 
-                     "Reviews Submitted":"=ARRAYFORMULA({\"Reviews Submitted\";COUNTIF(Reviews!D:D,\"=\"&A2:A)})",
-                     "Reviews Accepted":"=ARRAYFORMULA({\"Reviews Accepted\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_accept\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_accept\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_accept\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_accept\")})", 
-                     "Reviews Declined":"=ARRAYFORMULA({\"Reviews Declined\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_decline\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_decline\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_decline\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_decline\")})", 
-                     "Reviews Reminded":"=ARRAYFORMULA({\"Reviews Reminded\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_reminded\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_reminded\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_reminded\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_reminded\")})"
-                    };
-  
-  calcCols.forEach(function(source){
-    var colIdx = headings.indexOf(source)+1;
-    if (colIdx > 0 ){
+  var calcFormula = {
+    "Reviews Assigned": "=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF(AllReviewCols,J$2:J)})",
+    "Reviews Submitted": "=ARRAYFORMULA({\"Reviews Submitted\";COUNTIF(Reviews!D:D,\"=\"&A2:A)})",
+    "Reviews Accepted": "=ARRAYFORMULA({\"Reviews Accepted\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_accept\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_accept\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_accept\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_accept\")})",
+    "Reviews Declined": "=ARRAYFORMULA({\"Reviews Declined\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_decline\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_decline\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_decline\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_decline\")})",
+    "Reviews Reminded": "=ARRAYFORMULA({\"Reviews Reminded\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_reminded\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_reminded\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_reminded\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_reminded\")})"
+  };
+
+  calcCols.forEach(function(source) {
+    var colIdx = headings.indexOf(source) + 1;
+    if (colIdx > 0) {
       sheet.getRange(1, colIdx, sheet.getLastRow()).clearContent();
       sheet.getRange(1, colIdx).setFormula(calcFormula[source]);
       SpreadsheetApp.flush();

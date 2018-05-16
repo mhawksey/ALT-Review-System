@@ -25,8 +25,8 @@ function setProposalStatus(token, type) {
   var dataRange = sheet.getDataRange();
   var dataValues = dataRange.getValues();
   var dataValuesHeader = dataRange.offset(0, 0, 1)
-                                  .getValues()[0];
-  
+    .getValues()[0];
+
   for (var r = 0; r < dataValues.length; r++) {
     if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === data.row) {
       sheet.getRange(r + 1, dataValuesHeader.indexOf('RSVP') + 1)
@@ -36,7 +36,7 @@ function setProposalStatus(token, type) {
       return {
         result: 'ok',
         review_status: type
-      }; 
+      };
     }
   }
   throw "Did not find submission";
@@ -144,9 +144,11 @@ function getReviewData(review_token, reviewer_token, reviewer_num) {
  */
 function getProposalData(token) {
   var data = decodeToken_(token);
-  if (data.mode !== 'decision'){
-    return JSON.stringify({result: 'error'});
-  } 
+  if (data.mode !== 'decision') {
+    return JSON.stringify({
+      result: 'error'
+    });
+  }
   console.time('getProposalData');
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
   // Fetch the range of cells A:AN
@@ -179,28 +181,28 @@ function getAllSubmissionData(optMode) {
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
   var dataRange = sheet.getDataRange();
   var data = objectify(dataRange);
-  data = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), data); 
-  
-  if (mode === 'reviewAdmin'){
-    var revSheet = SpreadsheetApp.getActive().getSheetByName(REVIEW_SHEET_NAME); 
+  data = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), data);
+
+  if (mode === 'reviewAdmin') {
+    var revSheet = SpreadsheetApp.getActive().getSheetByName(REVIEW_SHEET_NAME);
     var revData = revSheet.getDataRange();
     var revObj = objectify(revData);
-    for (i=0; i < data.length; i++){
+    for (i = 0; i < data.length; i++) {
       var id = data[i]['Hashed ID'];
-      var reviews = revObj.filter(function(r){
-        if(r.review_token === id){
-         return r 
+      var reviews = revObj.filter(function(r) {
+        if (r.review_token === id) {
+          return r
         }
       })
-      if (reviews.length > 0){
-        for (r=0; r < reviews.length; r++){
-           data[i]['Review'+reviews[r].reviewer_num+' Text'] = reviews[r].feedback_text_area;
-           data[i]['Review'+reviews[r].reviewer_num+' Type'] = reviews[r].different_type;
+      if (reviews.length > 0) {
+        for (r = 0; r < reviews.length; r++) {
+          data[i]['Review' + reviews[r].reviewer_num + ' Text'] = reviews[r].feedback_text_area;
+          data[i]['Review' + reviews[r].reviewer_num + ' Type'] = reviews[r].different_type;
         }
       }
     }
   }
-  
+
   return JSON.stringify(data);
 }
 
@@ -214,11 +216,13 @@ function getAllSubmissionData(optMode) {
  */
 function addFilteredRows_(ssId, sheetId, sourceData) {
   var hiddenRows = [];
-  
+
   // limit what's returned from the API
   var fields = "sheets(data(rowMetadata(hiddenByFilter)),properties/sheetId)";
-  var sheets = Sheets.Spreadsheets.get(ssId, {fields: fields}).sheets;  
-  
+  var sheets = Sheets.Spreadsheets.get(ssId, {
+    fields: fields
+  }).sheets;
+
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].properties.sheetId == sheetId) {
       var data = sheets[i].data;
@@ -228,13 +232,13 @@ function addFilteredRows_(ssId, sheetId, sourceData) {
       }
     }
   }
-  for (var h=0; h < hiddenRows.length; h++){
-    if (sourceData[hiddenRows[h]-1]){
-      sourceData[hiddenRows[h]-1]['hidden'] = true;
+  for (var h = 0; h < hiddenRows.length; h++) {
+    if (sourceData[hiddenRows[h] - 1]) {
+      sourceData[hiddenRows[h] - 1]['hidden'] = true;
     }
   }
   return sourceData;
-} 
+}
 
 /**
  * Set the review status for admin_script.js
@@ -315,7 +319,7 @@ function processReviewForm(formData) {
  * @param {Object} formData to be recorded.
  * @return {Object} returns result.
  */
-function processReviewAdminForm(formData){
+function processReviewAdminForm(formData) {
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
   var dataRange = sheet.getDataRange()
   var dataValues = dataRange.getValues();
@@ -345,7 +349,7 @@ function processReviewAdminForm(formData){
  * @param {Object} formData to be recorded.
  * @return {Object} returns result.
  */
-function processSubmissionForm(formData){
+function processSubmissionForm(formData) {
   console.time('processSubmissionForm')
   // https://stackoverflow.com/a/43238894
   // BEGIN - start lock here
@@ -363,19 +367,19 @@ function processSubmissionForm(formData){
   var dataRange = sheet.getDataRange();
   var dataValues = dataRange.getValues();
   var dataValuesHeader = dataRange.offset(0, 0, 1)
-                                  .getValues()[0];
+    .getValues()[0];
   var updates = 0;
   for (var r = 0; r < dataValues.length; r++) {
     if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === data.row) {
-      for (f in formData){
-        if (dataValuesHeader.indexOf(f) > -1){
-          var writeRange =  sheet.getRange(r + 1, dataValuesHeader.indexOf(f) + 1)
+      for (f in formData) {
+        if (dataValuesHeader.indexOf(f) > -1) {
+          var writeRange = sheet.getRange(r + 1, dataValuesHeader.indexOf(f) + 1)
           var existingData = writeRange.getValue();
-          if (existingData !== formData[f]){
+          if (existingData !== formData[f]) {
             updates++;
             writeRange.setValue(formData[f])
-                      .setNote('Author updated this value \nDate: ' +
-                               Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+              .setNote('Author updated this value \nDate: ' +
+                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
           }
         }
       }

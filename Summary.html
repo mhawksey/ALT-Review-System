@@ -36,165 +36,168 @@
 
         <div class="row">
           <div class="col s12 m9 l10">
-           <? if (mode === 'decision') { ?>
-             <form id="submission_form">
-           <? } ?>
-            <? if (mode === 'review') { ?>
-              <h1>Review form</h1>
-              <blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'.</blockquote>
-              <div class="row center-align">
-                <div class="col s12">
-                  <a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a>
-                 </div>
-              </div>
-              <blockquote id="prompt_review_accept" style="display:none">If you are happy to review this proposal please scroll down to <a href="#review">Submit your review</a> and record your decision (you can revisit this page from the link in the email at anytime to complete your review).</blockquote>
-            <? } ?>
-           <? if (mode === 'decision') { ?>
-              <h1>Submission form</h1>
-              <blockquote>Before reviewing your proposal, please confirm that you or at least one of your co-authors will be registering for the conference by clicking on ‘Proceed with proposal’. If you are no longer able to participate please select ‘Withdraw proposal’. </blockquote>
-              <div class="row center-align">
-                <div class="col s12">
-                  <a id="proposal_include" class="waves-effect waves-light btn blue grey tooltipped" data-position="bottom" data-tooltip="Click you or at least one of your co-authors will be registering for the conference"><i class="material-icons left">check_circle</i>Proceed with proposal</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <a id="proposal_withdraw" class="waves-effect waves-light btn red grey tooltipped" data-position="bottom" data-tooltip="Click to withdraw this proposal"><i class="material-icons left">highlight_off</i>Withdraw</a>
-                </div>
-              </div>
-              <blockquote id="prompt_proposal_include" style="display:none">Please review your submission and feedback and de-anonymise your submission if required. If you make changes please remember to click 'Submit' at the bottom of this form (you can revisit this page from the link in the email to edit at a later date).</blockquote>
-              <div id="reviewDecision" class="card grey lighten-5 section scrollspy">
-               <div class="card-content">
-                <h2>Proposal Review</h2>
-                 <div class="row">
-                  <div class="col s12">
-                  <p>All submissions have been reviewed and feedback from reviewers is included below:</p>
-                  <h3>Review Decision</h3>
-                    <div id="Review">
-                      <div class="valign-wrapper review_dec">
-                       <i class="material-icons">block</i> <div class="status"></div>
-                     </div>
-                    </div>
-                    <div id="changeType">
-  <div class="row valign-wrapper ">
-    <div class="input-field col s5">
-      <input id="requestType" type="text" disabled>
-      <label class="active" for="requestType">Requested type</label>
-    </div>
-    <div class="col s1 center-align" ><i class="material-icons">chevron_right</i>
-    </div>
-    <div class="input-field col s6">
-      <input id="acceptType" type="text" disabled>
-      <label class="active" for="acceptType">Accepted type</label>
-    </div>
-  </div>
-</div>
-                  </div>
-                  <div class="input-field col s12">
-                    <textarea id="review_area" class="materialize-textarea" disabled></textarea>
-                    <label class="active" for="review_area">Feedback</label>
-                  </div>
-                 </div>
-                </div>
-              </div>
-            <? } ?>
-            <? if (isAdmin || mode === 'decision' ) { ?>
-              <? if (mode === 'reviewAdmin') { ?>
-                <?!= include('admin_review'); ?>
-              <? } ?>
-              <?!= include('admin_submitter'); ?>
-            <? } ?>
-              <div id="overview" class="section scrollspy">
-                <h2>Submission Overview</h2>
-                <div class="row">
-                  <div class="input-field col s12">
-                    <textarea id="title" name="Session title" class="materialize-textarea" disabled></textarea>
-                    <label class="active" for="title">Title</label>
-                  </div>
-                  <div class="input-field col s12">
-                    <textarea id="theme" class="materialize-textarea" disabled></textarea>
-                    <label class="active" for="theme">Session Theme</label>
-                  </div>
-                  <div class="input-field col s12">
-                    <textarea id="type" name="Session Type" class="materialize-textarea" disabled></textarea>
-                    <label class="active" for="type">Session Type</label>
-                  </div>
-                </div>
-              </div>
-              <div id="desc" class="section scrollspy">
-                <h2>Description</h2>
-                <div class="row">
-                  <div class="input-field col s12">
-                    <textarea id="desc_area" name="Session description" class="materialize-textarea" disabled></textarea>
-                    <label class="active" for="desc_area">Session Description</label>
-                    <span id="desc_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
-                  </div>
-                </div>
-              </div>
-              <div id="eval" class="section scrollspy">
-                <h2>Session Content</h2>
-                <div class="row">
-                  <div class="input-field col s12">
-                    <textarea id="eval_area" name="Session content: evaluation and reflection" class="materialize-textarea" disabled></textarea>
-                    <label class="active" for="eval_area">Session Content: evaluation and reflection</label>
-                    <span id="eval_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
-                  </div>
-                </div>
-              </div>
-              <div id="ref" class="section scrollspy">
-                <h2>References</h2>
-                <div class="row">
-                  <div class="input-field col s12">
-                    <textarea id="ref_area" name="References" class="materialize-textarea" disabled></textarea>
-                    <label class="active" for="ref_area">References </label>
-                  </div>
-                </div>
-              </div>
-              <div id="resources" class="section scrollspy">
-                <h2>Additional Resources</h2>
-                <div class="row">
-                  <div class="input-field col s12">
-                    <textarea id="resources_area" name="Resources for participants" class="materialize-textarea" disabled></textarea>
-                    <label class="active" for="resources_area">Resources for participants (Optional field - not submission requirement)</label>
-                  </div>
-                </div>
-              </div>
-            <? if (mode === 'review') { ?>
-              <?!= include('reviewer_form'); ?>
-            <? } // mode=review ?>
             <? if (mode === 'decision') { ?>
-            <div id="submit" class="section scrollspy">
-              <div class="row">
-                <div class="col s12 center-align">
-                  <button id="submit_but" class="btn waves-effect waves-light blue" type="submit" name="action">Submit <i class="material-icons right">send</i></button>
-                  <input type="hidden" id="token" name="token" />
-                  <input type="hidden" id="status" name="Submission Status" value="updated" />
-                  <input type="hidden" id="combined_authors" name="Additional Authors"/>
-                </div>
-              </div>
-             </div>
-            <? } ?>
-           <? if (mode === 'decision') { ?>
-             </form>
-           <? } ?>
+              <form id="submission_form">
+                <? } ?>
+                  <? if (mode === 'review') { ?>
+                    <h1>Review form</h1>
+                    <blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'.</blockquote>
+                    <div class="row center-align">
+                      <div class="col s12">
+                        <a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a>
+                      </div>
+                    </div>
+                    <blockquote id="prompt_review_accept" style="display:none">If you are happy to review this proposal please scroll down to <a href="#review">Submit your review</a> and record your decision (you can revisit this page from the link in the email at anytime to complete your review).</blockquote>
+                    <? } ?>
+                      <? if (mode === 'decision') { ?>
+                        <h1>Submission form</h1>
+                        <blockquote>Before reviewing your proposal, please confirm that you or at least one of your co-authors will be registering for the conference by clicking on ‘Proceed with proposal’. If you are no longer able to participate please select ‘Withdraw
+                          proposal’. </blockquote>
+                        <div class="row center-align">
+                          <div class="col s12">
+                            <a id="proposal_include" class="waves-effect waves-light btn blue grey tooltipped" data-position="bottom" data-tooltip="Click you or at least one of your co-authors will be registering for the conference"><i class="material-icons left">check_circle</i>Proceed with proposal</a>                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <a id="proposal_withdraw" class="waves-effect waves-light btn red grey tooltipped" data-position="bottom" data-tooltip="Click to withdraw this proposal"><i class="material-icons left">highlight_off</i>Withdraw</a>
+                          </div>
+                        </div>
+                        <blockquote id="prompt_proposal_include" style="display:none">Please review your submission and feedback and de-anonymise your submission if required. If you make changes please remember to click 'Submit' at the bottom of this form (you can revisit this page from the link in the email to
+                          edit at a later date).</blockquote>
+                        <div id="reviewDecision" class="card grey lighten-5 section scrollspy">
+                          <div class="card-content">
+                            <h2>Proposal Review</h2>
+                            <div class="row">
+                              <div class="col s12">
+                                <p>All submissions have been reviewed and feedback from reviewers is included below:</p>
+                                <h3>Review Decision</h3>
+                                <div id="Review">
+                                  <div class="valign-wrapper review_dec">
+                                    <i class="material-icons">block</i>
+                                    <div class="status"></div>
+                                  </div>
+                                </div>
+                                <div id="changeType">
+                                  <div class="row valign-wrapper ">
+                                    <div class="input-field col s5">
+                                      <input id="requestType" type="text" disabled>
+                                      <label class="active" for="requestType">Requested type</label>
+                                    </div>
+                                    <div class="col s1 center-align"><i class="material-icons">chevron_right</i>
+                                    </div>
+                                    <div class="input-field col s6">
+                                      <input id="acceptType" type="text" disabled>
+                                      <label class="active" for="acceptType">Accepted type</label>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="input-field col s12">
+                                <textarea id="review_area" class="materialize-textarea" disabled></textarea>
+                                <label class="active" for="review_area">Feedback</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <? } ?>
+                          <? if (isAdmin || mode === 'decision' ) { ?>
+                            <? if (mode === 'reviewAdmin') { ?>
+                              <?!= include('admin_review'); ?>
+                                <? } ?>
+                                  <?!= include('admin_submitter'); ?>
+                                    <? } ?>
+                                      <div id="overview" class="section scrollspy">
+                                        <h2>Submission Overview</h2>
+                                        <div class="row">
+                                          <div class="input-field col s12">
+                                            <textarea id="title" name="Session title" class="materialize-textarea" disabled></textarea>
+                                            <label class="active" for="title">Title</label>
+                                          </div>
+                                          <div class="input-field col s12">
+                                            <textarea id="theme" class="materialize-textarea" disabled></textarea>
+                                            <label class="active" for="theme">Session Theme</label>
+                                          </div>
+                                          <div class="input-field col s12">
+                                            <textarea id="type" name="Session Type" class="materialize-textarea" disabled></textarea>
+                                            <label class="active" for="type">Session Type</label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div id="desc" class="section scrollspy">
+                                        <h2>Description</h2>
+                                        <div class="row">
+                                          <div class="input-field col s12">
+                                            <textarea id="desc_area" name="Session description" class="materialize-textarea" disabled></textarea>
+                                            <label class="active" for="desc_area">Session Description</label>
+                                            <span id="desc_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div id="eval" class="section scrollspy">
+                                        <h2>Session Content</h2>
+                                        <div class="row">
+                                          <div class="input-field col s12">
+                                            <textarea id="eval_area" name="Session content: evaluation and reflection" class="materialize-textarea" disabled></textarea>
+                                            <label class="active" for="eval_area">Session Content: evaluation and reflection</label>
+                                            <span id="eval_area_count" class="character-counter" style="float: right; font-size: 12px;"></span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div id="ref" class="section scrollspy">
+                                        <h2>References</h2>
+                                        <div class="row">
+                                          <div class="input-field col s12">
+                                            <textarea id="ref_area" name="References" class="materialize-textarea" disabled></textarea>
+                                            <label class="active" for="ref_area">References </label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div id="resources" class="section scrollspy">
+                                        <h2>Additional Resources</h2>
+                                        <div class="row">
+                                          <div class="input-field col s12">
+                                            <textarea id="resources_area" name="Resources for participants" class="materialize-textarea" disabled></textarea>
+                                            <label class="active" for="resources_area">Resources for participants (Optional field - not submission requirement)</label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <? if (mode === 'review') { ?>
+                                        <?!= include('reviewer_form'); ?>
+                                          <? } // mode=review ?>
+                                            <? if (mode === 'decision') { ?>
+                                              <div id="submit" class="section scrollspy">
+                                                <div class="row">
+                                                  <div class="col s12 center-align">
+                                                    <button id="submit_but" class="btn waves-effect waves-light blue" type="submit" name="action">Submit <i class="material-icons right">send</i></button>
+                                                    <input type="hidden" id="token" name="token" />
+                                                    <input type="hidden" id="status" name="Submission Status" value="updated" />
+                                                    <input type="hidden" id="combined_authors" name="Additional Authors" />
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <? } ?>
+                                                <? if (mode === 'decision') { ?>
+              </form>
+              <? } ?>
           </div>
           <div class="col hide-on-small-onl m3 l2">
             <div class="toc-wrapper pinned">
               <ul class="section table-of-contents">
                 <? if (isAdmin || mode === 'decision') { ?>
-                <? if (mode === 'reviewAdmin' || mode === 'decision' ) { ?>
-                  <li><a href="#reviewDecision">Review Decision</a></li>
-                <? } ?>
-                  <li><a href="#submitter">Submitted by</a></li>
-                <? } ?>
-                  <li><a href="#overview">Submission Overview</a></li>
-                  <li><a href="#desc">Description</a></li>
-                  <li><a href="#eval">Session Content</a></li>
-                  <li><a href="#ref">References</a></li>
-                  <li><a href="#resources">Additional Resources</a></li>
-                  <? if (mode === 'review') { ?>
-                    <li><a href="#review">Submit your review</a></li>
-                  <? } ?>
-                  <? if (mode === 'decision') { ?>
-                    <li><a href="#submit">Submit</a></li>
-                  <? } ?>
+                  <? if (mode === 'reviewAdmin' || mode === 'decision' ) { ?>
+                    <li><a href="#reviewDecision">Review Decision</a></li>
+                    <? } ?>
+                      <li><a href="#submitter">Submitted by</a></li>
+                      <? } ?>
+                        <li><a href="#overview">Submission Overview</a></li>
+                        <li><a href="#desc">Description</a></li>
+                        <li><a href="#eval">Session Content</a></li>
+                        <li><a href="#ref">References</a></li>
+                        <li><a href="#resources">Additional Resources</a></li>
+                        <? if (mode === 'review') { ?>
+                          <li><a href="#review">Submit your review</a></li>
+                          <? } ?>
+                            <? if (mode === 'decision') { ?>
+                              <li><a href="#submit">Submit</a></li>
+                              <? } ?>
               </ul>
               <? if (mode === 'review' || mode === 'decision') { ?>
                 <div class="row">
@@ -208,8 +211,8 @@
                     <img src="https://www.alt.ac.uk/sites/alt.ac.uk/files/alt-logo_0_0.png" alt="ALT Logo" /><br/><span>Charity number: 1160039</span>
                   </div>
                 </div>
-              <? } ?>
-                
+                <? } ?>
+
             </div>
           </div>
         </div>
@@ -226,26 +229,27 @@
   </div>
 </body>
 <?!= include('script.js'); ?>
-    <script>
-      var mode = "<?= mode; ?>";
-    </script>
+  <script>
+    var mode = "<?= mode; ?>";
+  </script>
   <? if (isAdmin) { ?>
     <script>
       var currentRow = parseInt(<?= currentRow || 2; ?>);
-     </script>
+    </script>
     <?!= include('admin_script.js'); ?>
-  <? } else if (mode === 'decision') { ?>
-   <script>
-      var token = "<?= token ?>";
-    </script>
-    <?!= include('decision_script.js'); ?>
-  <? } else if (mode === 'review') { ?>
-    <script>
-      var token = "<?= token ?>";
-      var review_token = "<?= review_token ?>";
-      var reviewer_token = "<?= reviewer_token ?>";
-      var reviewer_num = "<?= reviewer_num ?>";
-    </script>
-    <?!= include('review_script.js'); ?>
-  <? } ?>
+      <? } else if (mode === 'decision') { ?>
+        <script>
+          var token = "<?= token ?>";
+        </script>
+        <?!= include('decision_script.js'); ?>
+          <? } else if (mode === 'review') { ?>
+            <script>
+              var token = "<?= token ?>";
+              var review_token = "<?= review_token ?>";
+              var reviewer_token = "<?= reviewer_token ?>";
+              var reviewer_num = "<?= reviewer_num ?>";
+            </script>
+            <?!= include('review_script.js'); ?>
+              <? } ?>
+
 </html>

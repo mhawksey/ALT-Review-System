@@ -14,7 +14,7 @@
     // get proposal success handler
     function setReview(data) {
       var data = JSON.parse(data);
-    console.log(data)
+      console.log(data)
       // update text boxes
       updateFields(data);
 
@@ -52,7 +52,7 @@
       $('[id^=review_]').prop("disabled", false);
       $('#' + data.review_status).removeClass('grey');
       $('#prompt_' + data.review_status).show(400);
-      if (data.review_status === 'review_decline'){
+      if (data.review_status === 'review_decline') {
         $('.modal').modal();
         $('#modal_title').text('Information');
         $('#modal_text').text('Your choice to decline this review has been recorded. You may close this browser tab.');

@@ -1,12 +1,13 @@
-<script> 
-  var default_feedback ="";
+<script>
+  var default_feedback = "";
+
   function updateFields(r) {
     // remove review decision classes
-    $( "[id^='Review'] .review_dec > i" ).removeClass().addClass('material-icons');
+    $("[id^='Review'] .review_dec > i").removeClass().addClass('material-icons');
     $('#feedback_area').val('');
     $('.review_type').hide()
 
-    // update fields from sheet data 
+    // update fields from sheet data
     $('#ID').val(r['ID']);
     $('#review_area').val(r['Feedback Text']);
     $('#rowTitle').text(r['Session title']);
@@ -22,31 +23,31 @@
     $('#eval_area_count').text('~' + countWords(r['Session content: evaluation and reflection']) + '/500 words');
     $('#ref_area').val(r['References']);
     $('#resources_area').val(r['Resources for participants']);
-    
-    
 
-        /*if (r[rev+' Text'] || resp === 'accept_different_type'){
-          var feed = $('#feedback_area');
-          var cur = feed.val();
-          var append = cur +'Reviewer '+i+'\n'+(r[rev+' Text'])+'\n\n';
-          feed.val(append);
-          $('#reviews_text').append('<li>' +
-                                      '<div class="collapsible-header"><i class="material-icons">keyboard_arrow_up</i>'+rev+' Feedback</div>'+
-                                      '<div class="collapsible-body"><div class="row" style="display:none" id="type_'+i+
-                                      '"><div class="col s12"><label>Change of type</label></div></div><div class="row"><div class="input-field col s12"><textarea id="feedback_'+i+'" class="materialize-textarea" disabled>'+r[rev+' Text']+
-                                      '</textarea><label class="active" for="feedback_'+i+'">Feedback</label></div></div></li>');
-          if (resp === 'accept_different_type'){
-            $('#type_'+i).append('<div class="col s5">'+r['Select what kind of session you\'d like to run:']+'</div><div class="col s2 center-align"><i class="material-icons">chevron_right</i></div><div class="col s5">'+r[rev+' Type']+'</div>');
-            $('#type_'+i).show();
-          }
-        }*/
+
+
+    /*if (r[rev+' Text'] || resp === 'accept_different_type'){
+      var feed = $('#feedback_area');
+      var cur = feed.val();
+      var append = cur +'Reviewer '+i+'\n'+(r[rev+' Text'])+'\n\n';
+      feed.val(append);
+      $('#reviews_text').append('<li>' +
+                                  '<div class="collapsible-header"><i class="material-icons">keyboard_arrow_up</i>'+rev+' Feedback</div>'+
+                                  '<div class="collapsible-body"><div class="row" style="display:none" id="type_'+i+
+                                  '"><div class="col s12"><label>Change of type</label></div></div><div class="row"><div class="input-field col s12"><textarea id="feedback_'+i+'" class="materialize-textarea" disabled>'+r[rev+' Text']+
+                                  '</textarea><label class="active" for="feedback_'+i+'">Feedback</label></div></div></li>');
+      if (resp === 'accept_different_type'){
+        $('#type_'+i).append('<div class="col s5">'+r['Select what kind of session you\'d like to run:']+'</div><div class="col s2 center-align"><i class="material-icons">chevron_right</i></div><div class="col s5">'+r[rev+' Type']+'</div>');
+        $('#type_'+i).show();
+      }
+    }*/
 
 
     // Refresh materialize components
     M.updateTextFields();
-   // M.textareaAutoResize($('.materialize-textarea'));
+    // M.textareaAutoResize($('.materialize-textarea'));
     $('.materialize-textarea').each(function() {
-      M.textareaAutoResize($('#'+$( this ).attr('id')));
+      M.textareaAutoResize($('#' + $(this).attr('id')));
     });
     // hide progress bar
     $('.progress').hide();
@@ -58,25 +59,25 @@
     s = s.replace(/\n /, "\n"); // exclude newline with a start spacing
     return s.split(' ').length;
   }
-      // initialize materialize components
-    $(document).ready(function() {
-      $('select').formSelect();
-      $('.collapsible').collapsible();
-      $('.tooltipped').tooltip();
-      $('.scrollspy').scrollSpy();
+  // initialize materialize components
+  $(document).ready(function() {
+    $('select').formSelect();
+    $('.collapsible').collapsible();
+    $('.tooltipped').tooltip();
+    $('.scrollspy').scrollSpy();
 
-      $('select[required]').css({
-        display: 'inline',
-        position: 'absolute',
-        float: 'left',
-        padding: 0,
-        margin: 0,
-        border: '1px solid rgba(255,255,255,0)',
-        height: 0,
-        width: 0,
-        top: '2em',
-        left: '3em',
-        opacity: 0
-      });
+    $('select[required]').css({
+      display: 'inline',
+      position: 'absolute',
+      float: 'left',
+      padding: 0,
+      margin: 0,
+      border: '1px solid rgba(255,255,255,0)',
+      height: 0,
+      width: 0,
+      top: '2em',
+      left: '3em',
+      opacity: 0
     });
+  });
 </script>
