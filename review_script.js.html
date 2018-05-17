@@ -17,6 +17,7 @@
       console.log(data)
       // update text boxes
       updateFields(data);
+      $('#feedback_text_area').characterCounter();
 
       // handle review accept/decline buttons
       if (data.review_status === 'review_assigned' || data.review_status === 'review_reminded' || data.review_status === 'review_accept' || data.review_status === 'review_decline' || data.review_status === 'review_reassigned') {
