@@ -37,6 +37,7 @@
       $('#select_different_type').show();
       type_select.addClass('validate')
         .prop('required', true)
+        .prop('disabled', false)
         .attr("aria-required", "true");
       $('select[required]').css({
         display: 'inline',
@@ -57,6 +58,6 @@
         .prop('required', false)
         .removeAttr("aria-required");
     }
-    $('#feedback_decision').formSelect();
+    $('#feedback_decision,#different_type').formSelect();
   });
 </script>

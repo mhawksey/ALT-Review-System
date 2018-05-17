@@ -62,8 +62,9 @@
           .removeAttr('clicked');
         // remove collapsible
         $('#reviews_text').empty();
-        $("#feedback_decision").val(r['Decision'])
-          .formSelect();
+        $("#feedback_decision").val(r['Decision']);
+        $("#different_type").val(r['different_type']);
+        console.log(r['different_type']);
         $("#hashed_id").val(r['Hashed ID']);
         $('#feedback_area').val(r['Feedback Text']);
         if (r['Decision Status'] !== "") {
@@ -118,6 +119,8 @@
       var toReview = r['Include']
       $("[id$='_review']").removeClass('active');
       $('#' + toReview + '_review').addClass('active');
+      
+      $('#feedback_decision,#different_type').formSelect().change();
     }
 
     // review form event

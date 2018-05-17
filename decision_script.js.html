@@ -15,7 +15,6 @@
 
     function addAuthor() {
 
-
       $('#authors').append('<div class="row valign-wrapper" id="authorgroup' + author_count + '"><div class="input-field col s5">' +
         '<input class="auth_name" data-counter="' + author_count + '" id="additionalauthor' + author_count + '" type="text">' +
         '<label for="additionalauthor' + author_count + '">Additional Author ' + author_count + ' Full Name</label>' +
@@ -47,7 +46,7 @@
         if (author_info[0] !== '' || author_info[1] !== '') {
           author_count++;
           if (author_count > 1) {
-            addAuthor();
+            addAuthor('active');
           }
           $('#additionalauthor' + author_count).val(author_info[0]);
           $('#additionalinst' + author_count).val(author_info[1]);
@@ -77,7 +76,6 @@
           $('#requestType').val(r['Select what kind of session you\'d like to run:'].split('(')[0]);
           $('#acceptType').val(r['different_type']);
           $('#type').val(r['different_type']);
-          M.updateTextFields();
           $('#changeType').slideDown(400);
         }
       } else if (type[0] === 'reject') {
@@ -88,6 +86,7 @@
       } else {
         icon.text('block');
       }
+      M.updateTextFields();
     }
 
     // review button event
