@@ -165,6 +165,12 @@
                                             <? if (mode === 'decision') { ?>
                                               <div id="submit" class="section scrollspy">
                                                 <div class="row">
+                                                  <div class="input-field col s12">
+                                                   <textarea id="note_area" name="Note to Director" class="materialize-textarea"></textarea>
+                                            <label class="active" for="note_area">Note for conference Director (Optional field)</label>
+                                          </div>
+                                        </div>
+                                                <div class="row">
                                                   <div class="col s12 center-align">
                                                     <button id="submit_but" class="btn waves-effect waves-light blue" type="submit" name="action">Submit <i class="material-icons right">send</i></button>
                                                     <input type="hidden" id="token" name="token" />

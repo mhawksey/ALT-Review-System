@@ -79,7 +79,7 @@ function checkForReviewerMismatch_(review_token, reviewer_token, reviewer_num) {
   // fetch submission for review_token
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
   // Fetch the range of cells A:AN
-  var dataRange = sheet.getRange("A:AN");
+  var dataRange = sheet.getDataRange();
   var dataValues = dataRange.getValues();
   var dataValuesHeader = dataValues.shift();
   var subs = objectify(dataRange);
@@ -369,6 +369,7 @@ function processSubmissionForm(formData) {
   var dataValuesHeader = dataRange.offset(0, 0, 1)
     .getValues()[0];
   var updates = 0;
+  var update_fields = [];
   for (var r = 0; r < dataValues.length; r++) {
     if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === data.row) {
       for (f in formData) {
@@ -377,12 +378,16 @@ function processSubmissionForm(formData) {
           var existingData = writeRange.getValue();
           if (existingData !== formData[f]) {
             updates++;
+            update_fields.push(f);
             writeRange.setValue(formData[f])
               .setNote('Author updated this value \nDate: ' +
                 Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
           }
         }
       }
+      var note = 'Author updated:\n'+update_fields.join('\n');
+      sheet.getRange(r + 1, dataValuesHeader.indexOf('Submission Status') + 1).setNote(note+' \n\nDate: ' +
+                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
       break;
     }
   }

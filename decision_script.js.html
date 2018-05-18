@@ -57,6 +57,7 @@
       $('#desc_area, #eval_area').on('change keyup paste', function(event) {
         $('#' + event.target.id + '_count').text('~' + countWords($(this).val()) + '/500 words');
       });
+      $('#note_area').val(r['Note to Director']);
       var resp = r['Decision'];
       var type = resp.split('_');
       $('#Review .review_dec > i').addClass(type[0]);
@@ -87,6 +88,9 @@
         icon.text('block');
       }
       M.updateTextFields();
+      $('.materialize-textarea').each(function() {
+        M.textareaAutoResize($('#' + $(this).attr('id')));
+      });
     }
 
     // review button event

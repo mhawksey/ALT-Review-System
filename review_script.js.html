@@ -18,10 +18,15 @@
       // update text boxes
       updateFields(data);
       $('#feedback_text_area').characterCounter();
+      
 
       // handle review accept/decline buttons
       if (data.review_status === 'review_assigned' || data.review_status === 'review_reminded' || data.review_status === 'review_accept' || data.review_status === 'review_decline' || data.review_status === 'review_reassigned') {
         $('[id^=review_]').removeClass('disabled');
+      }
+      // allow submit if review accepted
+      if (data.review_status === 'review_accept'){
+        $('#submit_but').removeClass('disabled');
       }
       if (data.review_status) {
         $('#' + data.review_status).removeClass('grey');
