@@ -72,6 +72,9 @@
         } else {
           $('#saved_but').text('Save Decision');
         }
+        if (r['Decision Status'] === "sent") {
+          $('#saved_but').addClass('disabled');
+        }
         default_feedback = "";
         for (var i = 1; i <= 4; i++) {
           var rev = 'Review' + i;
