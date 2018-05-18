@@ -125,12 +125,13 @@
       $('.progress').show();
       $('#type').prop("disabled", false);
       $('#token').val(token);
+      
+      // join authors
       var auth_details = [];
       $('.auth_name').each(function() {
         auth_details.push($(this).val() + '||' + $('#additionalinst' + $(this).data('counter')).val());
       });
       $('#combined_authors').val(auth_details.join('~'));
-      //console.log(auth_details.join('~'))
       google.script.run.withSuccessHandler(handleSubmissionResponse)
         .processSubmissionForm(this);
 
