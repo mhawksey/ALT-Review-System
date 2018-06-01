@@ -27,7 +27,8 @@ function onOpen() {
       .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
       .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
       .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
-      .addItem('Send Decisions', 'sendReviewDecisions'))
+      .addItem('Send Decisions', 'sendReviewDecisions')
+      .addItem('Send Decisions Reminder', 'sendReviewDecisionsReminder'))
     .addToUi();
 }
 /**
@@ -184,7 +185,7 @@ function notifyAuthors() {
 }
 
 /**
- * Sends email to all included lead authors.
+ * Send review decision to lead authors.
  */
 function sendReviewDecisions() {
   var resp = Browser.msgBox("Sending emails", "You are about to send emails review decisions. Are you sure?", Browser.Buttons.YES_NO);
@@ -223,6 +224,55 @@ function sendReviewDecisions() {
         } catch (e) {
           sheet.getRange(row + 1, desCol + 1).setValue('error')
             .setNote(s['Decision'] + '_proposal sent by: ' +
+              Session.getActiveUser().getEmail() + '\nDate: ' +
+              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') + '\n' +
+              'Msg ' + e.message);
+        }
+      }
+    });
+  }
+}
+
+/**
+ * Send review decision reminder to lead authors.
+ */
+function sendReviewDecisionsReminder() {
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails review decisions reminder. Are you sure?", Browser.Buttons.YES_NO);
+  if (resp === 'yes') {
+    // get all submissions
+    var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+    var dataRange = sheet.getDataRange();
+    var sub_obj = objectify(dataRange);
+    sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj);
+
+    var headings = sheet.getDataRange()
+      .offset(0, 0, 1)
+      .getValues()[0];
+    var desCol = headings.indexOf('Decision Status');
+    var sub_filtered = sub_obj.filter(function(s) {
+      if (s['Decision'] !== '' && s['Decision'] !== 'reject' && s['Decision Status'] === 'sent' && s['Submission Status'] !== 'updated' && !s['hidden']) {
+        var recipient = s['Email address (for communication only)']
+        var url = UrlShortener.Url.insert({
+          longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'decision', 1)
+        });
+        s.review_url = url.id;
+        var email = getEmailTemplate('R_proposal_' + s['Decision']);
+        var subject = fillInTemplateFromObject(email.subject, s);
+        var body = fillInTemplateFromObject(email.text, s);
+        try {
+          MailApp.sendEmail(recipient, subject, body, {
+            cc: 'systems@alt.ac.uk',
+            replyTo: 'helpdesk@alt.ac.uk'
+          });
+          var row = parseInt(s.ID.match(/\d+$/)[0]);
+          // record email has been sent
+          sheet.getRange(row + 1, desCol + 1).setValue('reminder_sent')
+            .setNote('R_proposal_'+s['Decision']+' sent by: ' +
+              Session.getActiveUser().getEmail() + '\nDate: ' +
+              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+        } catch (e) {
+          sheet.getRange(row + 1, desCol + 1).setValue('error')
+            .setNote('R_proposal_'+s['Decision']+' sent by: ' +
               Session.getActiveUser().getEmail() + '\nDate: ' +
               Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') + '\n' +
               'Msg ' + e.message);
