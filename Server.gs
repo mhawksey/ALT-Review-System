@@ -183,7 +183,7 @@ function getAllSubmissionData(optMode) {
   var data = objectify(dataRange);
   data = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), data);
 
-  if (mode === 'reviewAdmin') {
+  if (mode === 'reviewAdmin' || mode === 'reviewAdmin2') {
     var revSheet = SpreadsheetApp.getActive().getSheetByName(REVIEW_SHEET_NAME);
     var revData = revSheet.getDataRange();
     var revObj = objectify(revData);
@@ -326,22 +326,43 @@ function processReviewAdminForm(formData) {
   var dataValuesHeader = dataValues.shift();
   for (var r = 0; r < dataValues.length; r++) {
     if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === formData.hashed_id) {
-      sheet.getRange(r + 2, dataValuesHeader.indexOf('Decision') + 1)
+      if (formData.action === 'saved'){
+        sheet.getRange(r + 2, dataValuesHeader.indexOf('Decision R1') + 1)
         .setValue(formData.feedback_decision)
         .setNote(formData.feedback_decision + ' ' + Session.getActiveUser().getEmail() + '\nDate: ' +
           Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
-      sheet.getRange(r + 2, dataValuesHeader.indexOf('Decision Status') + 1)
+        
+        sheet.getRange(r + 2, dataValuesHeader.indexOf('Decision Status R1') + 1)
         .setValue(formData.action)
         .setNote(formData.action + ' ' + Session.getActiveUser().getEmail() + '\nDate: ' +
           Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
-      sheet.getRange(r + 2, dataValuesHeader.indexOf('Feedback Text') + 1)
+        
+        sheet.getRange(r + 2, dataValuesHeader.indexOf('Feedback Text') + 1)
         .setValue(formData.feedback);
-      sheet.getRange(r + 2, dataValuesHeader.indexOf('different_type') + 1)
+        
+        sheet.getRange(r + 2, dataValuesHeader.indexOf('different_type') + 1)
         .setValue(formData.different_type || "");
-      break;
+        
+        break;
+      } else if(formData.action === 'decision'){
+        sheet.getRange(r + 2, dataValuesHeader.indexOf('Final Decision') + 1)
+        .setValue(formData.submission_decision)
+        .setNote(formData.submission_decision + ' ' + Session.getActiveUser().getEmail() + '\nDate: ' +
+          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+        
+        sheet.getRange(r + 2, dataValuesHeader.indexOf('Final Decision Status') + 1)
+        .setValue('saved')
+        .setNote('saved' + ' ' + Session.getActiveUser().getEmail() + '\nDate: ' +
+          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+        
+        sheet.getRange(r + 2, dataValuesHeader.indexOf('Final Decision Notes') + 1)
+        .setValue(formData.decision_notes_area);
+        
+        break;
+      }
     }
   }
-  return formData;
+  return formData.action;
 }
 
 /**

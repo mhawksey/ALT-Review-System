@@ -57,12 +57,15 @@
       $('.progress').hide();
       $('[id^=review_]').prop("disabled", false);
       $('#' + data.review_status).removeClass('grey');
-      $('#prompt_' + data.review_status).show(400);
+      
       if (data.review_status === 'review_decline') {
         $('.modal').modal();
         $('#modal_title').text('Information');
         $('#modal_text').text('Your choice to decline this review has been recorded. You may close this browser tab.');
         $('#modal').modal('open');
+      } else {
+        $('#prompt_' + data.review_status).show(400);
+        $('#submit_but').removeClass("disabled");
       }
     }
 

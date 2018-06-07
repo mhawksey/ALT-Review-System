@@ -19,7 +19,8 @@ function onOpen() {
   ui.createMenu('Review System')
     .addItem('Submission Details Check', 'showSummary')
     .addItem('Build Reviewer Lists', 'buildReviewerLists')
-    .addItem('Review Decisions Admin', 'showReviewAdmin')
+    .addItem('Round 1 Review Decisions Admin', 'showReviewAdminRound1')
+    .addItem('Final Decisions Admin', 'showReviewAdminRound2')
     .addSubMenu(ui.createMenu('Email Notifications')
       .addItem('Send test email', 'sendTestEmail')
       .addItem('Send to all included submissions', 'notifyAuthors')
@@ -39,10 +40,17 @@ function showSummary() {
 }
 
 /**
- * Show proposal data with reviews for admin
+ * Show proposal data with reviews for Round 1 admin
  */
-function showReviewAdmin() {
+function showReviewAdminRound1() {
   showDialog('reviewAdmin');
+}
+
+/**
+ * Show proposal data with reviews for Round 2 admin
+ */
+function showReviewAdminRound2() {
+  showDialog('reviewAdmin2');
 }
 
 /**
@@ -199,15 +207,15 @@ function sendReviewDecisions() {
     var headings = sheet.getDataRange()
       .offset(0, 0, 1)
       .getValues()[0];
-    var desCol = headings.indexOf('Decision Status');
+    var desCol = headings.indexOf('Decision Status R1');
     var sub_filtered = sub_obj.filter(function(s) {
-      if (s['Decision'] !== '' && s['Decision Status'] === 'saved' && !s['hidden']) {
+      if (s['Decision R1'] !== '' && s['Decision Status R1'] === 'saved' && !s['hidden']) {
         var recipient = s['Email address (for communication only)']
         var url = UrlShortener.Url.insert({
           longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'decision', 1)
         });
         s.review_url = url.id;
-        var email = getEmailTemplate('proposal_' + s['Decision']);
+        var email = getEmailTemplate('proposal_' + s['Decision R1']);
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         try {
@@ -218,12 +226,12 @@ function sendReviewDecisions() {
           var row = parseInt(s.ID.match(/\d+$/)[0]);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('sent')
-            .setNote(s['Decision'] + '_proposal sent by: ' +
+            .setNote(s['Decision R1'] + '_proposal sent by: ' +
               Session.getActiveUser().getEmail() + '\nDate: ' +
               Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
         } catch (e) {
           sheet.getRange(row + 1, desCol + 1).setValue('error')
-            .setNote(s['Decision'] + '_proposal sent by: ' +
+            .setNote(s['Decision R1'] + '_proposal sent by: ' +
               Session.getActiveUser().getEmail() + '\nDate: ' +
               Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') + '\n' +
               'Msg ' + e.message);
@@ -248,15 +256,15 @@ function sendReviewDecisionsReminder() {
     var headings = sheet.getDataRange()
       .offset(0, 0, 1)
       .getValues()[0];
-    var desCol = headings.indexOf('Decision Status');
+    var desCol = headings.indexOf('Decision Status R1');
     var sub_filtered = sub_obj.filter(function(s) {
-      if (s['Decision'] !== '' && s['Decision'] !== 'reject' && s['Decision Status'] === 'sent' && s['Submission Status'] !== 'updated' && !s['hidden']) {
+      if (s['Decision R1'] !== '' && s['Decision R1'] !== 'reject' && s['Decision Status R1'] === 'sent' && s['Submission Status'] !== 'updated' && !s['hidden']) {
         var recipient = s['Email address (for communication only)']
         var url = UrlShortener.Url.insert({
           longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'decision', 1)
         });
         s.review_url = url.id;
-        var email = getEmailTemplate('R_proposal_' + s['Decision']);
+        var email = getEmailTemplate('R_proposal_' + s['Decision R1']);
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         try {
@@ -267,12 +275,12 @@ function sendReviewDecisionsReminder() {
           var row = parseInt(s.ID.match(/\d+$/)[0]);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('reminder_sent')
-            .setNote('R_proposal_'+s['Decision']+' sent by: ' +
+            .setNote('R_proposal_'+s['Decision R1']+' sent by: ' +
               Session.getActiveUser().getEmail() + '\nDate: ' +
               Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
         } catch (e) {
           sheet.getRange(row + 1, desCol + 1).setValue('error')
-            .setNote('R_proposal_'+s['Decision']+' sent by: ' +
+            .setNote('R_proposal_'+s['Decision R1']+' sent by: ' +
               Session.getActiveUser().getEmail() + '\nDate: ' +
               Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') + '\n' +
               'Msg ' + e.message);

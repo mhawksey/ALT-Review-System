@@ -1,0 +1,52 @@
+<div id="reviewDecision2" class="card grey lighten-5 section scrollspy">
+  <form id="decision_form2" class="card-content">
+    <h2 class="card-title">Final Decision</h2>
+    <div class="row">
+      <div class="col s3">
+        <h3>RSVP</h3>
+        <div id="RSVP">
+          <div class="valign-wrapper sub_status">
+            <i class="material-icons">block</i>
+            <div class="status"></div>
+          </div>
+        
+        </div>
+      </div>
+      <div class="col s3">
+        <h3>Status</h3>
+        <div id="Status">
+          <div class="valign-wrapper sub_status">
+            <i class="material-icons">block</i>
+            <div class="status"></div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <div class="row">
+  <div class="input-field col s12">
+    <select id="submission_decision" name="submission_decision" class="validate setting" required="" aria-required="true">
+            <option value="" disabled selected>Choose your option</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+    <label for="submission_decision">Final decision</label>
+  </div>
+</div>
+      <div class="row">
+        <div class="input-field col s12">
+          <textarea id="decision_notes_area" name="decision_notes_area" class="materialize-textarea setting"></textarea>
+          <label class="active" for="decision_notes_area">Final Decision Notes</label>
+          <span id="decision_notes_area" class="character-counter" style="float: right; font-size: 12px;"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12 center-align">
+          <button id="decision_but" name="saved" class="btn waves-effect waves-light black disabled" type="submit">Save Decision <i class="material-icons right">save</i></button>&nbsp;&nbsp;&nbsp;&nbsp;
+          <!-- <button id="emailed_but" class="btn waves-effect waves-light blue disabled" type="submit">Save+Email Decision <i class="material-icons right">send</i></button> -->
+          <input type="hidden" id="hashed_id" name="hashed_id">
+          <input type="hidden" id="action" name="action">
+        </div>
+      </div>
+  </form>
+</div>
