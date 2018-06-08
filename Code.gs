@@ -1,8 +1,9 @@
-// @OnlyCurrentDoc
+
 
 var SUB_SHEET_NAME = "Form responses (DO NOT EDIT)";
 var REV_SHEET_NAME = "Reviewers";
 var REVIEW_SHEET_NAME = "Reviews";
+var ORIG_SUB_SHEET_NAME = "OriginalSubmissions"
 
 // Dev
 //var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxvEN6YaSj8c6MQ4dPZIYcBZq1PpywzmBLrsIYXZs-A/dev";

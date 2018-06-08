@@ -2,20 +2,40 @@ function checkSubmissions() {
   var doc = SpreadsheetApp.getActive();
   var formURL = doc.getFormUrl();
   var form = FormApp.openByUrl(formURL);
-  var resp = form.getResponses();
-  var out = [
-    ['timestamp', 'ID', 'email', 'title']
-  ];
-  for (r in resp) {
-    var sub = resp[r].getItemResponses();
-    var timestamp = resp[r].getTimestamp();
-    var id = resp[r].getId();
-    var email = sub[2].getResponse();
-    var title = sub[7].getResponse();
-    out.push([timestamp, id, email, title]);
+  var out = [];
+  
+  var formResponses = form.getResponses();
+  // create a question index
+  var headers = {};
+  var qArr = ['Session description','Session content: evaluation and reflection','References'];
+  out.push(['Timestamp'].concat(qArr));
+  var formResponse = formResponses[0];
+  var itemResponses = formResponse.getItemResponses();
+  for (var h = 0; h < itemResponses.length; h++) {
+    var itemResponse = itemResponses[h];
+    var q = itemResponse.getItem().getTitle();
+    if (qArr.indexOf(q) !== -1){
+      headers[q] = h;
+    }
   }
-  var sheet = doc.getSheetByName('SubmissionCheck');
-  sheet.getRange(1, 1, out.length, 4).setValues(out);
+  
+  for (var i = 0; i < formResponses.length; i++) {
+    var row = [];
+    var formResponse = formResponses[i];
+    var itemResponses = formResponse.getItemResponses();
+    var timestamp = formResponse.getTimestamp();
+    row.push(timestamp);
+    var submission = {};
+    for (j in headers){
+      var itemResponse = itemResponses[headers[j]+1];
+      var q = itemResponse.getItem().getTitle();
+      row.push(itemResponse.getResponse());
+    }
+    out.push(row);
+  }
+  
+  var sheet = doc.getSheetByName(ORIG_SUB_SHEET_NAME);
+  sheet.getRange(1, 1, out.length, out[0].length).setValues(out);
 }
 
 function createToken_(email, row, mode, reviewer_num) {

@@ -2,6 +2,7 @@
   $(function() {
     var IS_FILTERED = true;
     var SHEET = {};
+    var ORIG = {}; // Original Forma Data
 
     // get all submissions from the google sheet
     google.script.run.withSuccessHandler(getSubs)
@@ -10,8 +11,20 @@
     // get all submissions handler
     function getSubs(sheet) {
       SHEET = JSON.parse(sheet);
+      if (mode === 'reviewAdmin2') {
+        // get all original submissions from the google form
+        google.script.run.withSuccessHandler(getOriginalSubsHandler)
+          .getAllOriginalSubmissionData(mode);
+      } else {
+        showSubs(currentRow);
+      }
+    }
+
+    function getOriginalSubsHandler(data) {
+      ORIG = JSON.parse(data);
       showSubs(currentRow);
     }
+
     // update dialog title text
     $('#rowNum').text(currentRow);
 
@@ -19,10 +32,71 @@
     $('#pagePrev').on('click', function() {
       currentRow--;
       showSubs(currentRow, '--');
+      $('.progress').hide();
     });
     $('#pageNext').on('click', function() {
       currentRow++;
       showSubs(currentRow, '++');
+      $('.progress').hide();
+    });
+
+    $('#pageNext').on('mousedown', function(e) {
+      $('.progress').show();
+    });
+    $('label').on('mousedown', '.diff a', function(e) {
+      $('.progress').show();
+    });
+    
+    $('label').on('click', '.diff a', function(e) {
+    
+      $('.progress').show();
+      var field = $(this).data('parent');
+      var result = document.getElementById('result_' + field);
+      var colName = $('#' + field).attr('name');
+      var mode = $(this).text();
+
+      if (mode === 'compare') {
+      if (result.innerHTML === ""){
+      
+      
+        var a = SHEET[currentRow - 2];
+        var b = ORIG[a['Timestamp']];
+        
+
+        var diff = JsDiff.diffWords(b[colName], a[colName]);
+        var fragment = document.createDocumentFragment();
+        for (var i = 0; i < diff.length; i++) {
+          if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
+            var swap = diff[i];
+            diff[i] = diff[i + 1];
+            diff[i + 1] = swap;
+          }
+          var node;
+          if (diff[i].removed) {
+            node = document.createElement('del');
+            node.appendChild(document.createTextNode(diff[i].value));
+          } else if (diff[i].added) {
+            node = document.createElement('ins');
+            node.appendChild(document.createTextNode(diff[i].value));
+          } else {
+            node = document.createTextNode(diff[i].value);
+          }
+          fragment.appendChild(node);
+        }
+        result.textContent = '';
+        result.appendChild(fragment);
+        }
+        $('#' + field).hide();
+        $('#result_' + field).show();
+        $(this).text('current');
+      } else if (mode === 'current') {
+        console.log(mode)
+        $('#' + field).show();
+        $('#result_' + field).hide();
+        $(this).text('compare');
+      }
+      $('.progress').hide();
+      e.preventDefault();
     });
 
     // filter event
@@ -56,6 +130,10 @@
       }
       $('#rowNum').text(currentRow - 1);
       updateFields(r);
+      $('.diff').remove();
+      $('.diff_result').empty().hide();
+      $("[id$='_area']").show();
+      
       // add review responses
       if (mode === 'reviewAdmin' || mode === 'reviewAdmin2') {
         $('[id$=_but]').removeClass('disabled')
@@ -119,39 +197,41 @@
         $('#saved_but').closest('.row').hide();
         //$('#decision_but').show();
         $('#feedback_decision,#feedback_area').attr('disabled', true);
-        
+
         // set RSVP status
         $('#RSVP .status').text(r['RSVP']);
         $('#RSVP .sub_status > i').addClass(r['RSVP']);
-        if (r['RSVP'] === 'proposal_include'){
+        if (r['RSVP'] === 'proposal_include') {
           $('#RSVP .sub_status > i').text('sentiment_very_satisfied');
-        } else if(r['RSVP'] === 'proposal_withdraw'){
+        } else if (r['RSVP'] === 'proposal_withdraw') {
           $('#RSVP .sub_status > i').text('sentiment_very_dissatisfied');
         }
-        
+
         // set update status
         $('#Status .status').text(r['Submission Status']);
         $('#Status .sub_status > i').addClass(r['Submission Status']);
-        if (r['Submission Status'] === 'updated'){
+        if (r['Submission Status'] === 'updated') {
           $('#Status .sub_status > i').text('sentiment_very_satisfied');
         }
-        
+
         $('#submission_decision').val(r['Final Decision']);
         $('#decision_notes_area').val(r['Final Decision Notes']);
-        
+
         // handle compare
         // add compare button for description, content and references
         var labels = $("label[for='desc_area'],label[for='eval_area'],label[for='ref_area']");
-        $.each(labels, function(){
-          $(this).append('<span> (<a href="#" id="compare_'+$(this).attr('for')+'">compare</a>)</span>');
+        $.each(labels, function() {
+          var id = $(this).attr('for');
+          $(this).append('<span class="diff"> (<a href="#" data-parent="' + id + '">compare</a>)</span>');
+          $('#' + id).after('<pre class="diff_result" id="result_' + id + '"></pre>');
         });
-        
+
       }
-      
+
       var toReview = r['Include']
       $("[id$='_review']").removeClass('active');
       $('#' + toReview + '_review').addClass('active');
-      
+
       // Refresh materialize components
       M.updateTextFields();
       // M.textareaAutoResize($('.materialize-textarea'));
@@ -159,6 +239,9 @@
         M.textareaAutoResize($('#' + $(this).attr('id')));
       });
       $('#feedback_decision,#different_type,#submission_decision').formSelect().change();
+      if (mode === 'reviewAdmin2') {
+        $('.diff a').trigger('click');
+      }
     }
 
     // review form event
@@ -176,8 +259,8 @@
       $('.setting').attr("disabled", true);
       //$('select').formSelect();
     });
-    
-    
+
+
 
     $('[id$=_but]').on('click', function() {
       $("button[type=submit]", $(this).parents("form")).removeAttr("clicked");
@@ -195,13 +278,13 @@
       $('.progress').hide();
       $('[id$=_but]').removeClass('disabled');
       $('#saved_but,#decision_but').text('Update Decision');
-      if (data.action === 'decision'){
+      if (data.action === 'decision') {
         $('#submission_decision, #decision_notes_area').removeAttr('disabled')
       } else {
         $('#feedback_area, #feedback_decision, #select_different_type').removeAttr('disabled');
       }
       console.log(data);
     }
-    
+
   });
 </script>

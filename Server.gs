@@ -207,6 +207,24 @@ function getAllSubmissionData(optMode) {
 }
 
 /**
+ * Get all the original submission data for admin_script.js
+ * @param {string} optMode to include/exclude review data
+ * @return {string} returns all submission data.
+ */
+function getAllOriginalSubmissionData(optMode) {
+  console.time('getAllOriginalSubmissionData');
+  var mode = optMode || false;
+  var sheet = SpreadsheetApp.getActive().getSheetByName(ORIG_SUB_SHEET_NAME);
+  var dataRange = sheet.getDataRange();
+  var data = objectify(dataRange);
+  var output = {};
+  for (var i=0; i<data.length; i++){
+    output[data[i]['Timestamp'].toISOString()] = data[i];
+  }
+  return JSON.stringify(output);
+}
+
+/**
  * Add hidden row identifier to sheet data.
  * https://sites.google.com/site/scriptsexamples/learn-by-example/google-sheets-api/filters#TOC-Get-filtered-rows
  * @param {string} ssId of the spreadsheet
