@@ -1,5 +1,6 @@
 <script>
   $(function() {
+    $('#loading').show();
     var IS_FILTERED = true;
     var SHEET = {};
     var ORIG = {}; // Original Forma Data
@@ -32,24 +33,17 @@
     $('#pagePrev').on('click', function() {
       currentRow--;
       showSubs(currentRow, '--');
-      $('.progress').hide();
     });
     $('#pageNext').on('click', function() {
       currentRow++;
       showSubs(currentRow, '++');
-      $('.progress').hide();
     });
 
-    $('#pageNext').on('mousedown', function(e) {
-      $('.progress').show();
-    });
-    $('label').on('mousedown', '.diff a', function(e) {
-      $('.progress').show();
+    $('#pagePrev,#pageNext').on('mousedown', function(e) {
+      $('#loading').show();
     });
     
     $('label').on('click', '.diff a', function(e) {
-    
-      $('.progress').show();
       var field = $(this).data('parent');
       var result = document.getElementById('result_' + field);
       var colName = $('#' + field).attr('name');
@@ -58,10 +52,8 @@
       if (mode === 'compare') {
       if (result.innerHTML === ""){
       
-      
         var a = SHEET[currentRow - 2];
         var b = ORIG[a['Timestamp']];
-        
 
         var diff = JsDiff.diffWords(b[colName], a[colName]);
         var fragment = document.createDocumentFragment();
@@ -95,7 +87,7 @@
         $('#result_' + field).hide();
         $(this).text('compare');
       }
-      $('.progress').hide();
+      $('#loading').hide();
       e.preventDefault();
     });
 
@@ -205,6 +197,8 @@
           $('#RSVP .sub_status > i').text('sentiment_very_satisfied');
         } else if (r['RSVP'] === 'proposal_withdraw') {
           $('#RSVP .sub_status > i').text('sentiment_very_dissatisfied');
+        } else {
+          $('#RSVP .sub_status > i').text('block');
         }
 
         // set update status
@@ -212,6 +206,8 @@
         $('#Status .sub_status > i').addClass(r['Submission Status']);
         if (r['Submission Status'] === 'updated') {
           $('#Status .sub_status > i').text('sentiment_very_satisfied');
+        } else {
+          $('#Status .sub_status > i').text('block');
         }
 
         $('#submission_decision').val(r['Final Decision']);
@@ -239,9 +235,11 @@
         M.textareaAutoResize($('#' + $(this).attr('id')));
       });
       $('#feedback_decision,#different_type,#submission_decision').formSelect().change();
+      $('#loading').hide();
       if (mode === 'reviewAdmin2') {
         $('.diff a').trigger('click');
       }
+      
     }
 
     // review form event
