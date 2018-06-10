@@ -137,6 +137,7 @@
         console.log(r['different_type']);
         $("#hashed_id").val(r['Hashed ID']);
         $('#feedback_area').val(r['Feedback Text']);
+        if (mode === 'reviewAdmin'){
         if (r['Decision Status R1'] !== "") {
           $('#saved_but').text('Update Decision');
         } else {
@@ -144,6 +145,16 @@
         }
         if (r['Decision Status R1'] === "sent" || r['Decision Status R1'] === "reminder_sent") {
           $('#saved_but').addClass('disabled');
+        }
+        } else if (mode === 'reviewAdmin2'){
+        if (r['Final Decision Status'] !== "") {
+          $('#decision_but').text('Update Decision');
+        } else {
+          $('#decision_but').text('Save Decision');
+        }
+        if (r['Final Decision Status'] === "sent" || r['Final Decision Status'] === "reminder_sent") {
+          $('#decision_but').addClass('disabled');
+        }
         }
         default_feedback = "";
         for (var i = 1; i <= 4; i++) {
@@ -212,6 +223,7 @@
 
         $('#submission_decision').val(r['Final Decision']);
         $('#decision_notes_area').val(r['Final Decision Notes']);
+        $('#author_notes_area').val(r['Note to Director']);
 
         // handle compare
         // add compare button for description, content and references

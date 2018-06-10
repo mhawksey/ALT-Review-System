@@ -1,4 +1,4 @@
-function checkSubmissions() {
+function updateOriginalSubmissions() {
   var doc = SpreadsheetApp.getActive();
   var formURL = doc.getFormUrl();
   var form = FormApp.openByUrl(formURL);

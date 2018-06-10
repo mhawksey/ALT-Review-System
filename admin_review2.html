@@ -27,8 +27,8 @@
   <div class="input-field col s12">
     <select id="submission_decision" name="submission_decision" class="validate setting" required="" aria-required="true">
             <option value="" disabled selected>Choose your option</option>
-            <option value="accept">Confirmed</option>
-            <option value="accept_revised">Accepted revision</option>
+            <option value="accept">Accept</option>
+            <option value="confirmed">Confirmed</option>
             <option value="rejected">Rejected</option>
           </select>
     <label for="submission_decision">Final decision</label>
@@ -39,6 +39,12 @@
           <textarea id="decision_notes_area" name="decision_notes_area" class="materialize-textarea setting"></textarea>
           <label class="active" for="decision_notes_area">Final Decision Notes</label>
           <span id="decision_notes_area" class="character-counter" style="float: right; font-size: 12px;"></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <textarea id="author_notes_area" name="author_notes_area" class="materialize-textarea setting" disabled></textarea>
+          <label class="active" for="author_notes_area">Notes from author</label>
         </div>
       </div>
       <div class="row">

@@ -18,10 +18,12 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('Review System')
-    .addItem('Submission Details Check', 'showSummary')
     .addItem('Build Reviewer Lists', 'buildReviewerLists')
-    .addItem('Round 1 Review Decisions Admin', 'showReviewAdminRound1')
-    .addItem('Final Decisions Admin', 'showReviewAdminRound2')
+    .addItem('Update orginal submissions data', 'updateOriginalSubmissions')
+    .addSubMenu(ui.createMenu('Admin Inferface')
+      .addItem('Submission Details Check', 'showSummary')
+      .addItem('Round 1 Review Decisions Admin', 'showReviewAdminRound1')
+      .addItem('Final Decisions Admin', 'showReviewAdminRound2'))
     .addSubMenu(ui.createMenu('Email Notifications')
       .addItem('Send test email', 'sendTestEmail')
       .addItem('Send to all included submissions', 'notifyAuthors')
@@ -30,7 +32,8 @@ function onOpen() {
       .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
       .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
       .addItem('Send Decisions', 'sendReviewDecisions')
-      .addItem('Send Decisions Reminder', 'sendReviewDecisionsReminder'))
+      .addItem('Send Decisions Reminder', 'sendReviewDecisionsReminder')
+      .addItem('Send Final Decisions', 'sendFinalDecsions'))
     .addToUi();
 }
 /**
@@ -197,7 +200,7 @@ function notifyAuthors() {
  * Send review decision to lead authors.
  */
 function sendReviewDecisions() {
-  var resp = Browser.msgBox("Sending emails", "You are about to send emails review decisions. Are you sure?", Browser.Buttons.YES_NO);
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails for review decisions. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     // get all submissions
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
@@ -246,7 +249,7 @@ function sendReviewDecisions() {
  * Send review decision reminder to lead authors.
  */
 function sendReviewDecisionsReminder() {
-  var resp = Browser.msgBox("Sending emails", "You are about to send emails review decisions reminder. Are you sure?", Browser.Buttons.YES_NO);
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails for review decisions reminder. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     // get all submissions
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
@@ -290,6 +293,52 @@ function sendReviewDecisionsReminder() {
     });
   }
 }
+
+/**
+ * Send final decision to lead authors.
+ */
+function sendFinalDecsions() {
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails for final decisions. Are you sure?", Browser.Buttons.YES_NO);
+  if (resp === 'yes') {
+    // get all submissions
+    var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+    var dataRange = sheet.getDataRange();
+    var sub_obj = objectify(dataRange);
+    sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj);
+
+    var headings = sheet.getDataRange()
+      .offset(0, 0, 1)
+      .getValues()[0];
+    var desCol = headings.indexOf('Final Decision Status');
+    var sub_filtered = sub_obj.filter(function(s) {
+      if (s['Final Decision'] !== '' && s['Final Decision Status'] === 'saved' && !s['hidden']) {
+        var recipient = s['Email address (for communication only)']
+        var email = getEmailTemplate('2_proposal_' + s['Final Decision']);
+        var subject = fillInTemplateFromObject(email.subject, s);
+        var body = fillInTemplateFromObject(email.text, s);
+        try {
+          MailApp.sendEmail(recipient, subject, body, {
+            cc: 'systems@alt.ac.uk',
+            replyTo: 'helpdesk@alt.ac.uk'
+          });
+          var row = parseInt(s.ID.match(/\d+$/)[0]);
+          // record email has been sent
+          sheet.getRange(row + 1, desCol + 1).setValue('sent')
+            .setNote('2_proposal_' + s['Final Decision'] + ' sent by: ' +
+              Session.getActiveUser().getEmail() + '\nDate: ' +
+              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+        } catch (e) {
+          sheet.getRange(row + 1, desCol + 1).setValue('error')
+            .setNote('2_proposal_' + s['Final Decision'] + ' sent by: ' +
+              Session.getActiveUser().getEmail() + '\nDate: ' +
+              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') + '\n' +
+              'Msg ' + e.message);
+        }
+      }
+    });
+  }
+}
+
 /**
  * Sends email notifications to reviewers with link to review submission.
  */
