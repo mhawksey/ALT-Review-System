@@ -23,17 +23,6 @@
       </div>
       
     </div>
-    <div class="row">
-  <div class="input-field col s12">
-    <select id="submission_decision" name="submission_decision" class="validate setting" required="" aria-required="true">
-            <option value="" disabled selected>Choose your option</option>
-            <option value="accept">Accept</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="rejected">Rejected</option>
-          </select>
-    <label for="submission_decision">Final decision</label>
-  </div>
-</div>
       <div class="row">
         <div class="input-field col s12">
           <textarea id="decision_notes_area" name="decision_notes_area" class="materialize-textarea setting"></textarea>
@@ -47,6 +36,19 @@
           <label class="active" for="author_notes_area">Notes from author</label>
         </div>
       </div>
+          <div class="row">
+  <div class="input-field col s12">
+    <select id="submission_decision" name="submission_decision" class="validate setting" required="" aria-required="true">
+            <option value="" disabled selected>Choose your option</option>
+            <option value="accept">Accept</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="rejected">Rejected</option>
+            <option value="withdrawn">Withdrawn</option>
+            <option value="other">Other</option>
+          </select>
+    <label for="submission_decision">Final decision</label>
+  </div>
+</div>
       <div class="row">
         <div class="col s12 center-align">
           <button id="decision_but" name="saved" class="btn waves-effect waves-light black disabled" type="submit">Save Decision <i class="material-icons right">save</i></button>&nbsp;&nbsp;&nbsp;&nbsp;
