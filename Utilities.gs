@@ -101,6 +101,28 @@ function getEmailTemplate(id) {
   return email_obj.filter(idFilter(id))[0];
 }
 
+function getGmailTemplate(id) {
+  var drafts = GmailApp.getDrafts();
+  var draft = drafts.filter(subjectFilter(id))[0];
+  for (var d=0; d<drafts.length; d++){
+    var subject = drafts[d].getMessage().getSubject();
+    if(subject===id){
+      var draft = drafts[d];   
+      break;
+    }
+  }
+  var msg = draft.getMessage();
+  return {text: msg.getPlainBody(), html:msg.getBody()};
+}
+
+function subjectFilter(id){
+  return function(element) {
+    if (element.getMessage().getSubject() === id) {
+      return element;
+    }
+  }
+}
+
 function idFilter(id) {
   return function(element) {
     if (element.id === id) {

@@ -26,7 +26,7 @@ function onOpen() {
       .addItem('Final Decisions Admin', 'showReviewAdminRound2'))
     .addSubMenu(ui.createMenu('Email Notifications')
       .addItem('Send test email', 'sendTestEmail')
-      .addItem('Send to all included submissions', 'notifyAuthors')
+      .addItem('Send notify_authors message to all filtered submissions', 'notifyAuthors')
       .addItem('Check submission email', 'checkAuthor')
       .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
       .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
@@ -162,23 +162,24 @@ function checkAuthor() {
   }
 }
 /**
- * Sends email to all included lead authors.
+ * Sends email to all lead authors.
  */
 function notifyAuthors() {
-  var resp = Browser.msgBox("Sending emails", "You are about to send emails to all authors with 'yes' in the Include column. Are you sure?", Browser.Buttons.YES_NO);
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails to all authors that have been filtered. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     // get all submissions
     var email = getEmailTemplate('notify_authors');
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
     var subs = sheet.getDataRange();
-    var sub_obj = objectify(subs)
+    var sub_obj = objectify(subs);
+    sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj);
     var headings = sheet.getDataRange()
       .offset(0, 0, 1)
       .getValues()[0];
     var incCol = headings.indexOf('Include');
     // iterate for submissions with check_author in Include column
     var sub_filtered = sub_obj.filter(function(s) {
-      if (s['Include'] === 'yes') {
+      if (!s['hidden']) {
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         var recipient = s['Email address (for communication only)']
@@ -189,6 +190,45 @@ function notifyAuthors() {
         var row = parseInt(s.ID.match(/\d+$/)[0]);
         // record email has been sent
         sheet.getRange(row + 1, incCol + 1).setNote('notify_authors sent by: ' +
+          Session.getActiveUser().getEmail() + '\nDate: ' +
+          Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+      }
+    });
+  }
+}
+
+/**
+ * Sends email to all lead authors from Gmail draft.
+ */
+function notifyAuthorsFromGmail() {
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails to all authors that have been filtered. Are you sure?", Browser.Buttons.YES_NO);
+  if (resp === 'yes') {
+    // get all submissions
+    var subjectLine = 'Important information regarding your presentation [Ref: {ID}] at ALT’s Annual Conference (action required)';
+    var email = getGmailTemplate(subjectLine);
+    var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+    var subs = sheet.getDataRange();
+    var sub_obj = objectify(subs);
+    sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj);
+    var headings = sheet.getDataRange()
+      .offset(0, 0, 1)
+      .getValues()[0];
+    var incCol = headings.indexOf('Include');
+    // iterate for submissions with check_author in Include column
+    var sub_filtered = sub_obj.filter(function(s) {
+      if (!s['hidden'] && s['Email address (for communication only)'] !== "") {
+        var subject = fillInTemplateFromObject(subjectLine, s);
+        var body = fillInTemplateFromObject(email.text, s);
+        var htmlBody = fillInTemplateFromObject(email.html, s)
+        var recipient = s['Email address (for communication only)']
+       MailApp.sendEmail(recipient, subject, body, {
+          cc: 'systems@alt.ac.uk',
+          replyTo: 'helpdesk@alt.ac.uk',
+          htmlBody: htmlBody
+        });
+        var row = parseInt(s.ID.match(/\d+$/)[0]);
+        // record email has been sent
+        sheet.getRange(row + 1, incCol + 1).setNote('Gmail Draft - Permission sent by: ' +
           Session.getActiveUser().getEmail() + '\nDate: ' +
           Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
       }
