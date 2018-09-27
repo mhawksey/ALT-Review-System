@@ -1,84 +1,186 @@
 <script>
-  var default_feedback = "";
-
-  function updateFields(r) {
-    // remove review decision classes
-    $("i").removeClass().addClass('material-icons');
-    $('#feedback_area').val('');
-    $('.review_type').hide()
-
-    // update fields from sheet data
-    $('#ID').val(r['ID']);
-    $('#review_area').val(r['Feedback Text']);
-    $('#rowTitle').text(r['Session title']);
-    $('#name').val(r['First Name'] + ' ' + r['Last Name']);
-    $('#inst').val(r['Institution (if applicable)']);
-    $('#sectors').val(r['Which sector(s) are you based in?']);
-    $('#title').val(r['Session title']);
-    $('#theme').val(r['Which conference theme best fits your session?'].split(':')[0]);
-    $('#type').val(r['Session Type']);
-    $('#desc_area').val(r['Session description']);
-    $('#desc_area_count').text('~' + countWords(r['Session description']) + '/500 words');
-    $('#eval_area').val(r['Session content: evaluation and reflection']);
-    $('#eval_area_count').text('~' + countWords(r['Session content: evaluation and reflection']) + '/500 words');
-    $('#ref_area').val(r['References']);
-    $('#resources_area').val(r['Resources for participants']);
+    var default_feedback = "";
+    var author_count = 1;
     
+    function updateFields(r) {
+        console.log("updateFields ...");
+        // remove review decision classes
+        $("i").removeClass().addClass('material-icons');
+        $('#feedback_area').val('');
+        $('.review_type').hide()
 
+        // update fields from sheet data
+        $('#ID').val(r['ID']);
+        $('#review_area').val(r['Feedback Text']);
+        $('#rowTitle').text(r['Session title']);
+        $('#name').val(r['First Name'] + ' ' + r['Last Name']);
+        $('#inst').val(r['Institution (if applicable)']);
+        $('#sectors').val(r['Which sector(s) are you based in?']);
+        $('#title').val(r['Session title']);
+        $('#theme').val(r['Which conference theme best fits your session?'].split(':')[0]);
+        $('#type').val(r['Session Type']);
+        $('#desc_area').val(r['Session description']);
+        $('#desc_area_count').text('~' + countWords(r['Session description']) + '/500 words');
+        $('#eval_area').val(r['Session content: evaluation and reflection']);
+        $('#eval_area_count').text('~' + countWords(r['Session content: evaluation and reflection']) + '/500 words');
+        $('#ref_area').val(r['References']);
+        $('#resources_area').val(r['Resources for participants']);
 
+        // Refresh materialize components
+        M.updateTextFields();
+        // M.textareaAutoResize($('.materialize-textarea'));
+        $('.materialize-textarea').each(function () {
+            M.textareaAutoResize($('#' + $(this).attr('id')));
+        });
+        // hide progress bar
+        $('.progress').hide();
+    }
 
-    /*if (r[rev+' Text'] || resp === 'accept_different_type'){
-      var feed = $('#feedback_area');
-      var cur = feed.val();
-      var append = cur +'Reviewer '+i+'\n'+(r[rev+' Text'])+'\n\n';
-      feed.val(append);
-      $('#reviews_text').append('<li>' +
-                                  '<div class="collapsible-header"><i class="material-icons">keyboard_arrow_up</i>'+rev+' Feedback</div>'+
-                                  '<div class="collapsible-body"><div class="row" style="display:none" id="type_'+i+
-                                  '"><div class="col s12"><label>Change of type</label></div></div><div class="row"><div class="input-field col s12"><textarea id="feedback_'+i+'" class="materialize-textarea" disabled>'+r[rev+' Text']+
-                                  '</textarea><label class="active" for="feedback_'+i+'">Feedback</label></div></div></li>');
-      if (resp === 'accept_different_type'){
-        $('#type_'+i).append('<div class="col s5">'+r['Select what kind of session you\'d like to run:']+'</div><div class="col s2 center-align"><i class="material-icons">chevron_right</i></div><div class="col s5">'+r[rev+' Type']+'</div>');
-        $('#type_'+i).show();
+    function countWords(s) {
+        s = s.replace(/(^\s*)|(\s*$)/gi, ""); //exclude  start and end white-space
+        s = s.replace(/[ ]{2,}/gi, " "); //2 or more space to 1
+        s = s.replace(/\n /, "\n"); // exclude newline with a start spacing
+        return s.split(' ').length;
+    }
+     function addAuthor() {
+      $('#authors').append('<div class="row valign-wrapper" id="authorgroup' + author_count + '"><div class="input-field col s5">' +
+        '<input class="auth_name" data-counter="' + author_count + '" id="additionalauthor' + author_count + '" type="text" class="setting">' +
+        '<label for="additionalauthor' + author_count + '">Additional Author ' + author_count + ' Full Name</label>' +
+        '</div>' +
+        '<div class="input-field col s6">' +
+        '<input class="auth_inst" id="additionalinst' + author_count + '" type="text" class="setting">' +
+        '<label for="additionalinst' + author_count + '">Additional Author ' + author_count + ' Institution (if applicable)</label>' +
+        '</div>' +
+        '<div class="input-field col s1">' +
+        '<a data-counter="' + author_count + '" class="remove_additional"><i class="material-icons">cancel</i></a>' +
+        '</div></div>');
+    }
+    // initialize materialize components
+    $(document).ready(function () {
+        
+        var title = custom_fields.filter(function (el) {
+                return el.section == 'title';
+            });
+        $('#event_name').html(title[0].label);
+        
+        var sidebar = custom_fields.filter(function (el) {
+                return el.section == 'sidebar';
+            });
+        $('#sidebar_info').html(sidebar[0].label);
+        
+        $('.custom_fields').each(function (index) {
+            var section = $(this).attr('id');
+            var section_fields = custom_fields.filter(function (el) {
+                return el.section == section;
+            });
+            section_fields.forEach(function (s) {
+                var type = s.type; 
+                var values = s.values.split('|');
+                var required = s.required ? 'required' : '';
+                var required_asterix = s.required ? '<span class="required"></span>' : '';
+                var rc_elem = $('<div class="row"><div class="col s12 '+type+'" id="'+s.id+'_section"><h2>'+s.label+required_asterix+'</h2><p>'+s.help_text+'</p></div></div>');
+                var input = ''; 
+                if (type === 'radio' || type === 'checkbox'){
+                    $('#'+section).append(rc_elem);
+                    values.forEach(function(o){
+                      var o_text = $("<div/>").html(o).text();
+                      input += '<label><input name="'+s.id+'" type="'+type+'" class="setting" value="'+o_text+'" '+required+'/><span>'+o+'</span></label>'
+                    });
+                    $('#'+s.id+'_section').append($(input));
+                    $('#'+s.id+'_section input[type="checkbox"]').addClass('filled-in');
+                } else if(type === 'textarea'){
+                    var toc = s.toc ? 'scrollspy' : '';
+                    if (toc){
+                      $('.table-of-contents').append($('<li><a href="#'+s.id+'">'+s.heading+'</a></li>'));
+                    }
+                    var counter = s.max ? '<span id="'+s.id+'_area_count" class="character-counter" data-for="'+s.id+'_area" data-max-words="'+s.max+'" style="float: right; font-size: 12px;"></span>' : '';
+                    input = '<div id="'+s.id+'" class="section '+toc+'"><h2>'+s.heading+'</h2><p>'+s.help_text+'</p>'+
+                                    '<div class="row"><div class="input-field col s12"><textarea id="'+s.id+'_area" name="'+s.id+'" class="materialize-textarea validate setting" '+required+ 
+                                    ' disabled></textarea><label class="active" for="'+s.id+'_area">'+s.label+'</label>' +
+                                    counter + '</div></div></div>';
+                    $('#'+s.section).append($(input));
+                } else if (type === 'html'){
+                   $('#'+s.section).html(s.label);
+                } else {
+                  console.log("Type not found");
+                }
+            
+            });
+        });
+        
+         $('#add_additional').on('click', function() {
+      author_count++;
+      addAuthor();
+    });
+    $('#authors').on('click', '.remove_additional', function(event) {
+      $('#authorgroup' + $(this).data('counter')).remove();
+    });
+    
+    $('.character-counter').each(function () {
+      var textarea = $( this ).data('for');
+      var words = $( this ).data('max-words')
+      $('#'+textarea).on('change keyup paste', function(event) {
+        $('#' + event.target.id + '_count').text('~' + countWords($(this).val()) + '/'+words+' words');
+      });
+    });
+      
+$("input[required],textarea[required]").next("label").append($('<span class="required"></span>'));
+
+$("#submission_form").on('submit', function(e) {
+      e.preventDefault();
+      $('[id$=_but]').addClass('disabled');
+      $('.progress').show();
+      $('#type').prop("disabled", false);
+      //$('#token').val(token);
+      
+      // join authors
+      var auth_details = [];
+      $('.auth_name').each(function() {
+        auth_details.push($(this).val() + '||' + $('#additionalinst' + $(this).data('counter')).val());
+      });
+      $('#combined_authors').val(auth_details.join('~'));
+      google.script.run.withSuccessHandler(handleSubmissionResponse)
+        .processNewSubmissionForm(this);
+      $('.setting').prop("disabled", true);
+    });
+    // review form event handler
+    function handleSubmissionResponse(data) {
+      console.log(data)
+      $('[id$=_but]').removeClass('disabled');
+      $('#type').prop("disabled", true);
+      $('.progress').hide();
+      $('.modal').modal();
+      if (data.result === 'ok') {
+        $('#modal_title').text('Thank you - Proposal updated');
+        $('#modal_text').text('Your updated proposal has been recorded. You may now close this browser tab.');
+      } else {
+        $('#modal_title').text('Oops - an error has occured');
+        $('#modal_text').text('Your review was not recorded. Please try submitting again.');
+        $('#submit_but').removeClass("disabled");
       }
-    }*/
+      $('#modal').modal('open');
+    }
+    
+        $('select').formSelect();
+        $('.collapsible').collapsible();
+        $('.tooltipped').tooltip();
+        $('.scrollspy').scrollSpy();
 
-
-    // Refresh materialize components
-    M.updateTextFields();
-    // M.textareaAutoResize($('.materialize-textarea'));
-    $('.materialize-textarea').each(function() {
-      M.textareaAutoResize($('#' + $(this).attr('id')));
+        $('select[required]').css({
+            display: 'inline',
+            position: 'absolute',
+            float: 'left',
+            padding: 0,
+            margin: 0,
+            border: '1px solid rgba(255,255,255,0)',
+            height: 0,
+            width: 0,
+            top: '2em',
+            left: '3em',
+            opacity: 0
+        });
+        $('input,textarea').removeAttr('disabled');
+        $('#submit_but').removeClass('disabled');
+        $('.progress').hide();
     });
-    // hide progress bar
-    $('.progress').hide();
-  }
-
-  function countWords(s) {
-    s = s.replace(/(^\s*)|(\s*$)/gi, ""); //exclude  start and end white-space
-    s = s.replace(/[ ]{2,}/gi, " "); //2 or more space to 1
-    s = s.replace(/\n /, "\n"); // exclude newline with a start spacing
-    return s.split(' ').length;
-  }
-  // initialize materialize components
-  $(document).ready(function() {
-    $('select').formSelect();
-    $('.collapsible').collapsible();
-    $('.tooltipped').tooltip();
-    $('.scrollspy').scrollSpy();
-
-    $('select[required]').css({
-      display: 'inline',
-      position: 'absolute',
-      float: 'left',
-      padding: 0,
-      margin: 0,
-      border: '1px solid rgba(255,255,255,0)',
-      height: 0,
-      width: 0,
-      top: '2em',
-      left: '3em',
-      opacity: 0
-    });
-  });
 </script>

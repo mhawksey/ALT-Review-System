@@ -2,18 +2,24 @@
   <h2>Submitted By</h2>
   <div class="row">
     <div class="input-field col s6">
-      <input id="name" type="text" disabled>
-      <label class="active" for="name">Submitted by</label>
+      <input id="first_name" name="first_name" type="text" class="setting validate" required disabled>
+      <label class="active" for="first_name">First name</label>
     </div>
     <div class="input-field col s6">
-      <input id="inst" type="text" disabled>
+      <input id="last_name" name="last_name" type="text" class="setting validate" required  disabled>
+      <label class="active" for="last_name">Last Name</label>
+    </div>
+    <div class="input-field col s6">
+      <input id="email" name="email" type="email" class="setting validate" required disabled>
+      <label class="active" for="email">Email</label>
+    </div>
+    <div class="input-field col s6">
+      <input id="inst" name="inst" type="text" class="setting" disabled>
       <label class="active" for="inst">Institution</label>
     </div>
-    <div class="input-field col s12">
-      <input id="sectors" type="text" disabled>
-      <label class="active" for="sectors">Sectors</label>
-    </div>
+    
   </div>
+  <div class="custom_fields" id="submitted_by"></div>
 </div>
 
 <div id="additionalAuthors" class="section scrollspy">
@@ -21,11 +27,11 @@
   <div id="authors">
   <div class="row valign-wrapper" id="authorgroup1">
     <div class="input-field col s5">
-      <input class="auth_name" data-counter="1" id="additionalauthor1" type="text">
+      <input class="auth_name" data-counter="1" id="additionalauthor1" type="text" class="setting" disabled>
       <label class="active" for="additionalauthor1">Additional Author 1 Full Name</label>
     </div>
     <div class="input-field col s6">
-      <input class="active auth_inst"  id="additionalinst1" type="text">
+      <input class="active auth_inst"  id="additionalinst1" type="text" class="setting" disabled>
       <label for="additionalinst1">Additional Author 1 Institution (if applicable)</label>
     </div>
     <div class="input-field col s1">
@@ -34,4 +40,5 @@
   </div>
   
   </div><div><a id="add_additional"><i class="material-icons">add_circle</i></a></div>
+  <input type="hidden" id="combined_authors" name="additional_authors" />
 </div>

@@ -1,63 +1,11 @@
-<div class="row">
-  <div class="input-field col s12">
-    <select id="feedback_decision" name="feedback_decision" class="validate setting" required="" aria-required="true">
-            <option value="" disabled selected>Choose your option</option>
-            <option value="accept">Accept</option>
-            <option value="accept_minor_revisions">Accept with minor revisions</option>
-            <option value="accept_different_type">Accept as different type</option>
-            <option value="resubmit">Recommend re-submission</option>
-            <option value="reject">Reject</option>
-          </select>
-    <label for="feedback_decision">Review Outcome</label>
-  </div>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    
+  </body>
+</html>
 
-<div class="row" id="select_different_type" style="display:none">
-  <div class="input-field col s12">
-    <select id="different_type" name="different_type" class="setting">
-            <option value="" disabled selected>Choose your option</option>
-            <option>Research session</option>
-            <option>Discussion panel or forum</option>
-            <option>Workshop or demonstration</option>
-            <option>Work-in-progress report/experimental session</option>
-            <option>Short presentation</option>
-            <option>Lightning talk</option>
-            <option>Poster &amp; poster talk</option>
-          </select>
-    <label for="different_type">Recommended session type</label>
-  </div>
-</div>
 
-<script>
-  // feedback select event (show different seesion type select)
-  $("#feedback_decision").on('change', function(e) {
-    var accept_type = $(this).val();
-    var type_select = $('#different_type');
-    if (accept_type === 'accept_different_type') {
-      $('#select_different_type').show();
-      type_select.addClass('validate')
-        .prop('required', true)
-        .prop('disabled', false)
-        .attr("aria-required", "true");
-      $('select[required]').css({
-        display: 'inline',
-        position: 'absolute',
-        float: 'left',
-        padding: 0,
-        margin: 0,
-        border: '1px solid rgba(255,255,255,0)',
-        height: 0,
-        width: 0,
-        top: '2em',
-        left: '3em',
-        opacity: 0
-      });
-    } else {
-      $('#select_different_type').hide();
-      type_select.removeClass('validate')
-        .prop('required', false)
-        .removeAttr("aria-required");
-    }
-    $('#feedback_decision,#different_type').formSelect();
-  });
-</script>

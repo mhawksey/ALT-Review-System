@@ -439,3 +439,70 @@ function processSubmissionForm(formData) {
     updates: updates
   };
 }
+
+/**
+ * Process the new submission form data for script.js
+ * @param {Object} formData to be recorded.
+ * @return {Object} returns result.
+ */
+function processNewSubmissionForm(formData) {
+  //return formData;
+  console.time('processNewSubmissionForm');
+  // https://stackoverflow.com/a/43238894
+  // BEGIN - start lock here
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000); // wait 30 seconds for others' use of the code section and lock to stop and then proceed
+  } catch (e) {
+    return {
+      result: 'error',
+      message: 'Could not obtain lock'
+    };
+  }
+  
+  try {
+    var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+    formData.ID = ID_PREFIX+pad(sheet.getLastRow(),3);
+    formData.timestamp = new Date();
+    Logger.log(formData);
+    var email = getEmailTemplate('sub_receipt');
+    var subject = fillInTemplateFromObject(email.subject, formData);
+    var body = fillInTemplateFromObject(email.text, formData);
+    MailApp.sendEmail(formData.email, subject, body, {
+      //cc: 'systems@alt.ac.uk',
+      replyTo: 'helpdesk@alt.ac.uk'
+    });
+    // getting our headers
+    var heads = sheet.getDataRange()
+                     .offset(0, 0, 1)
+                     .getValues()[0];
+    Logger.log(formData);
+    // convert object data into a 2d array 
+    var tr = heads.map (function (cell) {
+      if (Array.isArray(formData[cell])){
+        return formData[cell].join(', ') || "";
+      } else {
+        return formData[cell] || "";
+      }
+    });
+    // write result
+    //Logger.log(tr)
+    sheet.appendRow(tr);
+  } catch(e) {
+    return {
+      result: 'error',
+      error: JSON.stringify(e)
+    };
+  }
+  
+  
+  SpreadsheetApp.flush(); // applies all pending spreadsheet changes
+  lock.releaseLock();
+  // END - end lock here
+  console.timeEnd('processNewSubmissionForm');
+  return {
+    result: 'ok',
+    updates: JSON.stringify(formData)
+  };
+}
+

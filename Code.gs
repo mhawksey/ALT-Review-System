@@ -1,9 +1,8 @@
-
-
-var SUB_SHEET_NAME = "Form responses (DO NOT EDIT)";
+var SUB_SHEET_NAME = "Submissions";
 var REV_SHEET_NAME = "Reviewers";
 var REVIEW_SHEET_NAME = "Reviews";
 var ORIG_SUB_SHEET_NAME = "OriginalSubmissions"
+var ID_PREFIX = 'O-';
 
 // Dev
 //var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxvEN6YaSj8c6MQ4dPZIYcBZq1PpywzmBLrsIYXZs-A/dev";
@@ -76,14 +75,19 @@ function showDialog(mode) {
  * @return {HtmlService} returns result.
  */
 function doGet(e) {
-  var token = e.parameter.token;
-  var data = decodeToken_(token);
-  var html = HtmlService.createTemplateFromFile('Summary');
-  html.reviewer_token = data.reviewer;
-  html.reviewer_num = data.reviewer_num;
-  html.review_token = data.row;
-  html.token = token;
+  var data = {};
+  var custom_fields = getCustomFields_()
+  var html = HtmlService.createTemplateFromFile('ui/index');
+  if (e.parameter.token){
+    var token = e.parameter.token;
+    var data = decodeToken_(token);
+    html.reviewer_token = data.reviewer;
+    html.reviewer_num = data.reviewer_num;
+    html.review_token = data.row;
+    html.token = token;
+  }
   html.mode = data.mode || false;
+  html.custom_fields = custom_fields;
   html.isAdmin = false;
   return html.evaluate()
     .setTitle("ALT - Submission System")

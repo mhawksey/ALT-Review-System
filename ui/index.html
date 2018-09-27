@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <!-- Compiled and minified CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <?!= include('ui/inc/style.css'); ?>
+</head>
+
+<body>
+    <div class="navbar-fixed ">
+        <nav>
+            <div class="nav-wrapper">
+            </div>
+        </nav>
+        <div class="progress white">
+            <div class="indeterminate green"></div>
+        </div>
+        <div id="loading" class="card amber accent-1" style="display:none">
+            <div class="card-content">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+    <div class='container'>
+        <div class="row">
+            <div class="col s12 m9 l10">
+                <form id="submission_form">
+                    <h1><span id="event_name"></span> Submission form</h1>
+                    
+                    <blockquote><div class="custom_fields" id="instructions"></div></blockquote>
+                    <p><span class="required">Required</span></p>
+                    <?!= include('ui/admin_submitter'); ?>
+
+                    <div id="overview" class="section scrollspy">
+                        <h2>Submission Overview</h2>
+                        <div class="custom_fields" id="sub_overview"></div>
+                    </div>
+                    <div class="custom_fields" id="sub_detail"></div>
+                    <div class="custom_fields" id="sub_extras"></div>
+                    <div class="row">
+                            <div class="col s12 center-align">
+          <button id="submit_but" class="btn waves-effect waves-light blue disabled" type="submit" name="action">Submit <i class="material-icons right">send</i></button>
+        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col hide-on-small-onl m3 l2">
+                <div class="toc-wrapper pinned">
+                    <ul class="section table-of-contents">
+                        <li><a href="#submitter">Submitted By</a></li>
+                        <li><a href="#overview">Submission Overview</a></li>
+                    </ul>
+
+                    <div class="row">
+                        <div  class="col s8 center-align small" id="sidebar_info"></div>
+                        <div class="col center-align logo">
+                            <img src="https://www.alt.ac.uk/sites/alt.ac.uk/files/alt-logo_0_0.png" alt="ALT Logo" /><br /><span>Charity
+                                number: 1160039</span>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Structure -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h4>
+                <div id="modal_title">Oops - an error has occured</div>
+            </h4>
+            <div id="modal_text">We can't find your review assignment. Please check the link from your email.</div>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn-flat">OK</a>
+        </div>
+    </div>
+</body>
+<?!= include('ui/inc/script.js'); ?>
+<script>
+    var mode = "<?= mode; ?>";
+    var custom_fields = JSON.parse("<?= custom_fields ?>");
+    // console.log(custom_fields);
+</script>
+<? if (isAdmin) { ?>
+<script>
+    var currentRow = parseInt(<?= currentRow || 2; ?>);
+</script>
+<?!= include('admin_script.js'); ?>
+<? } else if (mode === 'decision') { ?>
+<script>
+    var token = "<?= token ?>";
+</script>
+<?!= include('decision_script.js'); ?>
+<? } else if (mode === 'review') { ?>
+<script>
+    var token = "<?= token ?>";
+    var review_token = "<?= review_token ?>";
+    var reviewer_token = "<?= reviewer_token ?>";
+    var reviewer_num = "<?= reviewer_num ?>";
+
+</script>
+<?!= include('review_script.js'); ?>
+<? } ?>
+
+</html>

@@ -1,4 +1,7 @@
 <style>
+nav {
+background-color: #079948;
+}
   #pagePrev,
   #pageNext {
     cursor: pointer;
@@ -36,6 +39,10 @@
   }
   #loading.card .card-content {
     padding:0
+  }
+  
+  #authors div.row{
+    margin-bottom:0px;
   }
 
   i.action {
@@ -78,6 +85,12 @@
     line-height: 110%;
     margin: 1rem 0 0.6rem 0;
     font-weight: 600;
+  }
+
+  .section p:first-of-type {
+  margin-top:0px;
+  font-size: 0.95em;
+    font-style: italic;
   }
 
   .collapsible-header {
@@ -163,6 +176,16 @@ input:not([type]):focus:not([readonly]), input[type=text]:not(.browser-default):
     box-shadow: 0 1px 0 0 #079948;
 }
 
+.checkbox label, .radio label {
+ display:block;
+}
+.required{
+  color:red;
+}
+.required:before{
+  content:"*";
+  font-weight:bold;
+}
   .review_dec>i, .sub_status>i {
     color: rgba(204, 204, 204, .8);
   }

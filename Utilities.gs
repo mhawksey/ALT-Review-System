@@ -1,3 +1,18 @@
+function clearCache(){
+  CacheService.getScriptCache().remove('custom_fields');
+}
+
+function getCustomFields_(){
+  var value = CacheService.getScriptCache().get('custom_fields');
+  if (!value){
+    var doc = SpreadsheetApp.getActive();
+    var range = doc.getSheetByName('custom_fields').getDataRange();
+    var value =  JSON.stringify(objectify(range));
+    CacheService.getScriptCache().put('custom_fields', value, 604800);
+  }
+  return value;
+}
+
 function updateOriginalSubmissions() {
   var doc = SpreadsheetApp.getActive();
   var formURL = doc.getFormUrl();
@@ -199,4 +214,10 @@ function refreshReviewStats() {
       col.setValues(data);
     }
   });
+}
+
+// https://stackoverflow.com/a/2998822
+function pad(num, size) {
+    var s = "000000000" + num;
+    return s.substr(s.length-size);
 }
