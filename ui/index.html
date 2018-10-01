@@ -36,9 +36,11 @@
         <div class="row">
             <div class="col s12 m9 l10">
                 <form id="submission_form">
-                    <h1><span id="event_name"></span> Submission form</h1>
-                    
-                    <blockquote><div class="custom_fields" id="instructions"></div></blockquote>
+                    <h1><span class="i18n" data-msg="event_name"></span> Submission form</h1>
+
+                    <blockquote>
+                        <div class="i18n" data-msg="instructions"></div>
+                    </blockquote>
                     <p><span class="required">Required</span></p>
                     <?!= include('ui/admin_submitter'); ?>
 
@@ -49,9 +51,10 @@
                     <div class="custom_fields" id="sub_detail"></div>
                     <div class="custom_fields" id="sub_extras"></div>
                     <div class="row">
-                            <div class="col s12 center-align">
-          <button id="submit_but" class="btn waves-effect waves-light blue disabled" type="submit" name="action">Submit <i class="material-icons right">send</i></button>
-        </div>
+                        <div class="col s12 center-align">
+                            <button id="submit_but" class="btn waves-effect waves-light blue disabled" type="submit"
+                                name="action">Submit <i class="material-icons right">send</i></button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -63,12 +66,12 @@
                     </ul>
 
                     <div class="row">
-                        <div  class="col s8 center-align small" id="sidebar_info"></div>
+                        <div class="col s8 center-align small"><div class="i18n" data-msg="sidebar"></div></div>
                         <div class="col center-align logo">
                             <img src="https://www.alt.ac.uk/sites/alt.ac.uk/files/alt-logo_0_0.png" alt="ALT Logo" /><br /><span>Charity
                                 number: 1160039</span>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>
@@ -80,7 +83,14 @@
             <h4>
                 <div id="modal_title">Oops - an error has occured</div>
             </h4>
-            <div id="modal_text">We can't find your review assignment. Please check the link from your email.</div>
+            <div id="modal_text">
+                <div id="modal_message">Something has gone wrong. Please contact <span class="i18n" data-msg="support_email"></span></div>
+                <div class="row center-align" id="sharer" style="display:none">
+                  <div class="col s4"><a id="twitter" class="waves-effect waves-light btn blue" data-qs="I've just submitted a session proposal '{session_title}' for  {call_url} {hashtag}" >Twitter Share</a></div>
+                  <div class="col s4"><a id="facebook" class="waves-effect waves-light btn blue" data-qs="{call_url}">Facebook Share</a></div>
+                  <div class="col s4"><a id="linkedin" class="waves-effect waves-light btn blue" data-qs="{call_url}">LinkedIn Share</a></div>
+                </div>
+            </div>
         </div>
         <div class="modal-footer">
             <a class="modal-action modal-close waves-effect waves-green btn-flat">OK</a>
@@ -90,28 +100,15 @@
 <?!= include('ui/inc/script.js'); ?>
 <script>
     var mode = "<?= mode; ?>";
+    var id = "<?= id; ?>";
     var custom_fields = JSON.parse("<?= custom_fields ?>");
-    // console.log(custom_fields);
+    var i18n = {};
+    custom_fields.map(function (el) {
+            if (el.section === 'global'){
+              i18n[el.id] =el.values;
+            }
+    });
+    
 </script>
-<? if (isAdmin) { ?>
-<script>
-    var currentRow = parseInt(<?= currentRow || 2; ?>);
-</script>
-<?!= include('admin_script.js'); ?>
-<? } else if (mode === 'decision') { ?>
-<script>
-    var token = "<?= token ?>";
-</script>
-<?!= include('decision_script.js'); ?>
-<? } else if (mode === 'review') { ?>
-<script>
-    var token = "<?= token ?>";
-    var review_token = "<?= review_token ?>";
-    var reviewer_token = "<?= reviewer_token ?>";
-    var reviewer_num = "<?= reviewer_num ?>";
-
-</script>
-<?!= include('review_script.js'); ?>
-<? } ?>
 
 </html>

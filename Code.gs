@@ -8,7 +8,7 @@ var ID_PREFIX = 'O-';
 //var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxvEN6YaSj8c6MQ4dPZIYcBZq1PpywzmBLrsIYXZs-A/dev";
 
 // Prod.
-var REVIEW_URL = "https://script.google.com/macros/s/AKfycbxNtXYjjLKafhqwjJD2lS-NoKadVMQYiUUsd-JXDieOPYW4IFc/exec";
+var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwuLhuyfdKo1CEVEIqEGSzIzzPHeOAKg9xCeVNP56jg-_1IUg4/exec";
 
 /**
  * On open
@@ -35,6 +35,13 @@ function onOpen() {
       .addItem('Send Final Decisions', 'sendFinalDecsions'))
     .addToUi();
 }
+
+function setup(){
+  // add columns to submission sheet
+  // add hash to script properties 
+  
+}
+
 /**
  * Show proposal data for admin
  */
@@ -86,6 +93,7 @@ function doGet(e) {
     html.review_token = data.row;
     html.token = token;
   }
+  html.id = e.parameter.id || false;
   html.mode = data.mode || false;
   html.custom_fields = custom_fields;
   html.isAdmin = false;

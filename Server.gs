@@ -446,7 +446,8 @@ function processSubmissionForm(formData) {
  * @return {Object} returns result.
  */
 function processNewSubmissionForm(formData) {
-  //return formData;
+  console.log({fn:processNewSubmissionForm, data:formData});
+  Logger.log(formData);
   console.time('processNewSubmissionForm');
   // https://stackoverflow.com/a/43238894
   // BEGIN - start lock here
@@ -463,20 +464,23 @@ function processNewSubmissionForm(formData) {
   try {
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
     formData.ID = ID_PREFIX+pad(sheet.getLastRow(),3);
+    formData.hashed_id = getHashedText(formData.ID);
     formData.timestamp = new Date();
-    Logger.log(formData);
+   
     var email = getEmailTemplate('sub_receipt');
     var subject = fillInTemplateFromObject(email.subject, formData);
     var body = fillInTemplateFromObject(email.text, formData);
-    MailApp.sendEmail(formData.email, subject, body, {
+    
+    GmailApp.sendEmail(formData.email, subject, body, {
       //cc: 'systems@alt.ac.uk',
+      from: 'helpdesk@alt.ac.uk',
       replyTo: 'helpdesk@alt.ac.uk'
     });
+
     // getting our headers
     var heads = sheet.getDataRange()
-                     .offset(0, 0, 1)
-                     .getValues()[0];
-    Logger.log(formData);
+    .offset(0, 0, 1)
+    .getValues()[0];
     // convert object data into a 2d array 
     var tr = heads.map (function (cell) {
       if (Array.isArray(formData[cell])){
@@ -502,7 +506,7 @@ function processNewSubmissionForm(formData) {
   console.timeEnd('processNewSubmissionForm');
   return {
     result: 'ok',
-    updates: JSON.stringify(formData)
+    data: JSON.stringify(formData)
   };
 }
 
