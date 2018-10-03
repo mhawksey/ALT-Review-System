@@ -1,0 +1,67 @@
+<script>
+  $(function() {
+    $('#loading').show();
+    var IS_FILTERED = true;
+    var SHEET = {};
+    var ORIG = {}; // Original Forma Data
+    // get all submissions from the google sheet
+    google.script.run.withSuccessHandler(getSubs)
+      .getAllSubmissionData();
+    // get all submissions handler
+    function getSubs(sheet) {
+      SHEET = JSON.parse(sheet);
+      console.log(sheet);
+      showSubs(currentRow);
+    }
+    
+    // update dialog title text
+    $('#rowNum').text(currentRow);
+    // pagination events
+    $('#pagePrev').on('click', function() {
+      currentRow--;
+      showSubs(currentRow, '--');
+    });
+    $('#pageNext').on('click', function() {
+      currentRow++;
+      showSubs(currentRow, '++');
+    });
+    $('#pagePrev,#pageNext').on('mousedown', function(e) {
+      $('#loading').show();
+    });
+    
+    // filter event
+    $('#include_filter').on('click', function() {
+      IS_FILTERED = !IS_FILTERED;
+      $(this).toggleClass("active")
+    });
+    // include/exclude buttons event
+    $("[id$='_review']").on('click', function(el) {
+      $('.progress').show();
+      $("[id$='_review']").removeClass('active');
+      $("[id$='_review']").addClass('disabled');
+      var value = el.target.id.split('_')[0];
+      google.script.run.withSuccessHandler(function(result) {
+        $("[id$='_review']").removeClass('active');
+        $("[id$='_review']").removeClass('disabled');
+        $('#' + result+'_review').addClass('active');
+        $('.progress').hide();
+      }).setReviewStatus(currentRow, value);
+    });
+    // pagination event handler
+    function showSubs(showRow, direction) {
+      var data = SHEET;
+      var r = data[showRow - 2];
+      if (IS_FILTERED && r['hidden'] !== undefined) {
+        eval('currentRow' + direction);
+        return showSubs(currentRow, direction);
+      }
+      $('#rowID').text(r.ID);
+      $('#rowTitle').text(r.session_title);
+      updateFields(r);
+      $("[id$='_review']").removeClass('active');
+      $('#' + r['Include']+'_review').addClass('active');
+      $('#submit_but').text('Update');
+      $('#loading').hide();
+    }
+  });
+</script>

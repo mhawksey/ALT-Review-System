@@ -3,6 +3,10 @@ var REV_SHEET_NAME = "Reviewers";
 var REVIEW_SHEET_NAME = "Reviews";
 var ORIG_SUB_SHEET_NAME = "OriginalSubmissions"
 var ID_PREFIX = 'O-';
+var EMAIL_FROM = 'helpdesk@alt.ac.uk';
+var EMAIL_CC = 'systems@alt.ac.uk';
+var ACCEPT_SUBMISSIONS = false;
+var EDIT_SUBMISSIONS = true;
 
 // Dev
 //var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxvEN6YaSj8c6MQ4dPZIYcBZq1PpywzmBLrsIYXZs-A/dev";
@@ -18,35 +22,35 @@ function onOpen() {
   // Or DocumentApp or FormApp.
   ui.createMenu('Review System')
     .addItem('Build Reviewer Lists', 'buildReviewerLists')
-    .addItem('Update orginal submissions data', 'updateOriginalSubmissions')
     .addSubMenu(ui.createMenu('Admin Inferface')
       .addItem('Submission Details Check', 'showSummary')
       .addItem('Round 1 Review Decisions Admin', 'showReviewAdminRound1')
       .addItem('Final Decisions Admin', 'showReviewAdminRound2'))
     .addSubMenu(ui.createMenu('Email Notifications')
       .addItem('Send test email', 'sendTestEmail')
-      .addItem('Send notify_authors message to all filtered submissions', 'notifyAuthors')
-      .addItem('Check submission email', 'checkAuthor')
-      .addItem('Send Reviewer Notifications', 'sendReviewerNotification')
+      .addItem('Send check with author email (check_author)', 'checkAuthor')
+      .addItem('Send Reviewer Notifications (assign_reviewer)', 'sendReviewerNotification')
       .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
       .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
       .addItem('Send Decisions', 'sendReviewDecisions')
       .addItem('Send Decisions Reminder', 'sendReviewDecisionsReminder')
-      .addItem('Send Final Decisions', 'sendFinalDecsions'))
+      .addItem('Send Final Decisions', 'sendFinalDecsions')
+      .addItem('Send notify_authors message to all filtered submissions', 'notifyAuthors'))
     .addToUi();
 }
 
 function setup(){
   // add columns to submission sheet
   // add hash to script properties 
-  
+  // switch on Sheets Advanced service and URLShortner
+  // add column validation
 }
 
 /**
  * Show proposal data for admin
  */
 function showSummary() {
-  showDialog('admin');
+  showDialog('review_submissions');
 }
 
 /**
@@ -67,12 +71,15 @@ function showReviewAdminRound2() {
  * Show proposal data for admin
  */
 function showDialog(mode) {
+  var custom_fields = getCustomFields_();
   var currentRow = SpreadsheetApp.getActiveSheet().getActiveRange().getRow();
-  var html = HtmlService.createTemplateFromFile('Summary')
+  var html = HtmlService.createTemplateFromFile('ui/index')
   html.currentRow = (currentRow < 2) ? 2 : currentRow;
-  html.isAdmin = true;
+  html.isModal = true;
   html.mode = mode;
-  SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
+  html.custom_fields = custom_fields;
+  html.data = '';
+  SpreadsheetApp.getUi()
     .showModalDialog(html.evaluate().setWidth(1200).setHeight(800), 'Submission Review');
 }
 
@@ -82,21 +89,27 @@ function showDialog(mode) {
  * @return {HtmlService} returns result.
  */
 function doGet(e) {
-  var data = {};
-  var custom_fields = getCustomFields_()
-  var html = HtmlService.createTemplateFromFile('ui/index');
-  if (e.parameter.token){
-    var token = e.parameter.token;
-    var data = decodeToken_(token);
-    html.reviewer_token = data.reviewer;
-    html.reviewer_num = data.reviewer_num;
-    html.review_token = data.row;
-    html.token = token;
-  }
-  html.id = e.parameter.id || false;
-  html.mode = data.mode || false;
+  
+  var custom_fields = getCustomFields_();
+  var html = HtmlService.createTemplateFromFile('ui/404');
   html.custom_fields = custom_fields;
-  html.isAdmin = false;
+  
+  if (e.parameter.action){
+    if ((e.parameter.action == 'new' && ACCEPT_SUBMISSIONS) || 
+        (e.parameter.action == 'edit' && EDIT_SUBMISSIONS && e.parameter.token) || 
+        (e.parameter.action == 'review' && e.parameter.token)){
+        
+        var html = HtmlService.createTemplateFromFile('ui/index');
+        html.custom_fields = custom_fields;
+        html.mode = e.parameter.action;
+        html.isModal = false;
+        
+        if (e.parameter.token){
+          var token = e.parameter.token;
+          html.data = decodeToken_(token);
+        } 
+      } 
+  }
   return html.evaluate()
     .setTitle("ALT - Submission System")
     .setFaviconUrl('https://www.alt.ac.uk/sites/alt.ac.uk/files/files/favicon.ico')
@@ -124,7 +137,7 @@ function sendTestEmail() {
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         var recipient = Session.getActiveUser().getEmail()
-        MailApp.sendEmail(recipient, subject, body, {
+        GmailApp.sendEmail(recipient, subject, body, {
           cc: 'systems@alt.ac.uk',
           replyTo: 'helpdesk@alt.ac.uk'
         });
@@ -158,8 +171,8 @@ function checkAuthor() {
       if (s['Include'] === 'check_author') {
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
-        var recipient = s['Email address (for communication only)']
-        MailApp.sendEmail(recipient, subject, body, {
+        var recipient = s.email
+        GmailApp.sendEmail(recipient, subject, body, {
           cc: 'systems@alt.ac.uk',
           replyTo: 'helpdesk@alt.ac.uk'
         });
@@ -194,8 +207,8 @@ function notifyAuthors() {
       if (!s['hidden']) {
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
-        var recipient = s['Email address (for communication only)']
-        MailApp.sendEmail(recipient, subject, body, {
+        var recipient = s.email
+        GmailApp.sendEmail(recipient, subject, body, {
           cc: 'systems@alt.ac.uk',
           replyTo: 'helpdesk@alt.ac.uk'
         });
@@ -228,12 +241,12 @@ function notifyAuthorsFromGmail() {
     var incCol = headings.indexOf('Include');
     // iterate for submissions with check_author in Include column
     var sub_filtered = sub_obj.filter(function(s) {
-      if (!s['hidden'] && s['Email address (for communication only)'] !== "") {
+      if (!s['hidden'] && s.email !== "") {
         var subject = fillInTemplateFromObject(subjectLine, s);
         var body = fillInTemplateFromObject(email.text, s);
         var htmlBody = fillInTemplateFromObject(email.html, s)
-        var recipient = s['Email address (for communication only)']
-       MailApp.sendEmail(recipient, subject, body, {
+        var recipient = s.email
+       GmailApp.sendEmail(recipient, subject, body, {
           cc: 'systems@alt.ac.uk',
           replyTo: 'helpdesk@alt.ac.uk',
           htmlBody: htmlBody
@@ -266,16 +279,16 @@ function sendReviewDecisions() {
     var desCol = headings.indexOf('Decision Status R1');
     var sub_filtered = sub_obj.filter(function(s) {
       if (s['Decision R1'] !== '' && s['Decision Status R1'] === 'saved' && !s['hidden']) {
-        var recipient = s['Email address (for communication only)']
+        var recipient = s.email
         var url = UrlShortener.Url.insert({
-          longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'decision', 1)
+          longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s.hashed_id, 'decision', 1)
         });
         s.review_url = url.id;
         var email = getEmailTemplate('proposal_' + s['Decision R1']);
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         try {
-          MailApp.sendEmail(recipient, subject, body, {
+          GmailApp.sendEmail(recipient, subject, body, {
             cc: 'systems@alt.ac.uk',
             replyTo: 'helpdesk@alt.ac.uk'
           });
@@ -315,16 +328,16 @@ function sendReviewDecisionsReminder() {
     var desCol = headings.indexOf('Decision Status R1');
     var sub_filtered = sub_obj.filter(function(s) {
       if (s['Decision R1'] !== '' && s['Decision R1'] !== 'reject' && s['Decision Status R1'] === 'sent' && s['Submission Status'] !== 'updated' && !s['hidden']) {
-        var recipient = s['Email address (for communication only)']
+        var recipient = s.email
         var url = UrlShortener.Url.insert({
-          longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'decision', 1)
+          longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s.hashed_id, 'decision', 1)
         });
         s.review_url = url.id;
         var email = getEmailTemplate('R_proposal_' + s['Decision R1']);
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         try {
-          MailApp.sendEmail(recipient, subject, body, {
+          GmailApp.sendEmail(recipient, subject, body, {
             cc: 'systems@alt.ac.uk',
             replyTo: 'helpdesk@alt.ac.uk'
           });
@@ -364,12 +377,12 @@ function sendFinalDecsions() {
     var desCol = headings.indexOf('Final Decision Status');
     var sub_filtered = sub_obj.filter(function(s) {
       if (s['Final Decision'] !== '' && s['Final Decision Status'] === 'saved' && !s['hidden']) {
-        var recipient = s['Email address (for communication only)']
+        var recipient = s.email
         var email = getEmailTemplate('2_proposal_' + s['Final Decision']);
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         try {
-          MailApp.sendEmail(recipient, subject, body, {
+          GmailApp.sendEmail(recipient, subject, body, {
             cc: 'systems@alt.ac.uk',
             replyTo: 'helpdesk@alt.ac.uk'
           });
@@ -460,7 +473,7 @@ function sendReviewerEmails_(email, type, days) {
           var recipient = extractBracket(s['Reviewer' + r]);
           // shorten link for email
           var url = UrlShortener.Url.insert({
-            longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s['Hashed ID'], 'review', r)
+            longUrl: REVIEW_URL + '?action=review&token=' + createToken_(recipient, s.hashed_id, 'review', r)
           });
           s.review_url = url.id;
           Logger.log(s.review_url);
@@ -468,7 +481,7 @@ function sendReviewerEmails_(email, type, days) {
           var subject = fillInTemplateFromObject(email.subject, s);
           var body = fillInTemplateFromObject(email.text, s);
           try {
-            MailApp.sendEmail(recipient, subject, body, {
+            GmailApp.sendEmail(recipient, subject, body, {
               cc: 'systems@alt.ac.uk',
               replyTo: 'helpdesk@alt.ac.uk'
             });
@@ -547,15 +560,18 @@ function buildReviewerLists() {
   }
 
   // Reviewer Rules
-  var nonHERevRule = reviewGroupRule(rev, 'Proposals from FE/Vocational/Adult Education');
+  /*var nonHERevRule = reviewGroupRule(rev, 'Proposals from FE/Vocational/Adult Education');
   var researcherRule = reviewGroupRule(rev, 'Research papers (with route to journal publication)');
   var workshopRule = reviewGroupRule(rev, 'Interactive/workshop proposals');
-  var shortPrezRule = reviewGroupRule(rev, 'Proposals for short presentations/lightning talks/posters');
+  var shortPrezRule = reviewGroupRule(rev, 'Proposals for short presentations/lightning talks/posters');*/
+  var allReviewers = reviewGroupRule(rev);
+  
 
   // apply data validatation rules
   for (var i = 0; i < data.length; i++) {
     if (data[i][incCol] === 'yes') {
-      if (data[i][secCol].indexOf('Higher Education') < 0) {
+      applyRule(sheet, i + 2, revCols, allReviewers)
+      /*if (data[i][secCol].indexOf('Higher Education') < 0) {
         // if Proposals from FE/Vocational/Adult Education
         applyRule(sheet, i + 2, revCols, nonHERevRule);
       } else if (data[i][typeCol].indexOf('Research session') > -1) {
@@ -567,14 +583,16 @@ function buildReviewerLists() {
       } else {
         // else if Proposals for short presentations/lightning talks/posters
         applyRule(sheet, i + 2, revCols, shortPrezRule);
-      }
+      }*/
     }
   }
 }
 
 function reviewGroupRule(rev, type) {
   var subgroup = rev.reduce(function(filtered, r) {
-    if (r['Help shape the programme'].indexOf(type) !== -1) {
+    if (type && r['Help shape the programme'].indexOf(type) !== -1) {
+      filtered.push(r['Select String']);
+    } else {
       filtered.push(r['Select String']);
     }
     return filtered

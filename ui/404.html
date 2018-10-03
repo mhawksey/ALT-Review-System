@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <!-- Compiled and minified CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+    <body>
+  <div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+      <br><br>
+      <h1 class="header center green-text i18n" data-msg="form_name"></h1>
+      <div class="row center">
+        <h5 class="header col s12 light i18n" data-msg="instructions"></h5>
+      </div>
+      <div class="row center">
+        <? if (ACCEPT_SUBMISSIONS) { ?>
+          <a href="<?= REVIEW_URL; ?>?action=new" id="download-button" class="btn-large waves-effect waves-light green">New Submissions</a>
+        <? } else { ?>
+            <h3 class="header col s12 light">Submissions are currently closed</h3>
+            <h4 class="header col s12 light">If you have any questions please email <a href="" class="i18n" data-msg="support_email"><span class="i18n" data-msg="support_email"></span></a></h4>
+        <? } ?>
+      </div>
+      <br><br>
+
+    </div>
+  </div>
+  </body>
+  <script>
+    var custom_fields = JSON.parse("<?= custom_fields ?>");
+    var Script = {};
+    Script.i18n = {};
+    custom_fields.map(function (el) {
+        if (el.section === 'global') {
+            Script.i18n[el.id] = el.values;
+        }
+    });
+
+    Script.i18n.getMessage = function (msg) {
+        return Script.i18n[msg];
+    }
+    /**
+     * Retrieves internationalized messages and loads them into the UI.
+     * @private
+     */
+    Script.fillMessages_ = function () {
+        // Load internationalized messages.
+        console.log("Adding messages..");
+        $('.i18n').each(function () {
+            var msg_id = $(this).attr('data-msg');
+            console.log(msg_id);
+            if (msg_id) {
+                var i18nText = Script.i18n.getMessage(msg_id.toString());
+                if ($(this).prop('tagName') == 'IMG') {
+                    $(this).attr({
+                        'title': i18nText
+                    });
+                } else if ($(this).prop('tagName') == 'A') {
+                    $(this).attr({
+                        'href': 'mailto:'+i18nText
+                    })
+                } else {
+                    $(this).html(i18nText);
+                }
+            }
+        });
+    };
+    $(function() {
+      Script.fillMessages_();
+    });
+</script>
+</html>
+
+

@@ -13,46 +13,6 @@ function getCustomFields_(){
   return value;
 }
 
-function updateOriginalSubmissions() {
-  var doc = SpreadsheetApp.getActive();
-  var formURL = doc.getFormUrl();
-  var form = FormApp.openByUrl(formURL);
-  var out = [];
-  
-  var formResponses = form.getResponses();
-  // create a question index
-  var headers = {};
-  var qArr = ['Session description','Session content: evaluation and reflection','References'];
-  out.push(['Timestamp'].concat(qArr));
-  var formResponse = formResponses[0];
-  var itemResponses = formResponse.getItemResponses();
-  for (var h = 0; h < itemResponses.length; h++) {
-    var itemResponse = itemResponses[h];
-    var q = itemResponse.getItem().getTitle();
-    if (qArr.indexOf(q) !== -1){
-      headers[q] = h;
-    }
-  }
-  
-  for (var i = 0; i < formResponses.length; i++) {
-    var row = [];
-    var formResponse = formResponses[i];
-    var itemResponses = formResponse.getItemResponses();
-    var timestamp = formResponse.getTimestamp();
-    row.push(timestamp);
-    var submission = {};
-    for (j in headers){
-      var itemResponse = itemResponses[headers[j]+1];
-      var q = itemResponse.getItem().getTitle();
-      row.push(itemResponse.getResponse());
-    }
-    out.push(row);
-  }
-  
-  var sheet = doc.getSheetByName(ORIG_SUB_SHEET_NAME);
-  sheet.getRange(1, 1, out.length, out[0].length).setValues(out);
-}
-
 function createToken_(email, row, mode, reviewer_num) {
   var hashedEmail = getHashedText(email);
   var blob = Utilities.newBlob(JSON.stringify({
@@ -221,3 +181,81 @@ function pad(num, size) {
     var s = "000000000" + num;
     return s.substr(s.length-size);
 }
+
+function testBitly(){
+  //var url = "https://api-ssl.bitly.com/v4/groups";
+  var url = 'https://api-ssl.bitly.com/v4/shorten'
+  var headers = {
+    authorization: "Bearer "+ PropertiesService.getScriptProperties().getProperty('BITLY_TOKEN')
+  };
+  
+  var options = {
+    contentType: 'application/json',
+    method : "POST",
+    headers : headers,
+    payload : JSON.stringify({
+      "long_url": "http://google.com",
+      "group_guid": PropertiesService.getScriptProperties().getProperty('BITLY_GUID')
+    })
+  };
+  
+  var response = UrlFetchApp.fetch(url,options);
+}
+
+// https://addyosmani.com/blog/essential-js-namespacing/
+// extend.js
+// written by andrew dupont, optimized by addy osmani
+function extend(destination, source) {
+    var toString = Object.prototype.toString,
+        objTest = toString.call({});
+    for (var property in source) {
+        if (source[property] && objTest == toString.call(source[property])) {
+            destination[property] = destination[property] || {};
+            extend(destination[property], source[property]);
+        } else {
+            destination[property] = source[property];
+        }
+    }
+    return destination;
+};
+
+var UrlShortener = UrlShortener || {};
+extend(UrlShortener, {
+  Util:{
+    getCachedProperty: function (key){
+      var cache = CacheService.getScriptCache()
+      var value = cache.get(key)
+      if (!value){
+        var value = PropertiesService.getScriptProperties().getProperty(key);
+        cache.put(key, value, 86400);
+      }
+      return value;
+    },
+    setToken: function(token){
+      PropertiesService.getScriptProperties().setProperty('BITLY_TOKEN', token)
+    },
+    setGUID: function(guid){
+      PropertiesService.getScriptProperties().setProperty('BITLY_GUID', token)
+    }
+  },
+  Url:{
+    insert: function (obj){
+      var url = 'https://api-ssl.bitly.com/v4/shorten'
+      var headers = {
+        authorization: "Bearer "+ UrlShortener.Util.getCachedProperty('BITLY_TOKEN')
+      };    
+      var options = {
+        contentType: 'application/json',
+        method : "POST",
+        headers : headers,
+        payload : JSON.stringify({
+          "long_url": obj.longUrl,
+          "group_guid": UrlShortener.Util.getCachedProperty('BITLY_GUID')
+        })
+      };
+      
+      var r = JSON.parse(UrlFetchApp.fetch(url,options));
+      return {id:r.link};
+    }
+  }
+});

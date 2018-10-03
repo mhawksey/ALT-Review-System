@@ -28,7 +28,7 @@ function setProposalStatus(token, type) {
     .getValues()[0];
 
   for (var r = 0; r < dataValues.length; r++) {
-    if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === data.row) {
+    if (dataValues[r][dataValuesHeader.indexOf('hashed_id')] === data.row) {
       sheet.getRange(r + 1, dataValuesHeader.indexOf('RSVP') + 1)
         .setValue(type)
         .setNote(type + ' \nDate: ' +
@@ -56,7 +56,7 @@ function updateReviewColumn_(review_token, reviewer_token, reviewer_num, type) {
   var d = checkForReviewerMismatch_(review_token, reviewer_token, reviewer_num);
   // loop through submissions and update review status
   for (var r = 0; r < d.dataValues.length; r++) {
-    if (d.dataValues[r][d.dataValuesHeader.indexOf('Hashed ID')] === review_token) {
+    if (d.dataValues[r][d.dataValuesHeader.indexOf('hashed_id')] === review_token) {
       d.sheet.getRange(r + 2, d.dataValuesHeader.indexOf('Review' + reviewer_num + ' Status') + 1)
         .setValue(type)
         .setNote(type + ' ' + d.reviewer + '\nDate: ' +
@@ -85,7 +85,7 @@ function checkForReviewerMismatch_(review_token, reviewer_token, reviewer_num) {
   var subs = objectify(dataRange);
   // return filtered for review_token (should return single row)
   var sub = subs.filter(function(r) {
-    if (r['Hashed ID'] === review_token) {
+    if (r.hashed_id === review_token) {
       return r
     }
   });
@@ -158,7 +158,7 @@ function getProposalData(token) {
   var subs = objectify(dataRange);
   // return filtered for review_token (should return single row)
   var sub = subs.filter(function(r) {
-    if (r['Hashed ID'] === data.row) {
+    if (r.hashed_id === data.row) {
       return r
     }
   });
@@ -188,7 +188,7 @@ function getAllSubmissionData(optMode) {
     var revData = revSheet.getDataRange();
     var revObj = objectify(revData);
     for (i = 0; i < data.length; i++) {
-      var id = data[i]['Hashed ID'];
+      var id = data[i].hashed_id;
       var reviews = revObj.filter(function(r) {
         if (r.review_token === id) {
           return r
@@ -271,7 +271,7 @@ function setReviewStatus(row, value) {
     .getValues()[0];
   var column = headings.indexOf('Include') + 1;
   sheet.getRange(row, column).setValue(value)
-  return el;
+  return value;
 }
 
 /**
@@ -318,12 +318,12 @@ function processReviewForm(formData) {
   var subject = fillInTemplateFromObject(email.subject, formData);
   var body = fillInTemplateFromObject(email.text, formData);
   try {
-    MailApp.sendEmail(recipient, subject, body, {
+    GmailApp.sendEmail(recipient, subject, body, {
       cc: 'systems@alt.ac.uk',
       replyTo: 'helpdesk@alt.ac.uk'
     });
   } catch (e) {
-    MailApp.sendEmail('martin.hawksey@alt.ac.uk', 'ALT Review System Error', JSON.stringify(formData, null, '\t'));
+    GmailApp.sendEmail('martin.hawksey@alt.ac.uk', 'ALT Review System Error', JSON.stringify(formData, null, '\t'));
   }
   // END - end lock here
   console.timeEnd('processReviewForm');
@@ -343,7 +343,7 @@ function processReviewAdminForm(formData) {
   var dataValues = dataRange.getValues();
   var dataValuesHeader = dataValues.shift();
   for (var r = 0; r < dataValues.length; r++) {
-    if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === formData.hashed_id) {
+    if (dataValues[r][dataValuesHeader.indexOf('hashed_id')] === formData.hashed_id) {
       if (formData.action === 'saved'){
         sheet.getRange(r + 2, dataValuesHeader.indexOf('Decision R1') + 1)
         .setValue(formData.feedback_decision)
@@ -410,7 +410,7 @@ function processSubmissionForm(formData) {
   var updates = 0;
   var update_fields = [];
   for (var r = 0; r < dataValues.length; r++) {
-    if (dataValues[r][dataValuesHeader.indexOf('Hashed ID')] === data.row) {
+    if (dataValues[r][dataValuesHeader.indexOf('hashed_id')] === data.row) {
       for (f in formData) {
         if (dataValuesHeader.indexOf(f) > -1) {
           var writeRange = sheet.getRange(r + 1, dataValuesHeader.indexOf(f) + 1)
@@ -472,9 +472,9 @@ function processNewSubmissionForm(formData) {
     var body = fillInTemplateFromObject(email.text, formData);
     
     GmailApp.sendEmail(formData.email, subject, body, {
-      //cc: 'systems@alt.ac.uk',
-      from: 'helpdesk@alt.ac.uk',
-      replyTo: 'helpdesk@alt.ac.uk'
+      //cc: EMAIL_CC,
+      from: EMAIL_FROM,
+      replyTo: EMAIL_FROM
     });
 
     // getting our headers
@@ -484,7 +484,7 @@ function processNewSubmissionForm(formData) {
     // convert object data into a 2d array 
     var tr = heads.map (function (cell) {
       if (Array.isArray(formData[cell])){
-        return formData[cell].join(', ') || "";
+        return formData[cell].join(' | ') || "";
       } else {
         return formData[cell] || "";
       }

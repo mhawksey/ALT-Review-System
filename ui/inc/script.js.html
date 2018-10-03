@@ -10,14 +10,20 @@
      */
     Script.fillMessages_ = function () {
         // Load internationalized messages.
+        console.log("Adding messages..");
         $('.i18n').each(function () {
             var msg_id = $(this).attr('data-msg');
+            console.log(msg_id);
             if (msg_id) {
                 var i18nText = Script.i18n.getMessage(msg_id.toString());
                 if ($(this).prop('tagName') == 'IMG') {
                     $(this).attr({
                         'title': i18nText
                     });
+                } else if ($(this).prop('tagName') == 'A') {
+                    $(this).attr({
+                        'href': 'mailto:'+i18nText
+                    })
                 } else {
                     $(this).html(i18nText);
                 }
@@ -51,27 +57,55 @@
                     $('#' + s.id + '_section').append($(input));
                     $('#' + s.id + '_section input[type="checkbox"]').addClass('filled-in');
                     $('#' + s.id + '_section input[type="radio"]').addClass('with-gap');
-                } else if (type === 'textarea') {
+                } else if (type === 'extra_authors') {
                     var toc = s.toc ? 'scrollspy' : '';
                     if (toc) {
                         $('.table-of-contents').append($('<li><a href="#' + s.id + '">' + s.heading +
                             '</a></li>'));
                     }
+                    input =  '<div id="' + s.id + '" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.help_text + '</p>' +
+                        '<div id="authors"><div class="row" id="authorgroup1">' +
+                           '<div class="input-field col s12 l5"><input class="auth_name setting" data-counter="1" id="additionalauthor1" type="text" disabled>'+
+                                    '<label class="active" for="additionalauthor1">Full Name</label></div>'+
+                                '<div class="input-field col s11 l6"><input class="auth_inst setting" id="additionalinst1" type="text" disabled>'+
+                                    '<label for="additionalinst1">Institution (if applicable)</label></div>'+
+                                '<div class="col s1 l1 rAuthor"><p><a data-counter="1" class="remove_additional"><i class="material-icons">cancel</i></a></p>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>' +
+                        '<div><a id="add_additional" class="tooltipped" data-position="right" data-tooltip="Click to add another author/speaker"><i class="material-icons">add_circle</i></a></div>'+
+                        '<input type="hidden" id="' + s.id + '" name="' + s.id + '" class="extra_authors" />' +
+                    '</div>';
+                    $('#' + s.section).append($(input));
+                } else if (type === 'textarea') {
+                    var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '_section">' + s.heading +
+                            '</a></li>'));
+                    }
                     var counter = s.max ? '<span id="' + s.id +
-                        '_area_count" class="character-counter" data-for="' + s.id +
-                        '_area" data-max-words="' + s.max +
+                        '_count" class="character-counter" data-for="' + s.id +
+                        '" data-max-words="' + s.max +
                         '" style="float: right; font-size: 12px;"></span>' : '';
-                    input = '<div id="' + s.id + '" class="section ' + toc + '"><h2>' + s.heading +
+                    input = '<div id="' + s.id + '_section" class="section ' + toc + '"><h2>' + s.heading +
                         '</h2><p>' + s.help_text + '</p>' +
                         '<div class="row"><div class="input-field col s12"><textarea id="' + s.id +
-                        '_area" name="' + s.id +
+                        '" name="' + s.id +
                         '" class="materialize-textarea validate setting" ' + required +
-                        ' disabled></textarea><label class="active" for="' + s.id + '_area">' +
+                        ' disabled></textarea><label class="active" for="' + s.id + '">' +
                         s.label + '</label>' +
                         counter + '</div></div></div>';
                     $('#' + s.section).append($(input));
                 } else if (type === 'html') {
-                    $('#' + s.section).html(s.label);
+                 var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '">' + s.heading +
+                            '</a></li>'));
+                    }
+                    input =  '<div id="' + s.id + '" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.label + '</p>'
+                    $('#' + s.section).append($(input));
                 } else {
                     console.log("Type not found");
                 }
@@ -84,31 +118,52 @@
     var default_feedback = "";
     var author_count = 1;
 
-
-
     function updateFields(r) {
         console.log("updateFields ...");
-        // remove review decision classes
-        $("i").removeClass().addClass('material-icons');
-        $('#feedback_area').val('');
-        $('.review_type').hide()
-
-        // update fields from sheet data
-        $('#ID').val(r['ID']);
-        $('#review_area').val(r['Feedback Text']);
-        $('#rowTitle').text(r['Session title']);
-        $('#name').val(r['First Name'] + ' ' + r['Last Name']);
-        $('#inst').val(r['Institution (if applicable)']);
-        $('#sectors').val(r['Which sector(s) are you based in?']);
-        $('#title').val(r['Session title']);
-        $('#theme').val(r['Which conference theme best fits your session?'].split(':')[0]);
-        $('#type').val(r['Session Type']);
-        $('#desc_area').val(r['Session description']);
-        $('#desc_area_count').text('~' + countWords(r['Session description']) + '/500 words');
-        $('#eval_area').val(r['Session content: evaluation and reflection']);
-        $('#eval_area_count').text('~' + countWords(r['Session content: evaluation and reflection']) + '/500 words');
-        $('#ref_area').val(r['References']);
-        $('#resources_area').val(r['Resources for participants']);
+        $('input[type=checkbox],input[type=radio]').prop('checked',false);
+        // set values
+        for (var el in r) {
+          if (r.hasOwnProperty(el)) {
+            $('#'+el).val(r[el]);
+            if (r[el]){
+              $('#'+el).next('label').addClass('active');
+            }
+          }
+        }
+        
+        // handles checkboxes, radios, extra_authors
+        
+        var input_fields = custom_fields.filter(function (el) {
+          return el.type == 'radio' || el.type == 'checkbox' || el.type == 'extra_authors';
+        });
+        input_fields.forEach(function (i) {
+          if (i.type === 'extra_authors'){
+            $('#authors').empty();
+            var author_data = r[i.id].split('~');
+            author_data.forEach(function(a) {
+              var author_info = a.split('||');
+              if (author_info[0] !== '' || author_info[1] !== '') {
+                //if (author_count > 1) {
+                  addAuthor(true);
+                //}
+                $('#additionalauthor' + author_count).val(author_info[0]);
+                $('#additionalinst' + author_count).val(author_info[1]);
+                author_count++;
+              }
+            });
+          } else if (i.type === 'radio') {
+            $("input[name='"+i.id+"'][value='"+r[i.id]+"']").prop('checked', true);
+          } else if (i.type === 'checkbox') {
+            var checks = r[i.id].split(' | ');
+            checks.forEach(function(v) {
+              $("input[name='"+i.id+"'][value='"+v+"']").prop('checked', true);
+            });
+          }
+        });
+      
+        console.log(r);
+        
+        
 
         // Refresh materialize components
         M.updateTextFields();
@@ -127,22 +182,23 @@
         return s.split(' ').length;
     }
 
-    function addAuthor() {
-        $('#authors').append('<div class="row valign-wrapper" id="authorgroup' + author_count +
-            '"><div class="input-field col s5">' +
-            '<input class="auth_name" data-counter="' + author_count + '" id="additionalauthor' + author_count +
-            '" type="text" class="setting">' +
-            '<label for="additionalauthor' + author_count + '">Additional Author ' + author_count +
-            ' Full Name</label>' +
+    function addAuthor(active) {
+        var active = (active) ? 'active' : '';
+        $('#authors').append('<div class="row" id="authorgroup' + author_count +
+            '"><div class="input-field col s12 l5">' +
+            '<input class="auth_name setting" data-counter="' + author_count + '" id="additionalauthor' + author_count +
+            '" type="text">' +
+            '<label class="'+active+'" for="additionalauthor' + author_count + '">' +
+            'Full Name</label>' +
             '</div>' +
-            '<div class="input-field col s6">' +
-            '<input class="auth_inst" id="additionalinst' + author_count + '" type="text" class="setting">' +
-            '<label for="additionalinst' + author_count + '">Additional Author ' + author_count +
-            ' Institution (if applicable)</label>' +
+            '<div class="input-field col s11 l6">' +
+            '<input class="auth_inst setting" id="additionalinst' + author_count + '" type="text">' +
+            '<label class="'+active+'" for="additionalinst' + author_count + '">' + 
+            'Institution (if applicable)</label>' +
             '</div>' +
-            '<div class="input-field col s1">' +
-            '<a data-counter="' + author_count +
-            '" class="remove_additional"><i class="material-icons">cancel</i></a>' +
+            '<div class="col s1 l1 rAuthor">' +
+            '<p><a data-counter="' + author_count +
+            '" class="remove_additional"><i class="material-icons">cancel</i></a></p>' +
             '</div></div>');
     }
     // initialize materialize components
@@ -199,7 +255,7 @@
 
         $('.character-counter').each(function () {
             var textarea = $(this).data('for');
-            var words = $(this).data('max-words')
+            var words = $(this).data('max-words');
             $('#' + textarea).on('change keyup paste', function (event) {
                 $('#' + event.target.id + '_count').text('~' + countWords($(this).val()) + '/' +
                     words + ' words');
@@ -221,8 +277,7 @@
                 auth_details.push($(this).val() + '||' + $('#additionalinst' + $(this).data(
                     'counter')).val());
             });
-            $('#combined_authors').val(auth_details.join('~'));
-            console.log(this);
+            $('.extra_authors').val(auth_details.join('~'));
             google.script.run.withSuccessHandler(handleSubmissionResponse)
                 .processNewSubmissionForm(this);
             $('.setting').prop("disabled", true);
@@ -252,25 +307,8 @@
             }
             $('#modal').modal('open');
         }
-
-        $('select').formSelect();
-        $('.collapsible').collapsible();
         $('.tooltipped').tooltip();
         $('.scrollspy').scrollSpy();
-
-        $('select[required]').css({
-            display: 'inline',
-            position: 'absolute',
-            float: 'left',
-            padding: 0,
-            margin: 0,
-            border: '1px solid rgba(255,255,255,0)',
-            height: 0,
-            width: 0,
-            top: '2em',
-            left: '3em',
-            opacity: 0
-        });
         $('input,textarea').removeAttr('disabled');
         $('#submit_but').removeClass('disabled');
         $('.progress').hide();
