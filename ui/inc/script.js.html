@@ -78,6 +78,35 @@
                         '<input type="hidden" id="' + s.id + '" name="' + s.id + '" class="extra_authors" />' +
                     '</div>';
                     $('#' + s.section).append($(input));
+                } else if (type === 'file') {
+                     
+                    var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '_section">' + s.heading +
+                            '</a></li>'));
+                    }
+                    input =  '<div id="' + s.id + '_section" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.help_text + '</p>' +
+                        '<div class="row"><div class="file-field input-field col s12">' +
+                        ' <div class="btn green"><span>Upload File</span><input type="file"" id="' + s.id +'" name="' + s.id +'" class="validate setting" ' + required +' disabled/></div>' +
+                        ' <div class="file-path-wrapper"><input class="file-path validate setting" type="text"></div>' +
+                        '</div></div>';
+                    $('#' + s.section).append($(input));
+                } else if (type === 'input') {
+                    var type = s.validation ? s.validation : 'text'; 
+                    var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '_section">' + s.heading +
+                            '</a></li>'));
+                    }
+                    input =  '<div id="' + s.id + '_section" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.help_text + '</p>' +
+                        '<div class="row"><div class="input-field col s12"><input type="'+type+'" id="' + s.id +
+                        '" name="' + s.id +
+                        '" class="validate setting" ' + required +
+                        ' disabled/><label for="' + s.id + '">' +
+                        s.label + '</label></div></div></div>';
+                    $('#' + s.section).append($(input));
                 } else if (type === 'textarea') {
                     var toc = s.toc ? 'scrollspy' : '';
                     if (toc) {
