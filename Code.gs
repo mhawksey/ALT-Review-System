@@ -5,7 +5,7 @@ var ORIG_SUB_SHEET_NAME = "OriginalSubmissions"
 var ID_PREFIX = 'O-';
 var EMAIL_FROM = 'helpdesk@alt.ac.uk';
 var EMAIL_CC = 'systems@alt.ac.uk';
-var ACCEPT_SUBMISSIONS = false;
+var ACCEPT_SUBMISSIONS = true;
 var EDIT_SUBMISSIONS = true;
 
 // Dev
