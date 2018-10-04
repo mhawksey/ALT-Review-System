@@ -472,7 +472,7 @@ function processNewSubmissionForm(formData) {
     var body = fillInTemplateFromObject(email.text, formData);
     
     GmailApp.sendEmail(formData.email, subject, body, {
-      //cc: EMAIL_CC,
+      bcc: 'systems@alt.ac.uk',
       from: EMAIL_FROM,
       replyTo: EMAIL_FROM
     });
