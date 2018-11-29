@@ -13,6 +13,15 @@ function getCustomFields_(){
   return value;
 }
 
+function getScriptProp(key){
+  var value = JSON.parse(CacheService.getScriptCache().get(key));
+  if (!value){
+    var value = JSON.parse(PropertiesService.getScriptProperties().getProperty(key));
+    CacheService.getScriptCache().put(key, value, 8600);
+  }
+  return value;
+}
+
 function createToken_(email, row, mode, reviewer_num) {
   var hashedEmail = getHashedText(email);
   var blob = Utilities.newBlob(JSON.stringify({
@@ -181,81 +190,3 @@ function pad(num, size) {
     var s = "000000000" + num;
     return s.substr(s.length-size);
 }
-
-function testBitly(){
-  //var url = "https://api-ssl.bitly.com/v4/groups";
-  var url = 'https://api-ssl.bitly.com/v4/shorten'
-  var headers = {
-    authorization: "Bearer "+ PropertiesService.getScriptProperties().getProperty('BITLY_TOKEN')
-  };
-  
-  var options = {
-    contentType: 'application/json',
-    method : "POST",
-    headers : headers,
-    payload : JSON.stringify({
-      "long_url": "http://google.com",
-      "group_guid": PropertiesService.getScriptProperties().getProperty('BITLY_GUID')
-    })
-  };
-  
-  var response = UrlFetchApp.fetch(url,options);
-}
-
-// https://addyosmani.com/blog/essential-js-namespacing/
-// extend.js
-// written by andrew dupont, optimized by addy osmani
-function extend(destination, source) {
-    var toString = Object.prototype.toString,
-        objTest = toString.call({});
-    for (var property in source) {
-        if (source[property] && objTest == toString.call(source[property])) {
-            destination[property] = destination[property] || {};
-            extend(destination[property], source[property]);
-        } else {
-            destination[property] = source[property];
-        }
-    }
-    return destination;
-};
-
-var UrlShortener = UrlShortener || {};
-extend(UrlShortener, {
-  Util:{
-    getCachedProperty: function (key){
-      var cache = CacheService.getScriptCache()
-      var value = cache.get(key)
-      if (!value){
-        var value = PropertiesService.getScriptProperties().getProperty(key);
-        cache.put(key, value, 86400);
-      }
-      return value;
-    },
-    setToken: function(token){
-      PropertiesService.getScriptProperties().setProperty('BITLY_TOKEN', token)
-    },
-    setGUID: function(guid){
-      PropertiesService.getScriptProperties().setProperty('BITLY_GUID', token)
-    }
-  },
-  Url:{
-    insert: function (obj){
-      var url = 'https://api-ssl.bitly.com/v4/shorten'
-      var headers = {
-        authorization: "Bearer "+ UrlShortener.Util.getCachedProperty('BITLY_TOKEN')
-      };    
-      var options = {
-        contentType: 'application/json',
-        method : "POST",
-        headers : headers,
-        payload : JSON.stringify({
-          "long_url": obj.longUrl,
-          "group_guid": UrlShortener.Util.getCachedProperty('BITLY_GUID')
-        })
-      };
-      
-      var r = JSON.parse(UrlFetchApp.fetch(url,options));
-      return {id:r.link};
-    }
-  }
-});

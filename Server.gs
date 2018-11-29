@@ -6,8 +6,9 @@
  * @param {string} type to be recorded (review_accept/review_decline).
  * @return {Object} response data.
  */
-function setReviewerStatus(review_token, reviewer_token, reviewer_num, type) {
-  updateReviewColumn_(review_token, reviewer_token, reviewer_num, type);
+function setReviewerStatus(token, type) {
+  var token = decodeToken_(token);
+  updateReviewColumn_(token.row, token.reviewer, token.reviewer_num, type);
   return {
     result: 'ok',
     review_status: type
@@ -53,15 +54,33 @@ function setProposalStatus(token, type) {
  */
 function updateReviewColumn_(review_token, reviewer_token, reviewer_num, type) {
   console.time('updateReviewColumn_');
-  var d = checkForReviewerMismatch_(review_token, reviewer_token, reviewer_num);
+  //var d = checkForReviewerMismatch_(review_token, reviewer_token, reviewer_num);
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+  // Fetch the range of cells A:AN
+  var dataRange = sheet.getDataRange();
+  var dataValues = dataRange.getValues();
+  var dataValuesHeader = dataValues.shift();
+  
+  // fetch reviewer for review_token
+  var rev_sheet = SpreadsheetApp.getActive().getSheetByName(REV_SHEET_NAME);
+  var revDataRange = rev_sheet.getDataRange();
+  var reviewers = objectify(revDataRange);
+  // return filtered for reviewer_token (should be single row)
+  var reviewer_obj = reviewers.filter(function(rev) {
+    if (rev['ID'] === reviewer_token) {
+      return rev
+    }
+  });
+  var reviewer = reviewer_obj[0]['Select String'];
+
   // loop through submissions and update review status
-  for (var r = 0; r < d.dataValues.length; r++) {
-    if (d.dataValues[r][d.dataValuesHeader.indexOf('hashed_id')] === review_token) {
-      d.sheet.getRange(r + 2, d.dataValuesHeader.indexOf('Review' + reviewer_num + ' Status') + 1)
+  for (var r = 0; r < dataValues.length; r++) {
+    if (dataValues[r][dataValuesHeader.indexOf('hashed_id')] === review_token) {
+      sheet.getRange(r + 2, dataValuesHeader.indexOf('Review' + reviewer_num + ' Status') + 1)
         .setValue(type)
-        .setNote(type + ' ' + d.reviewer + '\nDate: ' +
+        .setNote(type + ' ' + reviewer + '\nDate: ' +
           Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
-      return d.reviewer;
+      return reviewer;
     }
   }
   console.timeEnd('updateReviewColumn_');
@@ -124,17 +143,37 @@ function checkForReviewerMismatch_(review_token, reviewer_token, reviewer_num) {
  * @param {string} reviewer_num for the review.
  * @return {string} returns submission data.
  */
-function getReviewData(review_token, reviewer_token, reviewer_num) {
+function getReviewData(token) {
+  var token = decodeToken_(token);
   console.time('getReviewData');
-  var d = checkForReviewerMismatch_(review_token, reviewer_token, reviewer_num);
-
-  for (el in d.submission) {
-    if (el.indexOf('Email') > -1 || el.indexOf('Additional') > -1 || el.indexOf('Review') > -1) {
-      delete d.submission[el];
+  // var d = checkForReviewerMismatch_(token.row, token.reviewer, token.reviewer_num);
+  
+  // fetch submission for review_token
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
+  // Fetch the range of cells A:AN
+  var dataRange = sheet.getDataRange();
+  var dataValues = dataRange.getValues();
+  var dataValuesHeader = dataValues.shift();
+  var subs = objectify(dataRange);
+  // return filtered for token.row (should return single row)
+  var sub = subs.filter(function(r) {
+    if (r.hashed_id === token.row) {
+      return r
     }
-  }
+  });
+  
+  var custom_fields = JSON.parse(getCustomFields_());
+  var result = {};
+  custom_fields.forEach(function (s) {
+    if (sub[0][s.id] && s.id !== 'additional_authors'){
+      result[s.id] = sub[0][s.id]
+    }
+  });
+  
+  result.review_status = sub[0]['Review' + token.reviewer_num + ' Status'];
+  result.id = sub[0]['ID'];
   console.timeEnd('getReviewData')
-  return JSON.stringify(d.submission);
+  return JSON.stringify(result);
 }
 
 /**
@@ -280,7 +319,7 @@ function setReviewStatus(row, value) {
  * @return {Object} returns result.
  */
 function processReviewForm(formData) {
-  console.time('processReviewForm')
+  console.time('processReviewForm');
   // https://stackoverflow.com/a/43238894
   // BEGIN - start lock here
   var lock = LockService.getScriptLock();
@@ -300,7 +339,10 @@ function processReviewForm(formData) {
     .getValues()[0];
   sheet.insertRowAfter(1);
   formData.timestamp = new Date();
-
+  var data = decodeToken_(formData.token);
+  formData.review_token	= data.row;
+  formData.reviewer = data.reviewer;
+  formData.reviewer_num = data.reviewer_num;
   var row = heads.map(function(cell) {
     if (Array.isArray(formData[cell])) {
       return formData[cell].join(', ');
@@ -310,7 +352,7 @@ function processReviewForm(formData) {
   });
   // write result
   sheet.getRange(2, 1, 1, row.length).setValues([row]).setFontWeight('normal');
-  var email = updateReviewColumn_(formData.review_token, formData.reviewer_token, formData.reviewer_num, formData.feedback_decision);
+  var email = updateReviewColumn_(formData.review_token, formData.reviewer, formData.reviewer_num, formData.feedback_decision);
   SpreadsheetApp.flush(); // applies all pending spreadsheet changes
   lock.releaseLock();
   var recipient = extractBracket(email);

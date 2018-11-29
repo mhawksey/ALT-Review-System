@@ -57,7 +57,7 @@
                     $('#' + s.id + '_section').append($(input));
                     $('#' + s.id + '_section input[type="checkbox"]').addClass('filled-in');
                     $('#' + s.id + '_section input[type="radio"]').addClass('with-gap');
-                } else if (type === 'extra_authors') {
+                } else if (type === 'extra_authors' && mode !== "review") {
                     var toc = s.toc ? 'scrollspy' : '';
                     if (toc) {
                         $('.table-of-contents').append($('<li><a href="#' + s.id + '">' + s.heading +
@@ -168,29 +168,33 @@
         input_fields.forEach(function (i) {
           if (i.type === 'extra_authors'){
             $('#authors').empty();
-            var author_data = r[i.id].split('~');
-            author_data.forEach(function(a) {
-              var author_info = a.split('||');
-              if (author_info[0] !== '' || author_info[1] !== '') {
-                //if (author_count > 1) {
-                  addAuthor(true);
-                //}
-                $('#additionalauthor' + author_count).val(author_info[0]);
-                $('#additionalinst' + author_count).val(author_info[1]);
-                author_count++;
-              }
-            });
+            if (r[i.id]){
+              var author_data = r[i.id].split('~');
+              author_data.forEach(function(a) {
+                var author_info = a.split('||');
+                if (author_info[0] !== '' || author_info[1] !== '') {
+                  //if (author_count > 1) {
+                    addAuthor(true);
+                  //}
+                  $('#additionalauthor' + author_count).val(author_info[0]);
+                  $('#additionalinst' + author_count).val(author_info[1]);
+                  author_count++;
+                }
+              });
+            }
           } else if (i.type === 'radio') {
             $("input[name='"+i.id+"'][value='"+r[i.id]+"']").prop('checked', true);
           } else if (i.type === 'checkbox') {
-            var checks = r[i.id].split(' | ');
-            checks.forEach(function(v) {
-              $("input[name='"+i.id+"'][value='"+v+"']").prop('checked', true);
-            });
+            if (r[i.id]){
+              var checks = r[i.id].split(' | ');
+              checks.forEach(function(v) {
+                $("input[name='"+i.id+"'][value='"+v+"']").prop('checked', true);
+              });
+            }
           }
         });
       
-        console.log(r);
+        //console.log(r);
         
         
 
@@ -291,7 +295,7 @@
             });
         });
 
-        $("input[required],textarea[required]").next("label").append($('<span class="required"></span>'));
+        $("input[required],textarea[required],select[required]").next("label").append($('<span class="required"></span>'));
 
         $("#submission_form").on('submit', function (e) {
             e.preventDefault();

@@ -5,14 +5,14 @@ var ORIG_SUB_SHEET_NAME = "OriginalSubmissions"
 var ID_PREFIX = 'O-';
 var EMAIL_FROM = 'helpdesk@alt.ac.uk';
 var EMAIL_CC = 'systems@alt.ac.uk';
-var ACCEPT_SUBMISSIONS = true;
-var EDIT_SUBMISSIONS = true;
+var ACCEPT_SUBMISSIONS = getScriptProp('ACCEPT_SUBMISSIONS');
+var EDIT_SUBMISSIONS = getScriptProp('EDIT_SUBMISSIONS');
 
 // Dev
-//var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxvEN6YaSj8c6MQ4dPZIYcBZq1PpywzmBLrsIYXZs-A/dev";
+var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbyMdjZWPXho2aQuJSFMoR_wN4nqww3VWlKC-iFfVvIJ/dev";
 
 // Prod.
-var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwuLhuyfdKo1CEVEIqEGSzIzzPHeOAKg9xCeVNP56jg-_1IUg4/exec";
+//var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwuLhuyfdKo1CEVEIqEGSzIzzPHeOAKg9xCeVNP56jg-_1IUg4/exec";
 
 /**
  * On open
@@ -89,7 +89,7 @@ function showDialog(mode) {
  * @return {HtmlService} returns result.
  */
 function doGet(e) {
-  
+
   var custom_fields = getCustomFields_();
   var html = HtmlService.createTemplateFromFile('ui/404');
   html.custom_fields = custom_fields;
@@ -97,16 +97,22 @@ function doGet(e) {
   if (e.parameter.action){
     if ((e.parameter.action == 'new' && ACCEPT_SUBMISSIONS) || 
         (e.parameter.action == 'edit' && EDIT_SUBMISSIONS && e.parameter.token) || 
-        (e.parameter.action == 'review' && e.parameter.token)){
+        (e.parameter.action == 'review')){
         
-        var html = HtmlService.createTemplateFromFile('ui/index');
+          if (e.parameter.action == 'review'){
+            var html = HtmlService.createTemplateFromFile('ui/index');
+          } else {
+            var html = HtmlService.createTemplateFromFile('ui/index');
+          }
+        
         html.custom_fields = custom_fields;
         html.mode = e.parameter.action;
         html.isModal = false;
+        html.data = JSON.stringify({notoken: true});
         
         if (e.parameter.token){
-          var token = e.parameter.token;
-          html.data = decodeToken_(token);
+          //var token = e.parameter.token;
+          html.data = e.parameter.token;
         } 
       } 
   }
@@ -155,7 +161,7 @@ function sendTestEmail() {
  * Sends email to notify them proposal isn't going to be reviewed.
  */
 function checkAuthor() {
-  var resp = Browser.msgBox("Sending emails", "You are about to send emails to authors with 'check_author' in the Include column. Are you sure?", Browser.Buttons.YES_NO);
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails to authors with 'check' in the Include column. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     // get all submissions
     var email = getEmailTemplate('check_author');
@@ -168,7 +174,7 @@ function checkAuthor() {
     var incCol = headings.indexOf('Include');
     // iterate for submissions with check_author in Include column
     var sub_filtered = sub_obj.filter(function(s) {
-      if (s['Include'] === 'check_author') {
+      if (s['Include'] === 'check') {
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         var recipient = s.email
@@ -179,7 +185,7 @@ function checkAuthor() {
         var row = parseInt(s.ID.match(/\d+$/)[0]);
         // record email has been sent
         sheet.getRange(row + 1, incCol + 1).setValue('check_author_sent')
-          .setNote('check_author by: ' +
+          .setNote('check by: ' +
             Session.getActiveUser().getEmail() + '\nDate: ' +
             Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
       }
@@ -230,7 +236,7 @@ function notifyAuthorsFromGmail() {
   if (resp === 'yes') {
     // get all submissions
     var subjectLine = 'Important information regarding your presentation [Ref: {ID}] at ALT’s Annual Conference (action required)';
-    var email = getGmailTemplate(subjectLine);
+    //var email = getGmailTemplate(subjectLine);
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
     var subs = sheet.getDataRange();
     var sub_obj = objectify(subs);
