@@ -38,13 +38,16 @@
     <div class='container'>
         <div class="row">
             <div class="col s12 m9 l10">
+            <? if (mode ==="reviewAdmin") { ?>    
+                    <?!= include('ui/admin_review'); ?>
+<? } ?>
                 <form id="submission_form">
                     <h1><span class="i18n" data-msg="form_name"></span></h1>
 <? if (isModal) { ?>
 
 
 <? } else if (mode==="review") { ?>
-<blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reasons, click 'I decline review'.</blockquote>
+<blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reason, click 'I decline review'.</blockquote>
                     <div class="row center-align">
                       <div class="col s12">
                         <a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -52,13 +55,15 @@
                       </div>
                     </div>
                     <blockquote id="prompt_review_accept" style="display:none">If you are happy to review this proposal please scroll down to <a href="#review">Submit your review</a> and record your decision (you can revisit this page from the link in the email at anytime to complete your review).</blockquote>
-                  
+<? } else if (mode==="decision") { ?>
+                    <?!= include('ui/decisionfeedback'); ?>
 <? } else { ?>                    
                     <blockquote>
                         <div class="i18n" data-msg="instructions"></div>
                     </blockquote>
 <? } ?>
                     <p><span class="required">Required</span></p>
+                    
 <? if (mode !=="review") { ?>                    
                     <?!= include('ui/admin_submitter'); ?>
 <? } ?>
@@ -68,21 +73,32 @@
                         <div class="custom_fields" id="sub_overview"></div>
                     </div>
                     <div class="custom_fields" id="sub_detail"></div>
-<? if (mode !=="review") { ?> 
+<? if (mode !=="review" || mode !== 'decision') { ?> 
                     <div class="custom_fields" id="sub_extras"></div>
 <? } ?>
-
-                </form>
-<? if (mode ==="review") { ?> 
-                    <?!= include('ui/reviewer_form'); ?>
-<? } ?> 
+<? if (mode === 'decision') { ?>
+                                              
+                                                <div class="row">
+                                                  <div class="input-field col s12">
+                                                   <textarea id="note_area" name="Note to Director" class="materialize-textarea"></textarea>
+                                            <label class="active" for="note_area">Note to conference Director (e.g. Timetable requests, changing the type of session, general feedback)</label>
+                                            <input type="hidden" name="token" id="token">
+                                          </div>
+                                        </div>
+  <? } ?>                                      
                     <div class="row">
                         <div class="col s12 center-align">
                             
                             <button id="submit_but" class="btn waves-effect waves-light blue disabled" type="submit"
                                 name="action">Submit <i class="material-icons right">send</i></button>
+                            
                         </div>
                     </div>
+                </form>
+<? if (mode ==="review") { ?> 
+                    <?!= include('ui/reviewer_form'); ?>
+<? } ?> 
+
             </div>
             <div class="col hide-on-small-onl m3 l2">
                 <div class="toc-wrapper pinned">
@@ -145,7 +161,8 @@
     <script>
       var currentRow = parseInt(<?= currentRow || 2; ?>);
     </script>
-    
+    <?!= include('ui/inc/review_submissions_script.js'); ?>
+<? } else { ?>
+    <?!= include('ui/inc/'+mode+'_script.js'); ?>
 <? } ?>
-<?!= include('ui/inc/'+mode+'_script.js'); ?>
 </html>

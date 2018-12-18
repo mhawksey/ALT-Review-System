@@ -16,20 +16,14 @@
   <div class="input-field col s12">
     <select id="different_type" name="different_type" class="review">
             <option value="" disabled selected>Choose your option</option>
-            <option>Research session</option>
-            <option>Discussion panel or forum</option>
-            <option>Workshop or demonstration</option>
-            <option>Work-in-progress report/experimental session</option>
-            <option>Short presentation</option>
-            <option>Lightning talk</option>
-            <option>Poster &amp; poster talk</option>
+
           </select>
     <label for="different_type">Recommended session type</label>
   </div>
 </div>
 
 <script>
-  // feedback select event (show different seesion type select)
+ // feedback select event (show different seesion type select)
   $("#feedback_decision").on('change', function(e) {
     var accept_type = $(this).val();
     var type_select = $('#different_type');
@@ -60,4 +54,16 @@
     }
     $('#feedback_decision,#different_type').formSelect();
   });
+  $(function() {
+  var type_fields = custom_fields.filter(function (el) {
+     return el.id == "session_type";
+  });
+  type_fields.forEach(function (s) {
+    var values = s.values.split('|');
+    values.forEach(function (o) {
+      $('#different_type').append($('<option>'+o+'</option>'));
+    });
+  });
+  });
+ 
 </script>

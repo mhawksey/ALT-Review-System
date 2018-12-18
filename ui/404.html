@@ -24,7 +24,7 @@
         <h5 class="header col s12 light i18n" data-msg="instructions"></h5>
       </div>
       <div class="row center">
-        <? if (ACCEPT_SUBMISSIONS) { ?>
+        <? if (ACCEPT_SUBMISSIONS !=='closed') { ?>
           <a href="<?= REVIEW_URL; ?>?action=new" id="download-button" class="btn-large waves-effect waves-light green">New Submissions</a>
         <? } else { ?>
             <h3 class="header col s12 light">Submissions are currently closed</h3>

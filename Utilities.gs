@@ -1,4 +1,5 @@
 function clearCache(){
+  var test = getScriptProp_('EDIT_SUBMISSIONS');
   CacheService.getScriptCache().remove('custom_fields');
 }
 
@@ -13,10 +14,10 @@ function getCustomFields_(){
   return value;
 }
 
-function getScriptProp(key){
-  var value = JSON.parse(CacheService.getScriptCache().get(key));
+function getScriptProp_(key){
+  var value = CacheService.getScriptCache().get(key);
   if (!value){
-    var value = JSON.parse(PropertiesService.getScriptProperties().getProperty(key));
+    var value = PropertiesService.getScriptProperties().getProperty(key);
     CacheService.getScriptCache().put(key, value, 8600);
   }
   return value;
@@ -165,7 +166,7 @@ function refreshReviewStats() {
   Logger.log(formulas);
   var calcCols = ['Reviews Assigned', 'Reviews Submitted', 'Reviews Accepted', 'Reviews Declined', 'Reviews Reminded'];
   var calcFormula = {
-    "Reviews Assigned": "=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF(AllReviewCols,J$2:J)})",
+    "Reviews Assigned": "=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF({Submissions!T:T,Submissions!V:V,Submissions!X:X,Submissions!Z:Z},B$2:B)})",
     "Reviews Submitted": "=ARRAYFORMULA({\"Reviews Submitted\";COUNTIF(Reviews!D:D,\"=\"&A2:A)})",
     "Reviews Accepted": "=ARRAYFORMULA({\"Reviews Accepted\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_accept\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_accept\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_accept\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_accept\")})",
     "Reviews Declined": "=ARRAYFORMULA({\"Reviews Declined\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_decline\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_decline\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_decline\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_decline\")})",

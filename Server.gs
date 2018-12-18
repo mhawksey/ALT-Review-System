@@ -15,6 +15,14 @@ function setReviewerStatus(token, type) {
   }
 }
 
+function test(){
+ var token_str = "eyJyZXZpZXdlciI6IjY2ZWIwYWJhODgyYTc1ODkxYzZmZjU3NjlmMTQ2OGU3MDY3NWM3YTgwNjE4Y2Q0ZDc2ZDk5ZmRjYzY5YjFhYjciLCJyb3ciOiI3YzNiNDNjMjhiMDIwNjI0ZDAxMTRjMDBjMjM4Y2Y2YjczZWI1MDQyNGMxMWMxNmEzNGQxZjc1OGYyMTk2OGYyIiwicmV2aWV3ZXJfbnVtIjoyLCJtb2RlIjoicmV2aWV3In0=";
+  var token = decodeToken_(token_str);
+  var type = 'accept';
+  updateReviewColumn_(token.row, token.reviewer, token.reviewer_num, type);
+  Logger.log(data);
+}
+
 /**
  * Sets the RSVP column for decision_script.js.
  * @param {string} type to be recorded (review_accept/review_decline).
@@ -183,6 +191,7 @@ function getReviewData(token) {
  */
 function getProposalData(token) {
   var data = decodeToken_(token);
+  Logger.log(data);
   if (data.mode !== 'decision') {
     return JSON.stringify({
       result: 'error'
@@ -343,6 +352,7 @@ function processReviewForm(formData) {
   formData.review_token	= data.row;
   formData.reviewer = data.reviewer;
   formData.reviewer_num = data.reviewer_num;
+  formData.session_title = formData.review_session_title;
   var row = heads.map(function(cell) {
     if (Array.isArray(formData[cell])) {
       return formData[cell].join(', ');
@@ -438,6 +448,7 @@ function processSubmissionForm(formData) {
   try {
     lock.waitLock(30000); // wait 30 seconds for others' use of the code section and lock to stop and then proceed
   } catch (e) {
+    console.error('processSubmissionForm', {error:e, values:formData});
     return {
       result: 'error',
       message: 'Could not obtain lock'
@@ -451,8 +462,11 @@ function processSubmissionForm(formData) {
     .getValues()[0];
   var updates = 0;
   var update_fields = [];
+  var backupSheet = SpreadsheetApp.getActive().getSheetByName(ORIG_SUB_SHEET_NAME);
   for (var r = 0; r < dataValues.length; r++) {
     if (dataValues[r][dataValuesHeader.indexOf('hashed_id')] === data.row) {
+      formData.ID = dataValues[r][dataValuesHeader.indexOf('ID')];
+      backupSheet.appendRow(dataValues[r]);
       for (f in formData) {
         if (dataValuesHeader.indexOf(f) > -1) {
           var writeRange = sheet.getRange(r + 1, dataValuesHeader.indexOf(f) + 1)
@@ -468,7 +482,16 @@ function processSubmissionForm(formData) {
       }
       var note = 'Author updated:\n'+update_fields.join('\n');
       sheet.getRange(r + 1, dataValuesHeader.indexOf('Submission Status') + 1).setNote(note+' \n\nDate: ' +
-                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm')).setValue('updated');
+      var email = getEmailTemplate('resub_receipt');
+      var subject = fillInTemplateFromObject(email.subject, formData);
+      var body = fillInTemplateFromObject(email.text, formData);
+    
+      GmailApp.sendEmail(formData.email, subject, body, {
+        bcc: 'systems@alt.ac.uk',
+        from: EMAIL_FROM,
+        replyTo: EMAIL_FROM
+      });
       break;
     }
   }
@@ -478,10 +501,23 @@ function processSubmissionForm(formData) {
   console.timeEnd('processSubmissionForm');
   return {
     result: 'ok',
-    updates: updates
+    type: 'update',
+    data: {ID: formData.ID,
+           session_title: formData.session_title,
+           email: formData.email}
   };
 }
 
+function processSubmitForm(formData){
+  if (formData.token){
+    var data = decodeToken_(formData.token);
+    if (data.mode === 'decision'){
+      return processSubmissionForm(formData);
+    } else {
+      return processNewSubmissionForm(formData);
+    }
+  }
+}
 /**
  * Process the new submission form data for script.js
  * @param {Object} formData to be recorded.
@@ -528,7 +564,11 @@ function processNewSubmissionForm(formData) {
       if (Array.isArray(formData[cell])){
         return formData[cell].join(' | ') || "";
       } else {
-        return formData[cell] || "";
+        if  (typeof formData[cell] === 'string'){
+          return formData[cell].trim() || "";
+        } else {
+          return formData[cell] || "";
+        }
       }
     });
     // write result
@@ -548,7 +588,10 @@ function processNewSubmissionForm(formData) {
   console.timeEnd('processNewSubmissionForm');
   return {
     result: 'ok',
-    data: JSON.stringify(formData)
+    type: 'new',
+    data: {ID: formData.ID,
+           session_title: formData.session_title,
+           email: formData.email}
   };
 }
 

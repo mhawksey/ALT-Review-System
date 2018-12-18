@@ -5,14 +5,14 @@ var ORIG_SUB_SHEET_NAME = "OriginalSubmissions"
 var ID_PREFIX = 'O-';
 var EMAIL_FROM = 'helpdesk@alt.ac.uk';
 var EMAIL_CC = 'systems@alt.ac.uk';
-var ACCEPT_SUBMISSIONS = getScriptProp('ACCEPT_SUBMISSIONS');
-var EDIT_SUBMISSIONS = getScriptProp('EDIT_SUBMISSIONS');
+var ACCEPT_SUBMISSIONS = getScriptProp_('ACCEPT_SUBMISSIONS');
+var EDIT_SUBMISSIONS = getScriptProp_('EDIT_SUBMISSIONS');
 
 // Dev
-var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbyMdjZWPXho2aQuJSFMoR_wN4nqww3VWlKC-iFfVvIJ/dev";
+//var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxraNLV-AvejgwWdvHdX6O_44iOOJHcr0k_cTY0M5Q/dev";
 
 // Prod.
-//var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwuLhuyfdKo1CEVEIqEGSzIzzPHeOAKg9xCeVNP56jg-_1IUg4/exec";
+var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwuLhuyfdKo1CEVEIqEGSzIzzPHeOAKg9xCeVNP56jg-_1IUg4/exec";
 
 /**
  * On open
@@ -30,9 +30,9 @@ function onOpen() {
       .addItem('Send test email', 'sendTestEmail')
       .addItem('Send check with author email (check_author)', 'checkAuthor')
       .addItem('Send Reviewer Notifications (assign_reviewer)', 'sendReviewerNotification')
-      .addItem('Send Reviewer Reminder', 'sendReviewerReminder')
-      .addItem('Send Reviewer Reminder for accepted reviews', 'sendReviewerReminderAccepted')
-      .addItem('Send Decisions', 'sendReviewDecisions')
+      .addItem('Send Reviewer Reminder (remind_reviewer)', 'sendReviewerReminder')
+      .addItem('Send Reviewer Reminder for accepted reviews (remind_reviewer_accepted)', 'sendReviewerReminderAccepted')
+      .addItem('Send Decisions (proposal_)', 'sendReviewDecisions')
       .addItem('Send Decisions Reminder', 'sendReviewDecisionsReminder')
       .addItem('Send Final Decisions', 'sendFinalDecsions')
       .addItem('Send notify_authors message to all filtered submissions', 'notifyAuthors'))
@@ -95,8 +95,9 @@ function doGet(e) {
   html.custom_fields = custom_fields;
   
   if (e.parameter.action){
-    if ((e.parameter.action == 'new' && ACCEPT_SUBMISSIONS) || 
-        (e.parameter.action == 'edit' && EDIT_SUBMISSIONS && e.parameter.token) || 
+    if ((e.parameter.action == 'new' && ACCEPT_SUBMISSIONS !== 'closed') || 
+        (e.parameter.action == 'edit' && EDIT_SUBMISSIONS !== 'closed') || 
+        (e.parameter.action == 'decision') ||
         (e.parameter.action == 'review')){
         
           if (e.parameter.action == 'review'){
@@ -108,7 +109,7 @@ function doGet(e) {
         html.custom_fields = custom_fields;
         html.mode = e.parameter.action;
         html.isModal = false;
-        html.data = JSON.stringify({notoken: true});
+        html.data = 'notoken';
         
         if (e.parameter.token){
           //var token = e.parameter.token;
@@ -147,7 +148,7 @@ function sendTestEmail() {
           cc: 'systems@alt.ac.uk',
           replyTo: 'helpdesk@alt.ac.uk'
         });
-        var row = parseInt(s.ID.match(/\d+$/)[0]);
+        var row = parseInt(s.ID.match(/\d+$/)[0], 10);
         // record email has been sent
         sheet.getRange(row + 1, incCol + 1).setNote(template + ' sent by: ' +
           Session.getActiveUser().getEmail() + '\nDate: ' +
@@ -180,9 +181,10 @@ function checkAuthor() {
         var recipient = s.email
         GmailApp.sendEmail(recipient, subject, body, {
           cc: 'systems@alt.ac.uk',
-          replyTo: 'helpdesk@alt.ac.uk'
+          replyTo: 'helpdesk@alt.ac.uk',
+          from:'helpdesk@alt.ac.uk'
         });
-        var row = parseInt(s.ID.match(/\d+$/)[0]);
+        var row = parseInt(s.ID.match(/\d+$/)[0], 10);
         // record email has been sent
         sheet.getRange(row + 1, incCol + 1).setValue('check_author_sent')
           .setNote('check by: ' +
@@ -218,7 +220,7 @@ function notifyAuthors() {
           cc: 'systems@alt.ac.uk',
           replyTo: 'helpdesk@alt.ac.uk'
         });
-        var row = parseInt(s.ID.match(/\d+$/)[0]);
+        var row = parseInt(s.ID.match(/\d+$/)[0], 10);
         // record email has been sent
         sheet.getRange(row + 1, incCol + 1).setNote('notify_authors sent by: ' +
           Session.getActiveUser().getEmail() + '\nDate: ' +
@@ -257,7 +259,7 @@ function notifyAuthorsFromGmail() {
           replyTo: 'helpdesk@alt.ac.uk',
           htmlBody: htmlBody
         });
-        var row = parseInt(s.ID.match(/\d+$/)[0]);
+        var row = parseInt(s.ID.match(/\d+$/)[0], 10);
         // record email has been sent
         sheet.getRange(row + 1, incCol + 1).setNote('Gmail Draft - Permission sent by: ' +
           Session.getActiveUser().getEmail() + '\nDate: ' +
@@ -287,7 +289,7 @@ function sendReviewDecisions() {
       if (s['Decision R1'] !== '' && s['Decision Status R1'] === 'saved' && !s['hidden']) {
         var recipient = s.email
         var url = UrlShortener.Url.insert({
-          longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s.hashed_id, 'decision', 1)
+          longUrl: REVIEW_URL + '?action=decision&token=' + createToken_(recipient, s.hashed_id, 'decision', 1)
         });
         s.review_url = url.id;
         var email = getEmailTemplate('proposal_' + s['Decision R1']);
@@ -298,7 +300,7 @@ function sendReviewDecisions() {
             cc: 'systems@alt.ac.uk',
             replyTo: 'helpdesk@alt.ac.uk'
           });
-          var row = parseInt(s.ID.match(/\d+$/)[0]);
+          var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('sent')
             .setNote(s['Decision R1'] + '_proposal sent by: ' +
@@ -347,7 +349,7 @@ function sendReviewDecisionsReminder() {
             cc: 'systems@alt.ac.uk',
             replyTo: 'helpdesk@alt.ac.uk'
           });
-          var row = parseInt(s.ID.match(/\d+$/)[0]);
+          var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('reminder_sent')
             .setNote('R_proposal_'+s['Decision R1']+' sent by: ' +
@@ -392,7 +394,7 @@ function sendFinalDecsions() {
             cc: 'systems@alt.ac.uk',
             replyTo: 'helpdesk@alt.ac.uk'
           });
-          var row = parseInt(s.ID.match(/\d+$/)[0]);
+          var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('sent')
             .setNote('2_proposal_' + s['Final Decision'] + ' sent by: ' +
@@ -425,7 +427,7 @@ function sendReviewerNotification() {
  */
 function sendReviewerReminder() {
   var email = getEmailTemplate('remind_reviewer');
-  var days = parseInt(Browser.inputBox('Number of days since assigned to remind'));
+  var days = parseInt(Browser.inputBox('Number of days since assigned to send remind_reviewer'));
   sendReviewerEmails_(email, 'reminded', days);
 }
 
@@ -433,7 +435,7 @@ function sendReviewerReminder() {
  * Sends email reminder to reviewers who have accepted with link to review submission.
  */
 function sendReviewerReminderAccepted() {
-  var resp = Browser.msgBox("Sending emails", "You are about to send reviewer reminder emails to reviewers who have accepted reviews but not provided feedback. Are you sure?", Browser.Buttons.YES_NO);
+  var resp = Browser.msgBox("Sending emails", "You are about to send reviewer reminder emails to reviewers who have accepted reviews but not provided feedback (remind_reviewer_accepted). Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     var email = getEmailTemplate('remind_reviewer_accepted');
     sendReviewerEmails_(email, 'accept');
@@ -451,6 +453,7 @@ function sendReviewerEmails_(email, type, days) {
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
   var subs = sheet.getDataRange();
   var sub_obj = objectify(subs);
+  sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj);
   var headings = sheet.getDataRange()
     .offset(0, 0, 1)
     .getValues()[0];
@@ -461,8 +464,8 @@ function sendReviewerEmails_(email, type, days) {
   }
   // filter where Include column is 'yes'
   var sub_filtered = sub_obj.filter(function(s) {
-    if (s['Include'] === 'yes') {
-      var row = parseInt(s.ID.match(/\d+$/)[0]) + 1;
+    if (s['Include'] === 'yes' && !s['hidden']) {
+      var row = parseInt(s.ID.match(/\d+$/)[0], 10) + 1;
       for (var r = 1; r < 5; r++) {
 
         var colReviewer = revCols[r - 1];
@@ -477,7 +480,9 @@ function sendReviewerEmails_(email, type, days) {
           })) {
           // get email address
           var recipient = extractBracket(s['Reviewer' + r]);
+          Logger.log(recipient);
           // shorten link for email
+          
           var url = UrlShortener.Url.insert({
             longUrl: REVIEW_URL + '?action=review&token=' + createToken_(recipient, s.hashed_id, 'review', r)
           });
@@ -493,17 +498,18 @@ function sendReviewerEmails_(email, type, days) {
             });
             // record on sheet
             sheet.getRange(row, colReviewStatus).setValue('review_' + type)
-              .setNote(capitalizeFirstLetter(type) + ' by: ' +
-                Session.getActiveUser().getEmail() + '\nTo: ' +
-                recipient + '\nDate: ' +
-                Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+              .setNote(capitalizeFirstLetter(type) + ' by: ' + Session.getActiveUser().getEmail() +
+                '\nTo: ' + recipient +
+                '\nURL: ' + s.review_url + 
+                '\nDate: ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
           } catch (e) {
             sheet.getRange(row, colReviewStatus).setValue('error_' + type)
-              .setNote('Error ' + capitalizeFirstLetter(type) + ' by: ' +
+              .setNote('Error ' + type + ' by: ' +
                 Session.getActiveUser().getEmail() + '\nDate: ' +
                 Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm') +
                 'Msg ' + e.message);
           }
+          
         }
       }
 

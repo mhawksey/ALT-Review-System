@@ -195,7 +195,13 @@
         });
       
         //console.log(r);
-        
+        $('.character-counter').each(function () {
+            var textarea = $(this).data('for');
+            var words = $(this).data('max-words');
+            if (words){
+              $('#' + textarea+ '_count').text('~' + countWords($('#' + textarea).val()) + '/' + words + ' words');
+            }
+        });
         
 
         // Refresh materialize components
@@ -302,7 +308,7 @@
             $('[id$=_but]').addClass('disabled');
             $('.progress').show();
             //$('#type').prop("disabled", false);
-            //$('#token').val(token);
+            $('#token').val(token);
 
             // join authors
             var auth_details = [];
@@ -311,25 +317,39 @@
                     'counter')).val());
             });
             $('.extra_authors').val(auth_details.join('~'));
+            $('input[name=session_type],input[name=session_theme]').prop("disabled", false);
             google.script.run.withSuccessHandler(handleSubmissionResponse)
-                .processNewSubmissionForm(this);
+                .processSubmitForm(this);
             $('.setting').prop("disabled", true);
         });
         // review form event handler
         function handleSubmissionResponse(r) {
-            var data = JSON.parse(r.data);
-            console.log(data);
+            console.log(r)
+            var data = r.data;
             $('.progress').hide(); 
             $('.modal').modal();
             if (r.result === 'ok') {
                 i18n.session_title = data.session_title;
-                $('#sharer').show();
+                if (r.type === 'new'){
                 $('#modal_title').text('Your session "' + data.session_title +
                     '" has been successfully submitted');
                 $('#modal_message').html('<p>Your proposal has been submitted and a copy has been emailed to <strong>' +
                     data.email +
                     '</strong>. If you have any enquiries regarding your submission please quote <strong>Ref:' +
                     data.ID + '</strong>.</p><p>Share your submission title and the conference call:</p>');
+                    $('#sharer').show();
+                } else if (r.type === 'update'){
+                $('#modal_title').text('Your session "' + data.session_title +
+                    '" has been successfully updated');
+                $('#modal_message').html('<p>Your proposal has been updated and a copy has been emailed to <strong>' +
+                    data.email +
+                    '</strong>. If you have any enquiries regarding your submission please quote <strong>Ref:' +
+                    data.ID + '</strong>.<p>Share conference registration information:</p></p>');
+                    $('#facebook,#linkedin').attr('data-qs', '{registration_url}');
+                    $('#twitter').attr('data-qs','I\'ve just submitted an updated session proposal \'{session_title}\' for {hashtag} 10-11 April 2019, Galway. To register {registration_url}'); 
+                    $('#sharer').show();
+                }
+                
 
             } else {
                 $('#sharer').hide();

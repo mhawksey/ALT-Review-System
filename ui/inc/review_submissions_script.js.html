@@ -1,16 +1,17 @@
 <script>
   $(function() {
+   $('.container').removeClass('container');
     $('#loading').show();
     var IS_FILTERED = true;
     var SHEET = {};
     var ORIG = {}; // Original Forma Data
     // get all submissions from the google sheet
+    console.log(mode);
     google.script.run.withSuccessHandler(getSubs)
-      .getAllSubmissionData();
+      .getAllSubmissionData(mode);
     // get all submissions handler
     function getSubs(sheet) {
       SHEET = JSON.parse(sheet);
-      console.log(sheet);
       showSubs(currentRow);
     }
     
@@ -57,7 +58,78 @@
       }
       $('#rowID').text(r.ID);
       $('#rowTitle').text(r.session_title);
+      
+      if (mode === 'reviewAdmin' || mode === 'reviewAdmin2') {
+        $('[id$=_but]').removeClass('disabled').removeAttr('clicked');
+        console.log("Adding admin data");
+          
+        // remove collapsible
+        $('#reviews_text').empty();
+        $("#feedback_decision").val(r['Decision R1']);
+        $("#different_type").val(r['different_type']);
+        $("#feedback_decision").change();
+        $("#hashed_id").val(r['Hashed ID']);
+        $('#feedback_area').val(r['Feedback Text']);
+        if (mode === 'reviewAdmin'){
+        if (r['Decision Status R1'] !== "") {
+          $('#saved_but').text('Update Decision');
+        } else {
+          $('#saved_but').text('Save Decision');
+        }
+        if (r['Decision Status R1'] === "sent" || r['Decision Status R1'] === "reminder_sent") {
+          $('#saved_but').addClass('disabled');
+        }
+        } else if (mode === 'reviewAdmin2'){
+        if (r['Final Decision Status'] !== "") {
+          $('#decision_but').text('Update Decision');
+        } else {
+          $('#decision_but').text('Save Decision');
+        }
+        if (r['Final Decision Status'] === "sent" || r['Final Decision Status'] === "reminder_sent") {
+          $('#decision_but').addClass('disabled');
+        }
+        }
+        default_feedback = "";
+        for (var i = 1; i <= 4; i++) {
+          var rev = 'Review' + i;
+          var resp = r[rev + ' Status'];
+          var type = resp.split('_');
+          $('#' + rev + ' .review_dec > i').addClass(type[0]);
+          $('#' + rev + ' .status').text(resp);
+          $('#' + rev + ' .type').text(r[rev + ' Type']);
+          if (resp === 'accept_different_type') {
+            $('#' + rev + ' .review_type').show();
+          } else {
+            $('#' + rev + ' .review_type').hide();
+          }
+          var icon = $('#' + rev + ' .review_dec > i');
+          if (type[0] === 'accept' && type.length === 1) {
+            icon.text('sentiment_very_satisfied');
+          } else if (type[0] === 'accept') {
+            icon.text('sentiment_satisfied');
+          } else if (type[0] === 'reject') {
+            icon.text('sentiment_very_dissatisfied');
+          } else if (type[0] === 'resubmit') {
+            icon.text('sentiment_dissatisfied');
+          } else {
+            icon.text('block');
+          }
+
+          if (r[rev + ' Text']) {
+            var review_feedback = 'Reviewer ' + i + '\n' + (r[rev + ' Text']) + '\n\n';
+            default_feedback += review_feedback
+            if (r['Feedback Text'] === "") {
+              var feed = $('#feedback_area');
+              var cur = feed.val();
+              var append = cur + review_feedback;
+              feed.val(append);
+            }
+          }
+        }
+
+      }
       updateFields(r);
+      $('select').formSelect();
       $("[id$='_review']").removeClass('active');
       $('#' + r['Include']+'_review').addClass('active');
       //$('#submit_but').text('Update');

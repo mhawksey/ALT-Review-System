@@ -4,6 +4,7 @@
     $('#submit_but').hide();
     $('[data-msg="sidebar"] a').attr("href", "https://oer19.oerconf.org/oer19-guidance-for-reviewers/");
     $('[data-msg="sidebar"] a').text("OER19 Guidance for Reviewers");
+    $('[data-msg="form_name"]').text("OER19 Reviewer Form");
     // Handle no review token
     if (!token) {
       $('.modal').modal();
@@ -84,6 +85,7 @@
       $('[id^=review_]').addClass('disabled');
       $('.progress').show();
       $('#token').val(token);
+      $('#review_session_title').val($('#session_title').val());
       google.script.run.withSuccessHandler(handleReviewResponse).processReviewForm(this);
       $('.review').prop("disabled", true);
       $('select').formSelect();
