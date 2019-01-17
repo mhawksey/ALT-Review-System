@@ -198,7 +198,7 @@ function checkAuthor() {
  * Sends email to all lead authors.
  */
 function notifyAuthors() {
-  var resp = Browser.msgBox("Sending emails", "You are about to send emails to all authors that have been filtered. Are you sure?", Browser.Buttons.YES_NO);
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails (notify_authors) to all authors that have been filtered. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     // get all submissions
     var email = getEmailTemplate('notify_authors');
@@ -303,9 +303,10 @@ function sendReviewDecisions() {
           var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('sent')
-            .setNote(s['Decision R1'] + '_proposal sent by: ' +
-              Session.getActiveUser().getEmail() + '\nDate: ' +
-              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+            .setNote(s['Decision R1'] + '_proposal sent by: ' + Session.getActiveUser().getEmail() + 
+                '\nTo: ' + recipient +
+                '\nURL: ' + s.review_url + 
+                '\nDate: ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
         } catch (e) {
           sheet.getRange(row + 1, desCol + 1).setValue('error')
             .setNote(s['Decision R1'] + '_proposal sent by: ' +
@@ -352,9 +353,10 @@ function sendReviewDecisionsReminder() {
           var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('reminder_sent')
-            .setNote('R_proposal_'+s['Decision R1']+' sent by: ' +
-              Session.getActiveUser().getEmail() + '\nDate: ' +
-              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+            .setNote('R_proposal_'+s['Decision R1']+' sent by: ' + Session.getActiveUser().getEmail() + 
+                '\nTo: ' + recipient +
+                '\nURL: ' + s.review_url + 
+                '\nDate: ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
         } catch (e) {
           sheet.getRange(row + 1, desCol + 1).setValue('error')
             .setNote('R_proposal_'+s['Decision R1']+' sent by: ' +
@@ -397,9 +399,9 @@ function sendFinalDecsions() {
           var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
           sheet.getRange(row + 1, desCol + 1).setValue('sent')
-            .setNote('2_proposal_' + s['Final Decision'] + ' sent by: ' +
-              Session.getActiveUser().getEmail() + '\nDate: ' +
-              Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
+            .setNote('2_proposal_' + s['Final Decision'] + ' sent by: ' + Session.getActiveUser().getEmail() + 
+                '\nTo: ' + recipient +
+                '\nDate: ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
         } catch (e) {
           sheet.getRange(row + 1, desCol + 1).setValue('error')
             .setNote('2_proposal_' + s['Final Decision'] + ' sent by: ' +

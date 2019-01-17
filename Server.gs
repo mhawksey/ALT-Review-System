@@ -267,7 +267,9 @@ function getAllOriginalSubmissionData(optMode) {
   var data = objectify(dataRange);
   var output = {};
   for (var i=0; i<data.length; i++){
-    output[data[i]['Timestamp'].toISOString()] = data[i];
+    if (output[data[i]['timestamp'].toISOString()] == undefined){
+      output[data[i]['timestamp'].toISOString()] = data[i];
+    }
   }
   return JSON.stringify(output);
 }

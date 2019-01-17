@@ -15,6 +15,9 @@
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <?!= include('ui/inc/style.css'); ?>
+  <? if (mode === 'reviewAdmin2') { ?>
+    <?!= include('ui/inc/diff.js'); ?>
+  <? } ?>
 </head>
 
 <body>
@@ -38,7 +41,10 @@
     <div class='container'>
         <div class="row">
             <div class="col s12 m9 l10">
-            <? if (mode ==="reviewAdmin") { ?>    
+<? if (mode ==="reviewAdmin2") { ?>    
+                    <?!= include('ui/admin_review2'); ?>
+<? } ?>
+<? if (mode ==="reviewAdmin" || mode ==="reviewAdmin2") { ?>    
                     <?!= include('ui/admin_review'); ?>
 <? } ?>
                 <form id="submission_form">

@@ -12,6 +12,16 @@
     // get all submissions handler
     function getSubs(sheet) {
       SHEET = JSON.parse(sheet);
+      if (mode === 'reviewAdmin2') {
+        // get all original submissions from the google form
+        google.script.run.withSuccessHandler(getOriginalSubsHandler)
+          .getAllOriginalSubmissionData(mode);
+      } else {
+        showSubs(currentRow);
+      }
+    }
+    function getOriginalSubsHandler(data) {
+      ORIG = JSON.parse(data);
       showSubs(currentRow);
     }
     
@@ -28,6 +38,51 @@
     });
     $('#pagePrev,#pageNext').on('mousedown', function(e) {
       $('#loading').show();
+    });
+    
+    $('label').on('click', '.diff a', function(e) {
+      var field = $(this).data('parent');
+      var result = document.getElementById('result_' + field);
+      var colName = $('#' + field).attr('name');
+      var mode = $(this).text();
+      var a = SHEET[currentRow - 2];
+      var b = ORIG[a['timestamp']];
+      
+
+      if (mode === 'compare' && b !== undefined) {
+        var diff = JsDiff.diffWords(b[colName], a[colName]);
+        var fragment = document.createDocumentFragment();
+        for (var i = 0; i < diff.length; i++) {
+          if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
+            var swap = diff[i];
+            diff[i] = diff[i + 1];
+            diff[i + 1] = swap;
+          }
+          var node;
+          if (diff[i].removed) {
+            node = document.createElement('del');
+            node.appendChild(document.createTextNode(diff[i].value));
+          } else if (diff[i].added) {
+            node = document.createElement('ins');
+            node.appendChild(document.createTextNode(diff[i].value));
+          } else {
+            node = document.createTextNode(diff[i].value);
+          }
+          fragment.appendChild(node);
+        }
+        result.textContent = '';
+        result.appendChild(fragment);
+
+        $('#' + field).hide();
+        $('#result_' + field).show();
+        $(this).text('current');
+      } else {
+        $('#' + field).show();
+        $('#result_' + field).hide();
+        $(this).text('compare');
+      }
+      $('#loading').hide();
+      e.preventDefault();
     });
     
     // filter event
@@ -128,6 +183,52 @@
         }
 
       }
+      
+      
+            // Final review features
+      if (mode === 'reviewAdmin2') {
+        $('#saved_but').closest('.row').hide();
+        $('.diff').remove();
+        $('.diff_result').remove();
+        //$('#decision_but').show();
+        $('#feedback_decision,#feedback_area').attr('disabled', true);
+
+        // set RSVP status
+        $('#RSVP .status').text(r['RSVP']);
+        $('#RSVP .sub_status > i').addClass(r['RSVP']);
+        if (r['RSVP'] === 'proposal_include') {
+          $('#RSVP .sub_status > i').text('sentiment_very_satisfied');
+        } else if (r['RSVP'] === 'proposal_withdraw') {
+          $('#RSVP .sub_status > i').text('sentiment_very_dissatisfied');
+        } else {
+          $('#RSVP .sub_status > i').text('block');
+        }
+
+        // set update status
+        $('#Status .status').text(r['Submission Status']);
+        $('#Status .sub_status > i').addClass(r['Submission Status']);
+        if (r['Submission Status'] === 'updated') {
+          $('#Status .sub_status > i').text('sentiment_very_satisfied');
+        } else {
+          $('#Status .sub_status > i').text('block');
+        }
+
+        $('#submission_decision').val(r['Final Decision']);
+        $('#decision_notes_area').val(r['Final Decision Notes']);
+        $('#author_notes_area').val(r['Note to Director']);
+
+        // handle compare
+        // add compare button for description, content and references
+        // handles checkboxes, radios, extra_authors
+        
+        var labels = custom_fields.filter(function (el) {
+          return el.allow_compare;
+        });
+        labels.forEach(function (l) {
+          $("label[for='"+l.id+"']").append('<span class="diff"> (<a href="#" data-parent="' + l.id + '">compare</a>)</span>');
+          $('#' + l.id).after('<pre class="diff_result" id="result_' + l.id + '"></pre>');
+        });
+      }
       updateFields(r);
       $('select').formSelect();
       $("[id$='_review']").removeClass('active');
@@ -135,6 +236,10 @@
       //$('#submit_but').text('Update');
       $('.setting').prop("disabled", true);
       $('#loading').hide();
+      if (mode === 'reviewAdmin2') {
+        $('.diff a').trigger('click');
+      }
     }
+    
   });
 </script>
