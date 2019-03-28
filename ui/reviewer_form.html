@@ -4,26 +4,38 @@
       <h1>Submit your review</h1>
       <h2>Review criteria checklist</h2>
       <p>Use this checklist to record whether the submissions meets the criteria. Indicate if this proposal:</p>
-      <div class="col s12">
+      <div class="col s12 checkbox">
         <label>
-         <input name="criteria[]" type="checkbox" id="criteria_1" class="filled-in setting" value="1. Relates to theme" />
-         <span>Does explain how the session relates to the chosen conference theme.</span>
+         <input name="criteria[]" type="checkbox" id="criteria_1" class="filled-in review" value="1" />
+         <span>Relevance to the conference title ‘Recentering open: Critical and global perspectives’ and to one or more of the conference key questions</span>
         </label>
         <label>
-        <input name="criteria[]" type="checkbox" id="criteria_2" class="filled-in setting" value="2. Clearly written" />
-        <span>Is clearly written (i.e. acronyms are explained, and language appropriate for an international audience and from participants from different sectors).</span>
+        <input name="criteria[]" type="checkbox" id="criteria_2" class="filled-in review" value="2" />
+        <span>Usefulness to conference participants globally, and from across all sectors of education</span>
         </label>
         <label>
-        <input name="criteria[]" type="checkbox" id="criteria_3" class="filled-in setting" value="3. Session outcome" />
-        <span>States what participants will gain from the session and why they should attend.</span>
+        <input name="criteria[]" type="checkbox" id="criteria_3" class="filled-in review" value="3" />
+        <span>Contribution to the provision of reliable evidence for scholarship and research into Open Education</span>
         </label>
         <label>
-        <input name="criteria[]" type="checkbox" id="criteria_4" class="filled-in setting" value="4. Critical refection" />
-        <span>Includes details of what the session is based on, such as a particular project or initiative or practice? Does it critically reflect on this and evaluate it (i.e. state how many learners/staff are involved, what feedback was collected and how transferable your experience/findings/tools are).</span>
+        <input name="criteria[]" type="checkbox" id="criteria_4" class="filled-in review" value="4" />
+        <span>Demonstrated evidence of reflection, evaluation, and criticality</span>
         </label>
         <label>
-        <input name="criteria[]" type="checkbox" id="criteria_5" class="filled-in setting" value="5. Commercial acknowledgement" />
-        <span>If it is a commercial proposal, we ask that it meets all the above criteria and clearly states what products are being demonstrated or discussed and acknowledges the role of the company in the session.</span>
+        <input name="criteria[]" type="checkbox" id="criteria_5" class="filled-in review" value="5" />
+        <span>Engagement of participants</span>
+        </label>
+        <label>
+        <input name="criteria[]" type="checkbox" id="criteria_5" class="filled-in review" value="6" />
+        <span>Creativity and innovation</span>
+        </label>
+                <label>
+        <input name="criteria[]" type="checkbox" id="criteria_5" class="filled-in review" value="7" />
+        <span>Openness</span>
+        </label>
+                <label>
+        <input name="criteria[]" type="checkbox" id="criteria_5" class="filled-in review" value="8" />
+        <span>Clarity, coherence and conformance to guidelines</span>
         </label>
       </div>
       <div class="row">
@@ -50,11 +62,11 @@
           </ul>
         </div>
       </div>
-      <?!= include('decision_fields'); ?>
+      <?!= include('ui/decision_fields'); ?>
         <div class="row">
           <div class="col s12">
             <ul class="collapsible">
-              <li>
+              <li class="active">
                 <div class="collapsible-header"><i class="material-icons">help_outline</i>
                   <h3>How to write feedback for authors</h3></div>
                 <div class="collapsible-body">
@@ -62,13 +74,9 @@
                   <p>Be concise, sometimes a sentence or two is enough and we ask that feedback is as clear and specific as possible, referring directly to sentences or sections of the proposal that should be revised.</p>
                   <p>Here are tips from other reviewers:</p>
                   <ul class="browser-default">
-                    <li>Avoid praising or criticising the author, make sure all comments refer to the proposal . Consider giving 3 points of positive feedback, followed by the suggestions for change, which (as suggested below) should be focussed on what the
-                      author needs to do, rather than general comments.</li>
-                    <li>Try to write feedback that you’d be happy to receive and that the authors can clearly action. Be positive in your language and constructive in your suggestions, rather than tell people what the problem is tell them what you think the
-                      solution should be.</li>
-                    <li>For example: If you think a workshop proposal sounds boring, try saying “This session needs more interaction, please include details of the activities your participants will be doing during the session”.</li>
-                    <li>Remember that just because someone has done something in a different way than you would have done it, does not make them wrong. Be respectful and be explicit about the nature of the advice you are giving: for example, are you are offering
-                      suggestions for consideration (“the proposal could be enhanced by the inclusion of…”), or insisting on a problem being fixed (“this section is unclear and should be rewritten”)?</li>
+                    <li>Avoid praising or criticising the author(s), make sure all comments refer to the proposal. Rather than general comments, consider giving a few specific  points of positive feedback, followed by suggestions for change, which (as suggested below) should be focussed on what the author could do to improve the proposal.</li>
+                    <li>Try to write feedback that you’d be happy to receive and that the authors can clearly action. Be positive in your language and constructive in your suggestions. rather than simply stating any problems that you identify or anticipate for the session, you can suggest changes/additions to the proposal that would improve it (particularly in line with the review criteria). For example: If you think a workshop proposal sounds more like a one-way presentation, you might say “This session  would benefit from more interaction; please include details of the ways participants will be invited to engage  during the session”.</li>
+                    <li>Remember that just because someone has done something in a different way than you would have done it, does not make them wrong. Please be respectful and be explicit about the nature of the advice you are giving. For example, are you offering suggestions for consideration (“the proposal could be enhanced by the inclusion of…”), or insisting on a problem being fixed (“this section is unclear and should be rewritten”)?</li>
                     <li>Keep in mind that our authors come from different sectors and backgrounds and English may not be their first language.</li>
                   </ul>
                 </div>
@@ -79,21 +87,20 @@
         <div class="row">
           <div class="input-field col s12">
 
-            <textarea name="feedback_text_area" id="feedback_text_area" class="materialize-textarea validate setting" data-length="1500" required="" aria-required="true"></textarea>
+            <textarea name="feedback_text_area" id="feedback_text_area" class="materialize-textarea validate review" data-length="1500" required="" aria-required="true"></textarea>
             <label class="active" for="feedback_text_area">Feedback for the author (required):</label>
           </div>
         </div>
-
-        <div class="center-align">
-          <button id="submit_but" class="btn waves-effect waves-light blue disabled" type="submit" name="action">Submit <i class="material-icons right">send</i></button>
-        </div>
-
+        <div class="row">
+                        <div class="col s12 center-align">
+                            
+                            <button id="reviewsubmit_but" class="btn waves-effect waves-light blue disabled" type="submit"
+                                name="action">Submit <i class="material-icons right">send</i></button>
+                        </div>
+                    </div>
         <input type="hidden" id="ID" name="ID" />
-        <input type="hidden" id="session_title" name="Session title" />
+        <input type="hidden" id="review_session_title" name="review_session_title" />
         <input type="hidden" id="token" name="token" />
-        <input type="hidden" id="review_token" name="review_token" />
-        <input type="hidden" id="reviewer_num" name="reviewer_num" />
-        <input type="hidden" id="reviewer_token" name="reviewer_token" />
     </div>
   </form>
 </div>

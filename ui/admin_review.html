@@ -55,12 +55,12 @@
         </div>
       </div>
     </div>
-    <?!= include('decision_fields'); ?>
+    <?!= include('ui/decision_fields'); ?>
       <div class="row">
         <div class="input-field col s12">
-          <textarea id="feedback_area" name="feedback" class="materialize-textarea setting"></textarea>
+          <textarea id="feedback_area" name="feedback" class="materialize-textarea review"></textarea>
           <label class="active" for="feedback_area">Submission Feedback (<a id="reset_feedback" href="#">reset</a>)</label>
-          <span id="feedback_area" class="character-counter" style="float: right; font-size: 12px;"></span>
+          <span id="feedback_area_count" class="character-counter" data-for="feedback_area" data-max-words="500" style="float: right; font-size: 12px;"></span>
         </div>
       </div>
       <div class="row">
@@ -73,3 +73,43 @@
       </div>
   </form>
 </div>
+<script>
+    $('#reset_feedback').on('click', function(e) {
+      e.preventDefault();
+      $('#feedback_area').val(default_feedback);
+      M.textareaAutoResize($('#feedback_area'));
+    });
+    
+    $('[id$=_but]').on('click', function() {
+      $("button[type=submit]", $(this).parents("form")).removeAttr("clicked");
+      $(this).attr("clicked", "true");
+    });
+        // review form event
+    $("#decision_form,#decision_form2").on('submit', function(e) {
+      e.preventDefault();
+      var action = $("[id$=_but][clicked=true]").removeAttr('clicked')
+        .prop("id")
+        .split('_')[0];
+      $('#action').val(action);
+      $('[id$=_but]').addClass('disabled');
+      $('.progress').show();
+      google.script.run.withSuccessHandler(handleReviewAdminResponse)
+        .processReviewAdminForm(this);
+
+      $('.review').attr("disabled", true);
+      //$('select').formSelect();
+    });
+     // review form event handler
+    function handleReviewAdminResponse(data) {
+      $('.progress').hide();
+      $('[id$=_but]').removeClass('disabled');
+      $('#saved_but,#decision_but').text('Update Decision');
+      if (data.action === 'decision') {
+        $('#submission_decision, #decision_notes_area').removeAttr('disabled')
+      } else {
+        $('#feedback_area, #feedback_decision, #select_different_type').removeAttr('disabled');
+      }
+      $('.review').attr("disabled", false);
+      console.log(data);
+    }
+</script>

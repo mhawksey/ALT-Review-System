@@ -1,46 +1,38 @@
 <script>
-  $(function() {
+$(function() {
+    $('.progress').show();
+    $('#submit_but').hide();
+    $('#sub_extras').hide();
+    $('[data-msg="sidebar"] a').attr("href", "https://oer19.oerconf.org/oer19-guidance-for-reviewers/");
+    $('[data-msg="sidebar"] a').text("OER19 Guidance for Reviewers");
+    $('[data-msg="form_name"]').text("OER19 Reviewer Form");
     // Handle no review token
-    if (token === "undefined") {
+    if (token === 'notoken') {
       $('.modal').modal();
       $('#modal_title').text('Oops - an error has occured');
-      $('#modal_text').text('We can\'t find your submission. Please check the link from your email.');
+      $('#modal_text').text('We can\'t find the submission. Please check the link from your email.');
       $('#modal').modal('open');
     } else {
       // get proposal
       google.script.run.withSuccessHandler(setData)
         .getProposalData(token);
     }
-    var author_count = 0;
-
-    function addAuthor() {
-
-      $('#authors').append('<div class="row valign-wrapper" id="authorgroup' + author_count + '"><div class="input-field col s5">' +
-        '<input class="auth_name" data-counter="' + author_count + '" id="additionalauthor' + author_count + '" type="text">' +
-        '<label for="additionalauthor' + author_count + '">Additional Author ' + author_count + ' Full Name</label>' +
-        '</div>' +
-        '<div class="input-field col s6">' +
-        '<input class="auth_inst" id="additionalinst' + author_count + '" type="text">' +
-        '<label for="additionalinst' + author_count + '">Additional Author ' + author_count + ' Institution (if applicable)</label>' +
-        '</div>' +
-        '<div class="input-field col s1">' +
-        '<a data-counter="' + author_count + '" class="remove_additional"><i class="material-icons">cancel</i></a>' +
-        '</div></div>');
-
-    }
-    // get proposal success handler
+    
+     // get proposal success handler
     function setData(r) {
       var r = JSON.parse(r);
       console.log(r);
+      if (r.result !== 'error'){
       // update text boxes
       updateFields(r);
-      $('.materialize-textarea:not(#review_area,#theme,#type)').prop("disabled", false);
+      $('#submit_but').show();
+      //$('.materialize-textarea:not(#review_area,#theme,#type)').prop("disabled", false);
       if (r['RSVP']) {
         $('#' + r['RSVP']).removeClass('grey');
         $('#prompt_' + r['RSVP']).slideDown(400);
       }
 
-      var author_data = r['Additional Authors'].split('~');
+      /*var author_data = r['Additional Authors'].split('~');
       author_data.forEach(function(a) {
         var author_info = a.split('||');
         if (author_info[0] !== '' || author_info[1] !== '') {
@@ -51,13 +43,8 @@
           $('#additionalauthor' + author_count).val(author_info[0]);
           $('#additionalinst' + author_count).val(author_info[1]);
         }
-      });
-
-      // update word counts on selected fields
-      $('#desc_area, #eval_area').on('change keyup paste', function(event) {
-        $('#' + event.target.id + '_count').text('~' + countWords($(this).val()) + '/500 words');
-      });
-      $('#note_area').val(r['Note to Director']);
+      });*/
+      
       var resp = r['Decision R1'];
       var type = resp.split('_');
       $('#Review .review_dec > i').addClass(type[0]);
@@ -74,9 +61,9 @@
           review_text.html('<strong>Accepted with minor revisions:</strong> Congratulations! Your proposal has been accepted pending minor revisions, outlined in the feedback below.');
         } else {
           review_text.html('<strong>Change of session type:</strong> Your proposal requires revision as reviewers have recommended it for acceptance as a different type of session. Please refer to the feedback below.');
-          $('#requestType').val(r['Select what kind of session you\'d like to run:'].split('(')[0]);
+          $('#requestType').val(r['session_type'].split('(')[0]);
           $('#acceptType').val(r['different_type']);
-          $('#type').val(r['different_type']);
+          $("input[value='"+r['different_type']+"']").prop("checked",true)
           $('#changeType').slideDown(400);
         }
       } else if (type[0] === 'reject') {
@@ -87,12 +74,20 @@
       } else {
         icon.text('block');
       }
+      $('#review_area').val(r['Feedback Text']);
+      $('#note_area').val(r['Note to Director']);
+      $('input[name=session_type],input[name=session_theme],#requestType,#acceptType,#review_area').prop("disabled", true);
       M.updateTextFields();
       $('.materialize-textarea').each(function() {
         M.textareaAutoResize($('#' + $(this).attr('id')));
       });
+    } else {
+      $('.modal').modal();
+      $('#modal_title').text('Oops - an error has occured');
+      $('#modal_text').text('We can\'t find the submission. Please check the link from your email.');
+      $('#modal').modal('open');
     }
-
+    }
     // review button event
     $('[id^=proposal_]').on('click', function(e) {
       $('[id^=proposal_]').prop("disabled", true).addClass('grey');
@@ -118,49 +113,6 @@
       $('#modal').modal('open');
       //}
     }
-
-    $("#submission_form").on('submit', function(e) {
-      e.preventDefault();
-      $('[id$=_but]').addClass('disabled');
-      $('.progress').show();
-      $('#type').prop("disabled", false);
-      $('#token').val(token);
-      
-      // join authors
-      var auth_details = [];
-      $('.auth_name').each(function() {
-        auth_details.push($(this).val() + '||' + $('#additionalinst' + $(this).data('counter')).val());
-      });
-      $('#combined_authors').val(auth_details.join('~'));
-      google.script.run.withSuccessHandler(handleSubmissionResponse)
-        .processSubmissionForm(this);
-
-      $('.setting').prop("disabled", true);
-    });
-    // review form event handler
-    function handleSubmissionResponse(data) {
-      console.log(data)
-      $('[id$=_but]').removeClass('disabled');
-      $('#type').prop("disabled", true);
-      $('.progress').hide();
-      $('.modal').modal();
-      if (data.result === 'ok') {
-        $('#modal_title').text('Thank you - Proposal updated');
-        $('#modal_text').text('Your updated proposal has been recorded. You may now close this browser tab.');
-      } else {
-        $('#modal_title').text('Oops - an error has occured');
-        $('#modal_text').text('Your review was not recorded. Please try submitting again.');
-        $('#submit_but').removeClass("disabled");
-      }
-      $('#modal').modal('open');
-    }
-
-    $('#add_additional').on('click', function() {
-      author_count++;
-      addAuthor();
-    });
-    $('#authors').on('click', '.remove_additional', function(event) {
-      $('#authorgroup' + $(this).data('counter')).remove();
-    });
-  });
+    
+});
 </script>
