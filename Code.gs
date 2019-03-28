@@ -33,9 +33,9 @@ function onOpen() {
       .addItem('Send Reviewer Reminder (remind_reviewer)', 'sendReviewerReminder')
       .addItem('Send Reviewer Reminder for accepted reviews (remind_reviewer_accepted)', 'sendReviewerReminderAccepted')
       .addItem('Send Decisions (proposal_)', 'sendReviewDecisions')
-      .addItem('Send Decisions Reminder', 'sendReviewDecisionsReminder')
-      .addItem('Send Final Decisions', 'sendFinalDecsions')
-      .addItem('Send notify_authors message to all filtered submissions', 'notifyAuthors'))
+      .addItem('Send Decisions Reminder (R_proposal_)', 'sendReviewDecisionsReminder')
+      .addItem('Send Final Decisions (2_proposal_)', 'sendFinalDecsions')
+      .addItem('Send message to all filtered submissions (notify_authors)', 'notifyAuthors'))
     .addToUi();
 }
 
@@ -93,6 +93,10 @@ function doGet(e) {
   var custom_fields = getCustomFields_();
   var html = HtmlService.createTemplateFromFile('ui/404');
   html.custom_fields = custom_fields;
+  
+  /*if (!e.parameter.action){
+    e.parameter.action = 'decision';
+  }*/
   
   if (e.parameter.action){
     if ((e.parameter.action == 'new' && ACCEPT_SUBMISSIONS !== 'closed') || 
@@ -213,11 +217,17 @@ function notifyAuthors() {
     // iterate for submissions with check_author in Include column
     var sub_filtered = sub_obj.filter(function(s) {
       if (!s['hidden']) {
+        var recipient = s.email;
+        /*var url = UrlShortener.Url.insert({
+          longUrl: REVIEW_URL + '?action=decision&token=' + createToken_(recipient, s.hashed_id, 'decision', 1)
+        });
+        s.review_url = url.id;*/
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
-        var recipient = s.email
+        
         GmailApp.sendEmail(recipient, subject, body, {
           cc: 'systems@alt.ac.uk',
+          //replyTo: 'enquiries@alt.ac.uk'
           replyTo: 'helpdesk@alt.ac.uk'
         });
         var row = parseInt(s.ID.match(/\d+$/)[0], 10);
@@ -237,8 +247,8 @@ function notifyAuthorsFromGmail() {
   var resp = Browser.msgBox("Sending emails", "You are about to send emails to all authors that have been filtered. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     // get all submissions
-    var subjectLine = 'Important information regarding your presentation [Ref: {ID}] at ALT’s Annual Conference (action required)';
-    //var email = getGmailTemplate(subjectLine);
+    var subjectLine = 'OER19: Guidance for presenters and session chairs [Ref: {ID}]';
+    var email = getGmailTemplate(subjectLine);
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
     var subs = sheet.getDataRange();
     var sub_obj = objectify(subs);
@@ -255,8 +265,9 @@ function notifyAuthorsFromGmail() {
         var htmlBody = fillInTemplateFromObject(email.html, s)
         var recipient = s.email
        GmailApp.sendEmail(recipient, subject, body, {
-          cc: 'systems@alt.ac.uk',
+          bcc: 'systems@alt.ac.uk',
           replyTo: 'helpdesk@alt.ac.uk',
+          name:'ALT Helpdesk',
           htmlBody: htmlBody
         });
         var row = parseInt(s.ID.match(/\d+$/)[0], 10);
@@ -339,7 +350,7 @@ function sendReviewDecisionsReminder() {
       if (s['Decision R1'] !== '' && s['Decision R1'] !== 'reject' && s['Decision Status R1'] === 'sent' && s['Submission Status'] !== 'updated' && !s['hidden']) {
         var recipient = s.email
         var url = UrlShortener.Url.insert({
-          longUrl: REVIEW_URL + '?token=' + createToken_(recipient, s.hashed_id, 'decision', 1)
+          longUrl: REVIEW_URL + '?action=decision&token=' + createToken_(recipient, s.hashed_id, 'decision', 1)
         });
         s.review_url = url.id;
         var email = getEmailTemplate('R_proposal_' + s['Decision R1']);
@@ -403,6 +414,7 @@ function sendFinalDecsions() {
                 '\nTo: ' + recipient +
                 '\nDate: ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
         } catch (e) {
+          console.error('sendFinalDecsions() error: ' + e);
           sheet.getRange(row + 1, desCol + 1).setValue('error')
             .setNote('2_proposal_' + s['Final Decision'] + ' sent by: ' +
               Session.getActiveUser().getEmail() + '\nDate: ' +

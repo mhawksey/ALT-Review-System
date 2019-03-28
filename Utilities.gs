@@ -1,6 +1,5 @@
 function clearCache(){
-  var test = getScriptProp_('EDIT_SUBMISSIONS');
-  CacheService.getScriptCache().remove('custom_fields');
+  CacheService.getScriptCache().removeAll(['custom_fields','EDIT_SUBMISSIONS','ACCEPT_SUBMISSIONS']);
 }
 
 function getCustomFields_(){

@@ -511,13 +511,14 @@ function processSubmissionForm(formData) {
 }
 
 function processSubmitForm(formData){
+  console.log({fn:'processSubmitForm', data:formData})  
   if (formData.token){
     var data = decodeToken_(formData.token);
     if (data.mode === 'decision'){
       return processSubmissionForm(formData);
-    } else {
-      return processNewSubmissionForm(formData);
     }
+  } else {
+    return processNewSubmissionForm(formData);
   }
 }
 /**
@@ -526,7 +527,7 @@ function processSubmitForm(formData){
  * @return {Object} returns result.
  */
 function processNewSubmissionForm(formData) {
-  console.log({fn:processNewSubmissionForm, data:formData});
+  console.log({fn:'processNewSubmissionForm', data:formData});
   Logger.log(formData);
   console.time('processNewSubmissionForm');
   // https://stackoverflow.com/a/43238894

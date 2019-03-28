@@ -230,10 +230,12 @@
         });
       }
       updateFields(r);
+      $('.review').prop("disabled", false);
       $('select').formSelect();
       $("[id$='_review']").removeClass('active');
       $('#' + r['Include']+'_review').addClass('active');
       //$('#submit_but').text('Update');
+      
       $('.setting').prop("disabled", true);
       $('#loading').hide();
       if (mode === 'reviewAdmin2') {
