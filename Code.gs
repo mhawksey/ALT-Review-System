@@ -2,17 +2,17 @@ var SUB_SHEET_NAME = "Submissions";
 var REV_SHEET_NAME = "Reviewers";
 var REVIEW_SHEET_NAME = "Reviews";
 var ORIG_SUB_SHEET_NAME = "OriginalSubmissions"
-var ID_PREFIX = 'O-';
+var ID_PREFIX = 'A-';
 var EMAIL_FROM = 'helpdesk@alt.ac.uk';
 var EMAIL_CC = 'systems@alt.ac.uk';
 var ACCEPT_SUBMISSIONS = getScriptProp_('ACCEPT_SUBMISSIONS');
 var EDIT_SUBMISSIONS = getScriptProp_('EDIT_SUBMISSIONS');
 
 // Dev
-//var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxraNLV-AvejgwWdvHdX6O_44iOOJHcr0k_cTY0M5Q/dev";
+//var REVIEW_URL = "https://script.google.com/a/alt.ac.uk/macros/s/AKfycbxzAoNlhsqRUuPJuM1hLhbFGJd_6DgK2olUTrQF0MQ/dev";
 
 // Prod.
-var REVIEW_URL = "https://script.google.com/macros/s/AKfycbwuLhuyfdKo1CEVEIqEGSzIzzPHeOAKg9xCeVNP56jg-_1IUg4/exec";
+var REVIEW_URL = "https://script.google.com/macros/s/AKfycby8mr252cLqw7xjdznvcQIGkNzkLk5UZE6GFzapXtOA22VyQz4/exec";
 
 /**
  * On open
