@@ -1,3 +1,4 @@
+
 function clearCache(){
   CacheService.getScriptCache().removeAll(['custom_fields','EDIT_SUBMISSIONS','ACCEPT_SUBMISSIONS']);
 }
@@ -22,12 +23,13 @@ function getScriptProp_(key){
   return value;
 }
 
-function createToken_(email, row, mode, reviewer_num) {
+function createToken_(email, row, mode, reviewer_num, id) {
   var hashedEmail = getHashedText(email);
   var blob = Utilities.newBlob(JSON.stringify({
     reviewer: hashedEmail,
     row: row,
     reviewer_num: reviewer_num,
+    id: id,
     mode: mode
   }));
   return Utilities.base64EncodeWebSafe(blob.getBytes());

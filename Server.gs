@@ -16,11 +16,11 @@ function setReviewerStatus(token, type) {
 }
 
 function test(){
- var token_str = "eyJyZXZpZXdlciI6IjY2ZWIwYWJhODgyYTc1ODkxYzZmZjU3NjlmMTQ2OGU3MDY3NWM3YTgwNjE4Y2Q0ZDc2ZDk5ZmRjYzY5YjFhYjciLCJyb3ciOiI3YzNiNDNjMjhiMDIwNjI0ZDAxMTRjMDBjMjM4Y2Y2YjczZWI1MDQyNGMxMWMxNmEzNGQxZjc1OGYyMTk2OGYyIiwicmV2aWV3ZXJfbnVtIjoyLCJtb2RlIjoicmV2aWV3In0=";
+ var token_str = "eyJyZXZpZXdlciI6ImE3ODhlNzNmYTljMzM0Yzk4OTA2ZTUwMGY2ZGQzNmJiNWE0ZGQxY2ZhNWUxZDBlZmU0MmFiZjBmM2NmMmJjOTciLCJyb3ciOiJhOWU1YTlkOTJlNzBlZTE4ODQ2NjQwMWY4OWY2ZjgzYzIxNjQzYmU4YjIyMmE3YjU2MGQwNWJjZjUzMjYwNWZkIiwicmV2aWV3ZXJfbnVtIjoxLCJtb2RlIjoicmV2aWV3In0=";
   var token = decodeToken_(token_str);
   var type = 'accept';
-  updateReviewColumn_(token.row, token.reviewer, token.reviewer_num, type);
-  Logger.log(data);
+ // updateReviewColumn_(token.row, token.reviewer, token.reviewer_num, type);
+  Logger.log(token);
 }
 
 /**

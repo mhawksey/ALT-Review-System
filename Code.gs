@@ -89,7 +89,7 @@ function showDialog(mode) {
  * @return {HtmlService} returns result.
  */
 function doGet(e) {
-
+  var title = "ALT - Submission System";
   var custom_fields = getCustomFields_();
   var html = HtmlService.createTemplateFromFile('ui/404');
   html.custom_fields = custom_fields;
@@ -118,11 +118,13 @@ function doGet(e) {
         if (e.parameter.token){
           //var token = e.parameter.token;
           html.data = e.parameter.token;
+          var token = decodeToken_(e.parameter.token);
+          if (token.id) title = token.id + ' - ALT Review Form';
         } 
       } 
   }
   return html.evaluate()
-    .setTitle("ALT - Submission System")
+    .setTitle(title)
     .setFaviconUrl('https://www.alt.ac.uk/sites/alt.ac.uk/files/files/favicon.ico')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
@@ -247,7 +249,7 @@ function notifyAuthorsFromGmail() {
   var resp = Browser.msgBox("Sending emails", "You are about to send emails to all authors that have been filtered. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     // get all submissions
-    var subjectLine = 'OER19: Guidance for presenters and session chairs [Ref: {ID}]';
+    var subjectLine = '[Action Required] ALT Annual Conference 2019: Media Permission [Ref: {ID}]';
     var email = getGmailTemplate(subjectLine);
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
     var subs = sheet.getDataRange();
@@ -498,7 +500,7 @@ function sendReviewerEmails_(email, type, days) {
           // shorten link for email
           
           var url = UrlShortener.Url.insert({
-            longUrl: REVIEW_URL + '?action=review&token=' + createToken_(recipient, s.hashed_id, 'review', r)
+            longUrl: REVIEW_URL + '?action=review&token=' + createToken_(recipient, s.hashed_id, 'review', r, s.ID)
           });
           s.review_url = url.id;
           Logger.log(s.review_url);
@@ -507,8 +509,9 @@ function sendReviewerEmails_(email, type, days) {
           var body = fillInTemplateFromObject(email.text, s);
           try {
             GmailApp.sendEmail(recipient, subject, body, {
-              cc: 'systems@alt.ac.uk',
-              replyTo: 'helpdesk@alt.ac.uk'
+              bcc: 'systems@alt.ac.uk',
+              replyTo: 'helpdesk@alt.ac.uk',
+              name: 'ALT Helpdesk'
             });
             // record on sheet
             sheet.getRange(row, colReviewStatus).setValue('review_' + type)
@@ -567,7 +570,8 @@ function testEmailCase_(type, s, r, reminder) {
 
 function buildReviewerLists() {
   var review_sheet = SpreadsheetApp.getActive().getSheetByName(REV_SHEET_NAME);
-  var reviewers = review_sheet.getDataRange();
+  //var reviewers = review_sheet.getDataRange();
+  var reviewers = review_sheet.getRange("A1:G59");
   var rev = objectify(reviewers);
 
   var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
