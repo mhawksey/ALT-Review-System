@@ -19,7 +19,7 @@
     $('[data-msg="form_name"]').text(custom_var.review_form_name.values);
     
     var criteria = custom_var.review_criteria.values.split('|');
-    var crit_el = $('#review_criteria');
+    var crit_el = $('#criteria_list');
     criteria.forEach(function (c,idx) {
       crit_el.append('<label>'+
          '<input name="criteria[]" type="checkbox" id="criteria_'+idx+'" class="filled-in review" value="'+idx+'" />'+
