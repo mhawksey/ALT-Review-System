@@ -25,9 +25,9 @@
     </div>
       <div class="row">
         <div class="input-field col s12">
-          <textarea id="decision_notes_area" name="decision_notes_area" class="materialize-textarea setting"></textarea>
+          <textarea id="decision_notes_area" name="decision_notes_area" class="materialize-textarea review"></textarea>
           <label class="active" for="decision_notes_area">Final Decision Notes</label>
-          <span id="decision_notes_area" class="character-counter" style="float: right; font-size: 12px;"></span>
+          <span id="decision_notes_area_count" class="character-counter" data-for="decision_notes_area" data-max-words="500" style="float: right; font-size: 12px;"></span>
         </div>
       </div>
       <div class="row">
@@ -38,7 +38,7 @@
       </div>
           <div class="row">
   <div class="input-field col s12">
-    <select id="submission_decision" name="submission_decision" class="validate setting" required="" aria-required="true">
+    <select id="submission_decision" name="submission_decision" class="validate review" required="" aria-required="true">
             <option value="" disabled selected>Choose your option</option>
             <option value="accept">Accept</option>
             <option value="confirmed">Confirmed</option>
@@ -59,3 +59,4 @@
       </div>
   </form>
 </div>
+
