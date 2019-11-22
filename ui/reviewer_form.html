@@ -1,0 +1,72 @@
+<div id="review" class="section scrollspy">
+  <form id="form_review" class="row">
+    <div class="col s12">
+      <h1>Submit your review</h1>
+      <h2>Review criteria checklist</h2>
+      <p>Use this checklist to record whether the submissions meets the criteria. Indicate if this proposal:</p>
+      <div class="col s12 checkbox" id="review_criteria">
+        <!-- auto filled from custom_fields -->
+      </div>
+      <div class="row">
+        <div class="col s12" style="padding-top:20px">
+          <h2>Record your decision</h2>
+          <ul class="collapsible">
+            <li>
+              <div class="collapsible-header active">
+                <i class="material-icons">help_outline</i>
+                <h3>Review Outcomes Explained</h3></div>
+              <div class="collapsible-body">
+                <ul class="collection">
+                  <li class="collection-item"><strong>Accept</strong> - Accept the proposal with no changes, a strong proposal, everything is as it should be.</li>
+                  <li class="collection-item"><strong>Accept with minor revisions</strong> - Accept the proposal with only minor changes (i.e. a strong proposal, but usually lacking in one aspect, for example too little reflection or information, lack of criticality, lack of participant engagement, etc.). Your feedback will be directly sent to the authors, so be as clear and detailed as you can about what changes they should make.</li>
+                  <li class="collection-item"><strong>Accept as different type</strong> - Accept the proposal, but as a different type. Use this option if you feel the proposal would be better as a poster, Alt-format, etc. In your feedback, please  specify how the proposal should be revised in order to be accepted as a different type of session.</li>
+                  <li class="collection-item"><strong>Recommend re-submission</strong> - The proposal cannot be accepted, but you feel that it meets the criteria to a sufficient degree that it could be accepted if it was revised significantly. Your feedback will be directly sent to the authors, so be as clear and detailed as you can be about what changes they should make.</li>
+                  <li class="collection-item"><strong>Reject</strong> - Reject the proposal if it is out of scope, of poor quality, or otherwise fails to meet the review criteria, and you feel it cannot be improved sufficiently by making revisions.</li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <?!= include('ui/decision_fields'); ?>
+        <div class="row">
+          <div class="col s12">
+            <ul class="collapsible">
+              <li class="active">
+                <div class="collapsible-header"><i class="material-icons">help_outline</i>
+                  <h3>How to write feedback for authors</h3></div>
+                <div class="collapsible-body">
+                  <p>The feedback you provide is sent to authors, so keep this in mind when writing your comments.</p>
+                  <p>Be concise, sometimes a sentence or two is enough and we ask that feedback is as clear and specific as possible, referring directly to sentences or sections of the proposal that should be revised.</p>
+                  <p>Here are tips from other reviewers:</p>
+                  <ul class="browser-default">
+                    <li>Avoid praising or criticising the author(s), make sure all comments refer to the proposal. Rather than general comments, consider giving a few specific  points of positive feedback, followed by suggestions for change, which (as suggested below) should be focussed on what the author could do to improve the proposal.</li>
+                    <li>Try to write feedback that you’d be happy to receive and that the authors can clearly action. Be positive in your language and constructive in your suggestions. rather than simply stating any problems that you identify or anticipate for the session, you can suggest changes/additions to the proposal that would improve it (particularly in line with the review criteria). For example: If you think a workshop proposal sounds more like a one-way presentation, you might say “This session  would benefit from more interaction; please include details of the ways participants will be invited to engage  during the session”.</li>
+                    <li>Remember that just because someone has done something in a different way than you would have done it, does not make them wrong. Please be respectful and be explicit about the nature of the advice you are giving. For example, are you offering suggestions for consideration (“the proposal could be enhanced by the inclusion of…”), or insisting on a problem being fixed (“this section is unclear and should be rewritten”)?</li>
+                    <li>Keep in mind that our authors come from different sectors and backgrounds and English may not be their first language.</li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+
+            <textarea name="feedback_text_area" id="feedback_text_area" class="materialize-textarea validate review" data-length="1500" required="" aria-required="true"></textarea>
+            <label class="active" for="feedback_text_area">Feedback for the author (required):</label>
+          </div>
+        </div>
+        <div class="row">
+                        <div class="col s12 center-align">
+                            
+                            <button id="reviewsubmit_but" class="btn waves-effect waves-light blue disabled" type="submit"
+                                name="action">Submit <i class="material-icons right">send</i></button>
+                        </div>
+                    </div>
+        <input type="hidden" id="ID" name="ID" />
+        <input type="hidden" id="review_session_title" name="review_session_title" />
+        <input type="hidden" id="token" name="token" />
+    </div>
+  </form>
+</div>

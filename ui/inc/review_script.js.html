@@ -1,24 +1,56 @@
 <script>
+// https://dev.to/afewminutesofcode/how-to-convert-an-array-into-an-object-in-javascript-25a4
+    const convertArrayToObject = (array, key) => {
+  const initialValue = {};
+  return array.reduce((obj, item) => {
+    return {
+      ...obj,
+      [item[key]]: item,
+    };
+  }, initialValue);
+};
+
   $(function() {
+    $('.progress').show();
+    $('#submit_but').hide();
+    const custom_var = convertArrayToObject(custom_fields, 'id');
+    $('[data-msg="sidebar"] a').attr("href", custom_var.review_guidance_url.values);
+    $('[data-msg="sidebar"] a').text(custom_var.review_guidance_text.values);
+    $('[data-msg="form_name"]').text(custom_var.review_form_name.values);
+    
+    var criteria = custom_var.review_criteria.values.split('|');
+    var crit_el = $('#review_criteria');
+    criteria.forEach(function (c,idx) {
+      crit_el.append('<label>'+
+         '<input name="criteria[]" type="checkbox" id="criteria_'+idx+'" class="filled-in review" value="'+idx+'" />'+
+         '<span>'+c+'</span>'+
+        '</label>');
+    });
+
+    $('#sub_extras').hide();
+    
     // Handle no review token
-    if (review_token === "undefined") {
+    if (!token) {
       $('.modal').modal();
       $('#modal_title').text('Oops - an error has occured');
-      $('#modal_text').text('We can\'t find your submission. Please check the link from your email.');
+      $('#modal_text').text('We can\'t find the submission. Please check the link from your email.');
       $('#modal').modal('open');
     } else {
       // get proposal
       google.script.run.withSuccessHandler(setReview)
-        .getReviewData(review_token, reviewer_token, reviewer_num);
+        .getReviewData(token);
     }
     // get proposal success handler
     function setReview(data) {
       var data = JSON.parse(data);
-      console.log(data)
+      console.log('setReview');
+      console.log(data);
       // update text boxes
       updateFields(data);
+      $('#ID').val(data.id);
+      $('.setting').prop("disabled", true);
       $('#feedback_text_area').characterCounter();
-      
+       $('.collapsible').collapsible();
 
       // handle review accept/decline buttons
       if (data.review_status === 'review_assigned' || data.review_status === 'review_reminded' || data.review_status === 'review_accept' || data.review_status === 'review_decline' || data.review_status === 'review_reassigned') {
@@ -26,21 +58,22 @@
       }
       // allow submit if review accepted
       if (data.review_status === 'review_accept'){
-        $('#submit_but').removeClass('disabled');
+        $('#reviewsubmit_but').removeClass('disabled');
       }
       if (data.review_status) {
         $('#' + data.review_status).removeClass('grey');
         $('#prompt_' + data.review_status).slideDown(400);
+        $('.table-of-contents').append($('<li><a href="#review">Submit your review</a></li>'));
       }
-
+      $('select').formSelect();
       // check if proposal has already been reviewed
       var reviewed_options = ['accept', 'accept_minor_revisions', 'accept_different_type', 'resubmit', 'reject'];
       if (reviewed_options.indexOf(data.review_status) > -1) {
         $('.modal').modal();
         $('#modal_title').text('Information');
-        $('#modal_text').html('<p>It looks like you have already reviewed this proposal. If you think this is an error please email <a href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a> quoting Ref:' + data.ID + '</p>');
+        $('#modal_text').html('<p>It looks like you have already reviewed this proposal. If you think this is an error please email <a href="mailto:helpdesk@alt.ac.uk">helpdesk@alt.ac.uk</a> quoting Ref: ' + data.id + '</p>');
         $('#modal').modal('open');
-        $('#submit_but').addClass("disabled");
+        $('#reviewsubmit_but').addClass("disabled");
       }
     }
 
@@ -50,7 +83,7 @@
       $('.progress').show();
       var type = $(e.currentTarget).prop("id");
       google.script.run.withSuccessHandler(reviewHandler)
-        .setReviewerStatus(review_token, reviewer_token, reviewer_num, type);
+        .setReviewerStatus(token, type);
     });
     // review button event handler
     function reviewHandler(data) {
@@ -65,23 +98,20 @@
         $('#modal').modal('open');
       } else {
         $('#prompt_' + data.review_status).show(400);
-        $('#submit_but').removeClass("disabled");
+        $('#reviewsubmit_but').removeClass("disabled");
       }
     }
 
     // review form event
     $("#form_review").on('submit', function(e) {
       e.preventDefault();
-      $('#submit_but').addClass("disabled");
+      $('#reviewsubmit_but').addClass("disabled");
       $('[id^=review_]').addClass('disabled');
       $('.progress').show();
-      $('#session_title').val($('#title').val());
       $('#token').val(token);
-      $('#review_token').val(review_token);
-      $('#reviewer_token').val(reviewer_token);
-      $('#reviewer_num').val(reviewer_num);
+      $('#review_session_title').val($('#session_title').val());
       google.script.run.withSuccessHandler(handleReviewResponse).processReviewForm(this);
-      $('.setting').prop("disabled", true);
+      $('.review').prop("disabled", true);
       $('select').formSelect();
     });
     // review form event handler
@@ -94,7 +124,7 @@
       } else {
         $('#modal_title').text('Oops - an error has occured');
         $('#modal_text').text('Your review was not recorded. Please try submitting again.');
-        $('#submit_but').removeClass("disabled");
+        $('#reviewsubmit_but').removeClass("disabled");
       }
       $('#modal').modal('open');
     }

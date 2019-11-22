@@ -1,0 +1,369 @@
+<script>
+    var Script = {};
+    Script.i18n = {};
+    Script.i18n.getMessage = function (msg) {
+        return i18n[msg];
+    }
+    /**
+     * Retrieves internationalized messages and loads them into the UI.
+     * @private
+     */
+    Script.fillMessages_ = function () {
+        // Load internationalized messages.
+        console.log("Adding messages..");
+        $('.i18n').each(function () {
+            var msg_id = $(this).attr('data-msg');
+            console.log(msg_id);
+            if (msg_id) {
+                var i18nText = Script.i18n.getMessage(msg_id.toString());
+                if ($(this).prop('tagName') == 'IMG') {
+                    $(this).attr({
+                        'title': i18nText
+                    });
+                } else if ($(this).prop('tagName') == 'A') {
+                    $(this).attr({
+                        'href': 'mailto:'+i18nText
+                    })
+                } else {
+                    $(this).html(i18nText);
+                }
+            }
+        });
+    };
+    
+    Script.addCustomFields_ = function () {
+       $('.custom_fields').each(function (index) {
+            var section = $(this).attr('id');
+            var section_fields = custom_fields.filter(function (el) {
+                return el.section == section;
+            });
+            section_fields.forEach(function (s) {
+                var type = s.type;
+                var values = s.values.split('|');
+                var required = s.required ? 'required' : '';
+                var required_asterix = s.required ? '<span class="required"></span>' : '';
+                var rc_elem = $('<div class="row"><div class="col s12 ' + type + '" id="' + s.id +
+                    '_section"><h2>' + s.label + required_asterix + '</h2><p>' + s.help_text +
+                    '</p></div></div>');
+                var input = '';
+                if (type === 'radio' || type === 'checkbox') {
+                    $('#' + section).append(rc_elem);
+                    values.forEach(function (o) {
+                        var o_text = $("<div/>").html(o).text();
+                        input += '<label><input name="' + s.id + '" type="' + type +
+                            '" class="setting" value="' + o_text + '" ' + required +
+                            '/><span>' + o + '</span></label>'
+                    });
+                    $('#' + s.id + '_section').append($(input));
+                    $('#' + s.id + '_section input[type="checkbox"]').addClass('filled-in');
+                    $('#' + s.id + '_section input[type="radio"]').addClass('with-gap');
+                } else if (type === 'extra_authors' && mode !== "review") {
+                    var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '">' + s.heading +
+                            '</a></li>'));
+                    }
+                    input =  '<div id="' + s.id + '" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.help_text + '</p>' +
+                        '<div id="authors"><div class="row" id="authorgroup1">' +
+                           '<div class="input-field col s12 l5"><input class="auth_name setting" data-counter="1" id="additionalauthor1" type="text" disabled>'+
+                                    '<label class="active" for="additionalauthor1">Full Name</label></div>'+
+                                '<div class="input-field col s11 l6"><input class="auth_inst setting" id="additionalinst1" type="text" disabled>'+
+                                    '<label for="additionalinst1">Institution (if applicable)</label></div>'+
+                                '<div class="col s1 l1 rAuthor"><p><a data-counter="1" class="remove_additional"><i class="material-icons">cancel</i></a></p>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>' +
+                        '<div><a id="add_additional" class="tooltipped" data-position="right" data-tooltip="Click to add another author/speaker"><i class="material-icons">add_circle</i></a></div>'+
+                        '<input type="hidden" id="' + s.id + '" name="' + s.id + '" class="extra_authors" />' +
+                    '</div>';
+                    $('#' + s.section).append($(input));
+                } else if (type === 'file') {
+                     
+                    var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '_section">' + s.heading +
+                            '</a></li>'));
+                    }
+                    input =  '<div id="' + s.id + '_section" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.help_text + '</p>' +
+                        '<div class="row"><div class="file-field input-field col s12">' +
+                        ' <div class="btn green"><span>Upload File</span><input type="file"" id="' + s.id +'" name="' + s.id +'" class="validate setting" ' + required +' disabled/></div>' +
+                        ' <div class="file-path-wrapper"><input class="file-path validate setting" type="text"></div>' +
+                        '</div></div>';
+                    $('#' + s.section).append($(input));
+                } else if (type === 'input') {
+                    var type = s.validation ? s.validation : 'text'; 
+                    var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '_section">' + s.heading +
+                            '</a></li>'));
+                    }
+                    input =  '<div id="' + s.id + '_section" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.help_text + '</p>' +
+                        '<div class="row"><div class="input-field col s12"><input type="'+type+'" id="' + s.id +
+                        '" name="' + s.id +
+                        '" class="validate setting" ' + required +
+                        ' disabled/><label for="' + s.id + '">' +
+                        s.label + '</label></div></div></div>';
+                    $('#' + s.section).append($(input));
+                } else if (type === 'textarea') {
+                    var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '_section">' + s.heading +
+                            '</a></li>'));
+                    }
+                    var counter = s.max ? '<span id="' + s.id +
+                        '_count" class="character-counter" data-for="' + s.id +
+                        '" data-max-words="' + s.max +
+                        '" style="float: right; font-size: 12px;"></span>' : '';
+                    input = '<div id="' + s.id + '_section" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.help_text + '</p>' +
+                        '<div class="row"><div class="input-field col s12"><textarea id="' + s.id +
+                        '" name="' + s.id +
+                        '" class="materialize-textarea validate setting" ' + required +
+                        ' disabled></textarea><label class="active" for="' + s.id + '">' +
+                        s.label + '</label>' +
+                        counter + '</div></div></div>';
+                    $('#' + s.section).append($(input));
+                } else if (type === 'html') {
+                 var toc = s.toc ? 'scrollspy' : '';
+                    if (toc) {
+                        $('.table-of-contents').append($('<li><a href="#' + s.id + '">' + s.heading +
+                            '</a></li>'));
+                    }
+                    input =  '<div id="' + s.id + '" class="section ' + toc + '"><h2>' + s.heading +
+                        '</h2><p>' + s.label + '</p>'
+                    $('#' + s.section).append($(input));
+                } else {
+                    console.log("Type not found");
+                }
+
+            });
+        }); // end of custom_fields writting
+     }
+</script>
+<script>
+    var default_feedback = "";
+    var author_count = 1;
+
+    function updateFields(r) {
+        console.log("updateFields ...");
+        $('input[type=checkbox],input[type=radio]').prop('checked',false);
+        // set values
+        for (var el in r) {
+          if (r.hasOwnProperty(el)) {
+            $('#'+el).val(r[el]);
+            if (r[el]){
+              $('#'+el).next('label').addClass('active');
+            }
+          }
+        }
+        
+        // handles checkboxes, radios, extra_authors
+        
+        var input_fields = custom_fields.filter(function (el) {
+          return el.type == 'radio' || el.type == 'checkbox' || el.type == 'extra_authors';
+        });
+        input_fields.forEach(function (i) {
+          if (i.type === 'extra_authors'){
+            $('#authors').empty();
+            if (r[i.id]){
+              var author_data = r[i.id].split('~');
+              author_data.forEach(function(a) {
+                var author_info = a.split('||');
+                if (author_info[0] !== '' || author_info[1] !== '') {
+                  //if (author_count > 1) {
+                    addAuthor(true);
+                  //}
+                  $('#additionalauthor' + author_count).val(author_info[0]);
+                  $('#additionalinst' + author_count).val(author_info[1]);
+                  author_count++;
+                }
+              });
+            }
+          } else if (i.type === 'radio') {
+            $("input[name='"+i.id+"'][value='"+r[i.id]+"']").prop('checked', true);
+          } else if (i.type === 'checkbox') {
+            if (r[i.id]){
+              var checks = r[i.id].split(' | ');
+              checks.forEach(function(v) {
+                $("input[name='"+i.id+"'][value='"+v+"']").prop('checked', true);
+              });
+            }
+          }
+        });
+      
+        //console.log(r);
+        $('.character-counter').each(function () {
+            var textarea = $(this).data('for');
+            var words = $(this).data('max-words');
+            if (words){
+              $('#' + textarea+ '_count').text('~' + countWords($('#' + textarea).val()) + '/' + words + ' words');
+            }
+        });
+        
+
+        // Refresh materialize components
+        M.updateTextFields();
+        // M.textareaAutoResize($('.materialize-textarea'));
+        $('.materialize-textarea').each(function () {
+            M.textareaAutoResize($('#' + $(this).attr('id')));
+        });
+        // hide progress bar
+        $('.progress').hide();
+    }
+
+    function countWords(s) {
+        s = s.replace(/(^\s*)|(\s*$)/gi, ""); //exclude  start and end white-space
+        s = s.replace(/[ ]{2,}/gi, " "); //2 or more space to 1
+        s = s.replace(/\n /, "\n"); // exclude newline with a start spacing
+        return s.split(' ').length;
+    }
+
+    function addAuthor(active) {
+        var active = (active) ? 'active' : '';
+        $('#authors').append('<div class="row" id="authorgroup' + author_count +
+            '"><div class="input-field col s12 l5">' +
+            '<input class="auth_name setting" data-counter="' + author_count + '" id="additionalauthor' + author_count +
+            '" type="text">' +
+            '<label class="'+active+'" for="additionalauthor' + author_count + '">' +
+            'Full Name</label>' +
+            '</div>' +
+            '<div class="input-field col s11 l6">' +
+            '<input class="auth_inst setting" id="additionalinst' + author_count + '" type="text">' +
+            '<label class="'+active+'" for="additionalinst' + author_count + '">' + 
+            'Institution (if applicable)</label>' +
+            '</div>' +
+            '<div class="col s1 l1 rAuthor">' +
+            '<p><a data-counter="' + author_count +
+            '" class="remove_additional"><i class="material-icons">cancel</i></a></p>' +
+            '</div></div>');
+    }
+    // initialize materialize components
+    $(function() {
+        Script.fillMessages_();
+        Script.addCustomFields_();
+
+        $('#add_additional').on('click', function () {
+            author_count++;
+            addAuthor();
+        });
+
+        $('#sharer a').on('click', function () {
+            var qs = fillInTemplateFromObject($(this).attr('data-qs'), i18n);
+            var type = $(this).attr('id');
+            switch (type) {
+                case 'twitter':
+                    popwin('https://twitter.com/intent/tweet?text=' + encodeURIComponent(qs));
+                    break;
+                case 'facebook':
+                    popwin('https://www.facebook.com/sharer.php?u=' + encodeURIComponent(qs));
+                    break;
+                case 'linkedin':
+                    popwin('https://www.linkedin.com/shareArticle?url=' + encodeURIComponent(qs));
+                    break;
+            }
+            console.log(qs);
+        });
+
+        function popwin(url) {
+            var popUp = window.open(url, 'popupwindow', 'scrollbars=yes,width=800,height=400');
+            popUp.focus();
+        }
+
+        function fillInTemplateFromObject(template, data) {
+            var out = template;
+            // Search for all the variables to be replaced, for instance ${"Column name"}
+            var templateVars = template.match(/{([^}]+)}/g);
+
+            // Replace variables from the template with the actual values from the data object.
+            // If no value is available, replace with the empty string.
+            for (var i = 0; i < templateVars.length; ++i) {
+                // normalizeHeader ignores ${"} so we can call it directly here.
+                var variableData = data[templateVars[i].substring(1, templateVars[i].length - 1)];
+                out = out.replace(templateVars[i], variableData || "");
+            }
+
+            return out;
+        }
+
+        $('#authors').on('click', '.remove_additional', function (event) {
+            $('#authorgroup' + $(this).data('counter')).remove();
+        });
+
+        $('.character-counter').each(function () {
+            var textarea = $(this).data('for');
+            var words = $(this).data('max-words');
+            $('#' + textarea).on('change keyup paste', function (event) {
+                $('#' + event.target.id + '_count').text('~' + countWords($(this).val()) + '/' +
+                    words + ' words');
+            });
+        });
+
+        $("input[required],textarea[required],select[required]").next("label").append($('<span class="required"></span>'));
+
+        $("#submission_form").on('submit', function (e) {
+            e.preventDefault();
+            $('[id$=_but]').addClass('disabled');
+            $('.progress').show();
+            //$('#type').prop("disabled", false);
+            $('#token').val(token);
+
+            // join authors
+            var auth_details = [];
+            $('.auth_name').each(function () {
+                auth_details.push($(this).val() + '||' + $('#additionalinst' + $(this).data(
+                    'counter')).val());
+            });
+            $('.extra_authors').val(auth_details.join('~'));
+            $('input[name=session_type],input[name=session_theme]').prop("disabled", false);
+            google.script.run.withSuccessHandler(handleSubmissionResponse)
+                .processSubmitForm(this);
+            $('.setting').prop("disabled", true);
+        });
+        // review form event handler
+        function handleSubmissionResponse(r) {
+            console.log(r)
+            var data = r.data;
+            $('.progress').hide(); 
+            $('.modal').modal();
+            if (r.result === 'ok') {
+                i18n.session_title = data.session_title;
+                if (r.type === 'new'){
+                $('#modal_title').text('Your session "' + data.session_title +
+                    '" has been successfully submitted');
+                $('#modal_message').html('<p>Your proposal has been submitted and a copy has been emailed to <strong>' +
+                    data.email +
+                    '</strong>. If you have any enquiries regarding your submission please quote <strong>Ref:' +
+                    data.ID + '</strong>.</p><p>Share your submission title and the conference call:</p>');
+                    $('#sharer').show();
+                } else if (r.type === 'update'){
+                $('#modal_title').text('Your session "' + data.session_title +
+                    '" has been successfully updated');
+                $('#modal_message').html('<p>Your proposal has been updated and a copy has been emailed to <strong>' +
+                    data.email +
+                    '</strong>. If you have any enquiries regarding your submission please quote <strong>Ref:' +
+                    data.ID + '</strong>.<p>Share conference registration information:</p></p>');
+                    $('#facebook,#linkedin').attr('data-qs', '{registration_url}');
+                    $('#twitter').attr('data-qs','I\'ve just submitted an updated session proposal \'{session_title}\' for {hashtag} 3-5 September 2019, Edinburgh. To register {registration_url}'); 
+                    $('#sharer').show();
+                }
+                
+
+            } else {
+                $('#sharer').hide();
+                $('#modal_title').text('Oops - an error has occured');
+                $('#modal_message').text('Your review was not recorded. Please try submitting again.');
+                $('.setting').prop("disabled", false);
+                $('#submit_but').removeClass("disabled");
+            }
+            $('#modal').modal('open');
+        }
+        $('.tooltipped').tooltip();
+        $('.scrollspy').scrollSpy();
+        $('input,textarea').removeAttr('disabled');
+        $('#submit_but').removeClass('disabled');
+        $('.progress').hide();
+    });
+</script>

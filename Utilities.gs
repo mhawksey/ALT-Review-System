@@ -1,49 +1,35 @@
-function updateOriginalSubmissions() {
-  var doc = SpreadsheetApp.getActive();
-  var formURL = doc.getFormUrl();
-  var form = FormApp.openByUrl(formURL);
-  var out = [];
-  
-  var formResponses = form.getResponses();
-  // create a question index
-  var headers = {};
-  var qArr = ['Session description','Session content: evaluation and reflection','References'];
-  out.push(['Timestamp'].concat(qArr));
-  var formResponse = formResponses[0];
-  var itemResponses = formResponse.getItemResponses();
-  for (var h = 0; h < itemResponses.length; h++) {
-    var itemResponse = itemResponses[h];
-    var q = itemResponse.getItem().getTitle();
-    if (qArr.indexOf(q) !== -1){
-      headers[q] = h;
-    }
-  }
-  
-  for (var i = 0; i < formResponses.length; i++) {
-    var row = [];
-    var formResponse = formResponses[i];
-    var itemResponses = formResponse.getItemResponses();
-    var timestamp = formResponse.getTimestamp();
-    row.push(timestamp);
-    var submission = {};
-    for (j in headers){
-      var itemResponse = itemResponses[headers[j]+1];
-      var q = itemResponse.getItem().getTitle();
-      row.push(itemResponse.getResponse());
-    }
-    out.push(row);
-  }
-  
-  var sheet = doc.getSheetByName(ORIG_SUB_SHEET_NAME);
-  sheet.getRange(1, 1, out.length, out[0].length).setValues(out);
+
+function clearCache(){
+  CacheService.getScriptCache().removeAll(['custom_fields','EDIT_SUBMISSIONS','ACCEPT_SUBMISSIONS']);
 }
 
-function createToken_(email, row, mode, reviewer_num) {
+function getCustomFields_(){
+  var value = CacheService.getScriptCache().get('custom_fields');
+  if (!value){
+    var doc = SpreadsheetApp.getActive();
+    var range = doc.getSheetByName('custom_fields').getDataRange();
+    var value =  JSON.stringify(objectify(range));
+    CacheService.getScriptCache().put('custom_fields', value, 604800);
+  }
+  return value;
+}
+
+function getScriptProp_(key){
+  var value = CacheService.getScriptCache().get(key);
+  if (!value){
+    var value = PropertiesService.getScriptProperties().getProperty(key);
+    CacheService.getScriptCache().put(key, value, 8600);
+  }
+  return value;
+}
+
+function createToken_(email, row, mode, reviewer_num, id) {
   var hashedEmail = getHashedText(email);
   var blob = Utilities.newBlob(JSON.stringify({
     reviewer: hashedEmail,
     row: row,
     reviewer_num: reviewer_num,
+    id: id,
     mode: mode
   }));
   return Utilities.base64EncodeWebSafe(blob.getBytes());
@@ -181,7 +167,7 @@ function refreshReviewStats() {
   Logger.log(formulas);
   var calcCols = ['Reviews Assigned', 'Reviews Submitted', 'Reviews Accepted', 'Reviews Declined', 'Reviews Reminded'];
   var calcFormula = {
-    "Reviews Assigned": "=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF(AllReviewCols,J$2:J)})",
+    "Reviews Assigned": "=ARRAYFORMULA({\"Reviews Assigned\";COUNTIF({Submissions!T:T,Submissions!V:V,Submissions!X:X,Submissions!Z:Z},B$2:B)})",
     "Reviews Submitted": "=ARRAYFORMULA({\"Reviews Submitted\";COUNTIF(Reviews!D:D,\"=\"&A2:A)})",
     "Reviews Accepted": "=ARRAYFORMULA({\"Reviews Accepted\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_accept\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_accept\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_accept\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_accept\")})",
     "Reviews Declined": "=ARRAYFORMULA({\"Reviews Declined\";COUNTIFS(Reviewer1,$J$2:J,Review1Status,\"review_decline\")+COUNTIFS(Reviewer2,$J$2:J,Review2Status,\"review_decline\")+COUNTIFS(Reviewer3,$J$2:J,Review3Status,\"review_decline\")+COUNTIFS(Reviewer4,$J$2:J,Review4Status,\"review_decline\")})",
@@ -194,9 +180,15 @@ function refreshReviewStats() {
       sheet.getRange(1, colIdx, sheet.getLastRow()).clearContent();
       sheet.getRange(1, colIdx).setFormula(calcFormula[source]);
       SpreadsheetApp.flush();
-      var col = sheet.getRange(1, colIdx, sheet.getLastRow())
+      /*var col = sheet.getRange(1, colIdx, sheet.getLastRow())
       var data = col.getValues();
-      col.setValues(data);
+      col.setValues(data);*/
     }
   });
+}
+
+// https://stackoverflow.com/a/2998822
+function pad(num, size) {
+    var s = "000000000" + num;
+    return s.substr(s.length-size);
 }

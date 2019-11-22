@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <!-- Compiled and minified CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <?!= include('ui/inc/style.css'); ?>
+  <? if (mode === 'reviewAdmin2') { ?>
+    <?!= include('ui/inc/diff.js'); ?>
+  <? } ?>
+</head>
+
+<body>
+    <div <? if (isModal) { ?>class="navbar-fixed"<? } ?>>
+        <nav>
+            <div class="nav-wrapper">
+            <? if (isModal) { ?>
+              <?!= include('ui/admin_nav'); ?>
+            <? } ?>
+            </div>
+        </nav>
+        <div class="progress white">
+            <div class="indeterminate green"></div>
+        </div>
+        <div id="loading" class="card amber accent-1" style="display:none">
+            <div class="card-content">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+    <div class='container'>
+        <div class="row">
+            <div class="col s12 m9 l10">
+<? if (mode ==="reviewAdmin2") { ?>    
+                    <?!= include('ui/admin_review2'); ?>
+<? } ?>
+<? if (mode ==="reviewAdmin" || mode ==="reviewAdmin2") { ?>    
+                    <?!= include('ui/admin_review'); ?>
+<? } ?>
+                <form id="submission_form">
+                    <h1><span class="i18n" data-msg="form_name"></span></h1>
+<? if (isModal) { ?>
+
+
+<? } else if (mode==="review") { ?>
+<blockquote>Please click 'I will review' if you are able to review this proposal. If there is a conflict of interest or if you are unable to undertake the review for any reason, click 'I decline review'.</blockquote>
+                    <div class="row center-align">
+                      <div class="col s12">
+                        <a id="review_decline" class="waves-effect waves-light btn red grey disabled tooltipped" data-position="bottom" data-tooltip="Click to decline to review"><i class="material-icons left">highlight_off</i>I Decline Review</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a id="review_accept" class="waves-effect waves-light btn blue grey disabled tooltipped" data-position="bottom" data-tooltip="Click if you are happy to review"><i class="material-icons left">check_circle</i>I Will Review</a>
+                      </div>
+                    </div>
+                    <blockquote id="prompt_review_accept" style="display:none">If you are happy to review this proposal please scroll down to <a href="#review">Submit your review</a> and record your decision (you can revisit this page from the link in the email at anytime to complete your review).</blockquote>
+<? } else if (mode==="decision") { ?>
+                    <?!= include('ui/decisionfeedback'); ?>
+<? } else { ?>                    
+                    <blockquote>
+                        <div class="i18n" data-msg="instructions"></div>
+                    </blockquote>
+<? } ?>
+                    <p><span class="required">Required</span></p>
+                    
+<? if (mode !=="review") { ?>                    
+                    <?!= include('ui/admin_submitter'); ?>
+<? } ?>
+
+                    <div id="overview" class="section scrollspy">
+                        <h2>Tell us about your session</h2>
+                        <div class="custom_fields" id="sub_overview"></div>
+                    </div>
+                    <div class="custom_fields" id="sub_detail"></div>
+<? if (mode !=="review" || mode !== 'decision') { ?> 
+                    <div class="custom_fields" id="sub_extras"></div>
+<? } ?>
+<? if (mode === 'decision') { ?>
+                                              
+                                                <div class="row">
+                                                  <div class="input-field col s12">
+                                                   <textarea id="note_area" name="Note to Director" class="materialize-textarea"></textarea>
+                                            <label class="active" for="note_area">Note to conference Director (e.g. Timetable requests, changing the type of session, general feedback)</label>
+                                            <input type="hidden" name="token" id="token">
+                                          </div>
+                                        </div>
+  <? } ?>                                      
+                    <div class="row">
+                        <div class="col s12 center-align">
+                            
+                            <button id="submit_but" class="btn waves-effect waves-light blue disabled" type="submit"
+                                name="action">Submit <i class="material-icons right">send</i></button>
+                            
+                        </div>
+                    </div>
+                </form>
+<? if (mode ==="review") { ?> 
+                    <?!= include('ui/reviewer_form'); ?>
+<? } ?> 
+
+            </div>
+            <div class="col hide-on-small-onl m3 l2">
+                <div class="toc-wrapper pinned">
+                    <ul class="section table-of-contents">
+                        <li><a href="#submitter">Submitted By</a></li>
+                        <li><a href="#overview">About your session</a></li>
+                    </ul>
+
+                    <div class="row">
+                        <div class="col s8 center-align small">
+                            <div class="i18n" data-msg="sidebar"></div>
+                        </div>
+                        <div class="col center-align logo">
+                            <img src="https://www.alt.ac.uk/sites/alt.ac.uk/files/alt-logo_0_0.png" alt="ALT Logo" /><br /><span>Charity
+                                number: 1160039</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Structure -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h4>
+                <div id="modal_title">Oops - an error has occured</div>
+            </h4>
+            <div id="modal_text">
+                <div id="modal_message">Something has gone wrong. Please contact <a href="" class="i18n" data-msg="support_email"><span class="i18n" data-msg="support_email"></span></a></div>
+                <div class="row center-align" id="sharer" style="display:none">
+                    <div class="col s4"><a id="twitter" class="waves-effect waves-light btn blue" data-qs="I've just submitted a session proposal '{session_title}' for {hashtag}. Find out more {call_url} ">Twitter
+                            Share</a></div>
+                    <div class="col s4"><a id="facebook" class="waves-effect waves-light btn blue" data-qs="{call_url}">Facebook
+                            Share</a></div>
+                    <div class="col s4"><a id="linkedin" class="waves-effect waves-light btn blue" data-qs="{call_url}">LinkedIn
+                            Share</a></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect waves-green btn-flat">OK</a>
+        </div>
+    </div>
+</body>
+
+<script>
+    var mode = <?= mode ?>;
+    var token = "<?= data ?>";
+    var custom_fields = JSON.parse("<?= custom_fields ?>");
+    var i18n = {};
+    custom_fields.map(function (el) {
+        if (el.section === 'global') {
+            i18n[el.id] = el.values;
+        }
+    });
+</script>
+<?!= include('ui/inc/script.js'); ?>
+<? if (isModal) { ?>
+    <script>
+      var currentRow = parseInt(<?= currentRow || 2; ?>);
+    </script>
+    <?!= include('ui/inc/review_submissions_script.js'); ?>
+<? } else { ?>
+    <?!= include('ui/inc/'+mode+'_script.js'); ?>
+<? } ?>
+</html>

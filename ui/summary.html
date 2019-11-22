@@ -14,7 +14,7 @@
 
   <!--Let browser know website is optimized for mobile-->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <?!= include('style.css'); ?>
+  <?!= include('ui/inc/style.css'); ?>
   <? if (mode === 'reviewAdmin2') { ?>
     <?!= include('diff.js'); ?>
   <? } ?>
@@ -25,12 +25,12 @@
     <nav>
       <div class="nav-wrapper">
         <? if (isAdmin) { ?>
-          <?!= include('admin_nav'); ?>
+          <?!= include('ui/admin_nav'); ?>
             <? } ?>
       </div>
     </nav>
     <div class="progress white">
-      <div class="indeterminate blue"></div>
+      <div class="indeterminate green"></div>
     </div>
     <div id="loading" class="card amber accent-1" style="display:none">
         <div class="card-content">
@@ -114,7 +114,7 @@
                               <?!= include('admin_review'); ?>
                             <? } ?>
                             
-                                  <?!= include('admin_submitter'); ?>
+                                  <?!= include('ui/admin_submitter'); ?>
                                     <? } ?>
                                       <div id="overview" class="section scrollspy">
                                         <h2>Submission Overview</h2>
@@ -250,7 +250,7 @@
     </div>
   </div>
 </body>
-<?!= include('script.js'); ?>
+<?!= include('ui/inc/script.js'); ?>
   <script>
     var mode = "<?= mode; ?>";
   </script>
@@ -258,7 +258,7 @@
     <script>
       var currentRow = parseInt(<?= currentRow || 2; ?>);
     </script>
-    <?!= include('admin_script.js'); ?>
+    <?!= include('ui/inc/admin_script.js'); ?>
       <? } else if (mode === 'decision') { ?>
         <script>
           var token = "<?= token ?>";

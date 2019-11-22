@@ -1,0 +1,47 @@
+<script>
+$(function() {
+    $('.progress').show();
+    $('#submit_but').hide();
+    $('[data-msg="sidebar"] a').attr("href", "https://altc.alt.ac.uk/2019/reviewer-guidance/");
+    $('[data-msg="sidebar"] a').text("ALT Annual Conference 2019 - Guidance for Reviewers");
+    $('[data-msg="form_name"]').text("ALT Annual Conference 2019 - Edit Form");
+    // Handle no review token
+    if (token === 'notoken') {
+      $('.modal').modal();
+      $('#modal_title').text('Oops - an error has occured');
+      $('#modal_text').text('We can\'t find the submission. Please check the link from your email.');
+      $('#modal').modal('open');
+    } else {
+      // get proposal
+      google.script.run.withSuccessHandler(setData)
+        .getProposalData(token);
+    }
+    
+     // get proposal success handler
+    function setData(r) {
+      var r = JSON.parse(r);
+      console.log(r);
+      // update text boxes
+      updateFields(r);
+      $('#submit_but').show();
+      $('.materialize-textarea:not(#review_area,#theme,#type)').prop("disabled", false);
+      if (r['RSVP']) {
+        $('#' + r['RSVP']).removeClass('grey');
+        $('#prompt_' + r['RSVP']).slideDown(400);
+      }
+
+      var author_data = r['Additional Authors'].split('~');
+      author_data.forEach(function(a) {
+        var author_info = a.split('||');
+        if (author_info[0] !== '' || author_info[1] !== '') {
+          author_count++;
+          if (author_count > 1) {
+            addAuthor('active');
+          }
+          $('#additionalauthor' + author_count).val(author_info[0]);
+          $('#additionalinst' + author_count).val(author_info[1]);
+        }
+      });
+    }
+});
+</script>
