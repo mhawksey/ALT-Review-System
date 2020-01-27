@@ -21,22 +21,25 @@ function onOpen() {
   var ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('Review System')
-    .addItem('Build Reviewer Lists', 'buildReviewerLists')
-    .addSubMenu(ui.createMenu('Admin Inferface')
-      .addItem('Submission Details Check', 'showSummary')
-      .addItem('Round 1 Review Decisions Admin', 'showReviewAdminRound1')
-      .addItem('Final Decisions Admin', 'showReviewAdminRound2'))
-    .addSubMenu(ui.createMenu('Email Notifications')
-      .addItem('Send test email', 'sendTestEmail')
-      .addItem('Send check with author email (check_author)', 'checkAuthor')
-      .addItem('Send Reviewer Notifications (assign_reviewer)', 'sendReviewerNotification')
-      .addItem('Send Reviewer Reminder (remind_reviewer)', 'sendReviewerReminder')
-      .addItem('Send Reviewer Reminder for accepted reviews (remind_reviewer_accepted)', 'sendReviewerReminderAccepted')
-      .addItem('Send Decisions (proposal_)', 'sendReviewDecisions')
-      .addItem('Send Decisions Reminder (R_proposal_)', 'sendReviewDecisionsReminder')
-      .addItem('Send Final Decisions (2_proposal_)', 'sendFinalDecsions')
-      .addItem('Send message to all filtered submissions (notify_authors)', 'notifyAuthors'))
-    .addToUi();
+  .addItem('Build Reviewer Lists', 'buildReviewerLists')
+  .addSubMenu(ui.createMenu('Admin Inferface')
+              .addItem('Submission Details Check', 'showSummary')
+              .addItem('Round 1 Review Decisions Admin', 'showReviewAdminRound1')
+              .addItem('Final Decisions Admin', 'showReviewAdminRound2'))
+  .addSubMenu(ui.createMenu('Email Notifications')
+              .addItem('Send test email', 'sendTestEmail')
+              .addItem('Send propsoal authors an email', 'sendAuthorEmail')
+              .addItem('Send Reviewer Notifications (assign_reviewer)', 'sendReviewerNotification')
+              .addItem('Send Reviewer Reminder (remind_reviewer)', 'sendReviewerReminder')
+              .addItem('Send Reviewer Reminder for accepted reviews (remind_reviewer_accepted)', 'sendReviewerReminderAccepted')
+              .addItem('Send Decisions (proposal_)', 'sendReviewDecisions')
+              .addItem('Send Decisions Reminder (R_proposal_)', 'sendReviewDecisionsReminder')
+              .addItem('Send Final Decisions (2_proposal_)', 'sendFinalDecsions')
+              .addItem('Send message to all filtered submissions (notify_authors)', 'notifyAuthors'))
+  .addSubMenu(ui.createMenu('Utilities')
+              .addItem('Filter by color...', 'filterByColorSetupUi')
+              .addItem('Clear Ranges','clearProperties'))
+  .addToUi();
 }
 
 function setup(){
@@ -151,8 +154,10 @@ function sendTestEmail() {
         var body = fillInTemplateFromObject(email.text, s);
         var recipient = Session.getActiveUser().getEmail()
         GmailApp.sendEmail(recipient, subject, body, {
-          bcc: EMAIL_BCC,
-          replyTo: EMAIL_FROM
+              bcc: EMAIL_BCC,
+              from: EMAIL_FROM,
+              replyTo: EMAIL_FROM,
+              name: 'ALT Helpdesk'
         });
         var row = parseInt(s.ID.match(/\d+$/)[0], 10);
         // record email has been sent
@@ -165,35 +170,47 @@ function sendTestEmail() {
 }
 
 /**
+ * Sends email to authors.
+ */
+function sendAuthorEmail() {
+  var type = Browser.inputBox('Which template would you like to send to the proposal author?');
+  if (type === 'check' || type ==='check_duplicate'){
+    emailAuthor(type);  
+  }
+}
+
+/**
  * Sends email to notify them proposal isn't going to be reviewed.
  */
-function checkAuthor() {
-  var resp = Browser.msgBox("Sending emails", "You are about to send emails to authors with 'check' in the Include column. Are you sure?", Browser.Buttons.YES_NO);
+function emailAuthor(type) {
+  var resp = Browser.msgBox("Sending emails", "You are about to send emails to authors with '"+type+"' in the Include column. Are you sure?", Browser.Buttons.YES_NO);
   if (resp === 'yes') {
     // get all submissions
-    var email = getEmailTemplate('check_author');
+    var email = getEmailTemplate(type);
     var sheet = SpreadsheetApp.getActive().getSheetByName(SUB_SHEET_NAME);
     var subs = sheet.getDataRange();
-    var sub_obj = objectify(subs)
+    var sub_obj = objectify(subs);
+    sub_obj = addFilteredRows_(SpreadsheetApp.getActive().getId(), sheet.getSheetId(), sub_obj);
     var headings = sheet.getDataRange()
       .offset(0, 0, 1)
       .getValues()[0];
     var incCol = headings.indexOf('Include');
     // iterate for submissions with check_author in Include column
     var sub_filtered = sub_obj.filter(function(s) {
-      if (s['Include'] === 'check') {
+      if (s['Include'] === type && !s['hidden']) {
         var subject = fillInTemplateFromObject(email.subject, s);
         var body = fillInTemplateFromObject(email.text, s);
         var recipient = s.email
         GmailApp.sendEmail(recipient, subject, body, {
-          bcc: EMAIL_BCC,
-          replyTo: EMAIL_FROM,
-          from:'helpdesk@alt.ac.uk'
+              bcc: EMAIL_BCC,
+              from: EMAIL_FROM,
+              replyTo: EMAIL_FROM,
+              name: 'ALT Helpdesk'
         });
         var row = parseInt(s.ID.match(/\d+$/)[0], 10);
         // record email has been sent
-        sheet.getRange(row + 1, incCol + 1).setValue('check_author_sent')
-          .setNote('check by: ' +
+        sheet.getRange(row + 1, incCol + 1).setValue(type+'_sent')
+          .setNote(type+' by: ' +
             Session.getActiveUser().getEmail() + '\nDate: ' +
             Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm'));
       }
@@ -228,9 +245,10 @@ function notifyAuthors() {
         var body = fillInTemplateFromObject(email.text, s);
         
         GmailApp.sendEmail(recipient, subject, body, {
-          bcc: EMAIL_BCC,
-          //replyTo: 'enquiries@alt.ac.uk'
-          replyTo: EMAIL_FROM
+              bcc: EMAIL_BCC,
+              from: EMAIL_FROM,
+              replyTo: EMAIL_FROM,
+              name: 'ALT Helpdesk'
         });
         var row = parseInt(s.ID.match(/\d+$/)[0], 10);
         // record email has been sent
@@ -267,9 +285,10 @@ function notifyAuthorsFromGmail() {
         var htmlBody = fillInTemplateFromObject(email.html, s)
         var recipient = s.email
        GmailApp.sendEmail(recipient, subject, body, {
-          bbcc: EMAIL_BCC,
-          replyTo: EMAIL_FROM,
-          name:'ALT Helpdesk',
+              bcc: EMAIL_BCC,
+              from: EMAIL_FROM,
+              replyTo: EMAIL_FROM,
+              name: 'ALT Helpdesk',
           htmlBody: htmlBody
         });
         var row = parseInt(s.ID.match(/\d+$/)[0], 10);
@@ -310,8 +329,10 @@ function sendReviewDecisions() {
         var body = fillInTemplateFromObject(email.text, s);
         try {
           GmailApp.sendEmail(recipient, subject, body, {
-            bcc: EMAIL_BCC,
-            replyTo: EMAIL_FROM
+              bcc: EMAIL_BCC,
+              from: EMAIL_FROM,
+              replyTo: EMAIL_FROM,
+              name: 'ALT Helpdesk'
           });
           var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
@@ -360,8 +381,10 @@ function sendReviewDecisionsReminder() {
         var body = fillInTemplateFromObject(email.text, s);
         try {
           GmailApp.sendEmail(recipient, subject, body, {
-            bcc: EMAIL_BCC,
-            replyTo: EMAIL_FROM
+              bcc: EMAIL_BCC,
+              from: EMAIL_FROM,
+              replyTo: EMAIL_FROM,
+              name: 'ALT Helpdesk'
           });
           var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
@@ -406,8 +429,10 @@ function sendFinalDecsions() {
         var body = fillInTemplateFromObject(email.text, s);
         try {
           GmailApp.sendEmail(recipient, subject, body, {
-            bcc: EMAIL_BCC,
-            replyTo: EMAIL_FROM
+              bcc: EMAIL_BCC,
+              from: EMAIL_FROM,
+              replyTo: EMAIL_FROM,
+              name: 'ALT Helpdesk'
           });
           var row = parseInt(s.ID.match(/\d+$/)[0], 10);
           // record email has been sent
@@ -509,7 +534,8 @@ function sendReviewerEmails_(email, type, days) {
           var body = fillInTemplateFromObject(email.text, s);
           try {
             GmailApp.sendEmail(recipient, subject, body, {
-              bbcc: EMAIL_BCC,
+              bcc: EMAIL_BCC,
+              from: EMAIL_FROM,
               replyTo: EMAIL_FROM,
               name: 'ALT Helpdesk'
             });
