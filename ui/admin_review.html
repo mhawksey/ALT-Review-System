@@ -84,7 +84,7 @@
       $("button[type=submit]", $(this).parents("form")).removeAttr("clicked");
       $(this).attr("clicked", "true");
     });
-        // review form event
+
     $("#decision_form,#decision_form2").on('submit', function(e) {
       e.preventDefault();
       var action = $("[id$=_but][clicked=true]").removeAttr('clicked')

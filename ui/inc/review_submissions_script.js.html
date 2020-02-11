@@ -33,8 +33,13 @@
       showSubs(currentRow, '--');
     });
     $('#pageNext').on('click', function() {
+      // save decision form handled in ui/admin_review.html
       currentRow++;
       showSubs(currentRow, '++');
+    });
+    $('#edit_sub').on('click', function() {
+      $('.setting').prop("disabled", false);
+
     });
     $('#pagePrev,#pageNext').on('mousedown', function(e) {
       $('#loading').show();
